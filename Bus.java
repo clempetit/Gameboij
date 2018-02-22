@@ -43,5 +43,5 @@ public final class Bus {
             c.write(address, data);
         }
     }
-    
+
 }
