@@ -18,11 +18,26 @@ public final class Bits {
     }
     
     public static boolean test(int bits, int index) {
-        
+        index = Objects.checkIndex(index, Integer.SIZE);
+        int mask = mask(index);
+        boolean bitSet = (bits & mask) == mask;
+        return bitSet;
     }
     
     public static boolean test(int bits, Bit bit) {
-        
+        test(bits, bit.index());
+    }
+    
+    public int set(int bits, int index, boolean newValue) {
+        index = Objects.checkIndex(index, Integer.SIZE);
+        int mask = mask(index);
+        if (newValue) {
+            bits = bits | mask;
+        }
+        else {
+            bits = bits & ~mask;
+        }
+        return bits;
     }
 
 }
