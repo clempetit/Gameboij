@@ -1,6 +1,6 @@
 /*
- *	Author:      Yanis Berkani
- *	Date:        22 févr. 2018
+ *	Author:      Clément Petit
+ *	Date:        22 Feb 2018      
  */
 
 package ch.epfl.gameboj.bits;
@@ -14,6 +14,8 @@ public interface Bit {
     }
     
     public default int mask() {
-        
+        int mask = 1 << index();
+        return mask;
     }
+
 }
