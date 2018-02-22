@@ -39,5 +39,33 @@ public final class Bits {
         }
         return bits;
     }
+    
+    public int clip(int size, int bits) {
+        return 0;
+    }
+    
+    public int extract(int bits, int start, int size) {
+        return 0;
+    }
+    
+    public int rotate(int size, int bits, int distance) {
+        return 0;
+    }
+    
+    public int signExtend8(int b) {
+        return 0;
+    }
+    
+    public int reverse8(int b) {
+        return 0;
+    }
+    
+    public int complement8(int b) {
+        return 0;
+    }
+    
+    public int make16(int highB, int lowB) {
+        return 0;
+    }
 
 }
