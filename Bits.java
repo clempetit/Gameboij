@@ -25,23 +25,25 @@ public final class Bits {
     }
     
     public static boolean test(int bits, Bit bit) {
-        test(bits, bit.index());
+        return test(bits, bit.index());
     }
     
     public int set(int bits, int index, boolean newValue) {
         index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
         if (newValue) {
-            bits = bits | mask;
+            return bits | mask;
         }
         else {
-            bits = bits & ~mask;
+            return bits & ~mask;
         }
-        return bits;
     }
     
     public int clip(int size, int bits) {
-        return 0;
+        size = Objects.checkIndex(size, 33);
+        int clipBits = bits << size;
+        clipBits = bits >>> size;
+        return clipBits;
     }
     
     public int extract(int bits, int start, int size) {
