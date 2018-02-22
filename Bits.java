@@ -49,7 +49,7 @@ public final class Bits {
     public int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
         int extractBits = bits << start;
-        extractBits = bits >>> size;
+        extractBits = bits >>> start + size;
         return extractBits;
     }
     
