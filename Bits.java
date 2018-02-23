@@ -7,6 +7,8 @@ package ch.epfl.gameboj.bits;
 
 import java.util.Objects;
 
+import ch.epfl.gameboj.Preconditions;
+
 public final class Bits {
     
     private Bits() {}
@@ -29,6 +31,7 @@ public final class Bits {
     }
     
     public int set(int bits, int index, boolean newValue) {
+        index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
         if (newValue) {
             return bits | mask;
@@ -49,9 +52,9 @@ public final class Bits {
     }
     
     public int rotate(int size, int bits, int distance) {
-        size = Objects.checkIndex(size, 33);
-        int reducedDistance = Math.floorMod(distance,Integer.SIZE);
-        int rotatedBits = bits << reducedDistance | bits >>> Integer.SIZE - reducedDistance;
+        Preconditions.checkArgument(size > 0 && size <= 32 && bits < Math.pow(2,size));
+        int reducedDistance = Math.floorMod(distance,size);
+        int rotatedBits = (bits << reducedDistance) | (bits >>> (size - reducedDistance));
         return rotatedBits & (~(-1 << size));
     }
     

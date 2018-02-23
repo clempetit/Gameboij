@@ -14,14 +14,14 @@ public interface Preconditions {
     }
     
     public static int checkBits8(int v) {
-        if (v<0 && v>0xFF) {
+        if (v<0 || v>0xFF) {
             throw new IllegalArgumentException();
         }
         return v;
     }
     
     public static int checkBits16(int v) {
-        if (v<0 && v>0xFFFF) {
+        if (v<0 || v>0xFFFF) {
             throw new IllegalArgumentException();
         }
         return v;
