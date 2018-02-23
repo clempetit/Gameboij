@@ -42,10 +42,10 @@ public final class RamController implements Component {
 
     @Override
     public void write(int address, int data) {
-        int index = Preconditions.checkBits16(address) - start;
-        int verifData = Preconditions.checkBits8(data);
+        Preconditions.checkBits16(address);
+        Preconditions.checkBits8(data);
         if (address >= start && address < end) {
-            ctrldRam.write(index, verifData);
+            ctrldRam.write(address - start, data);
         }
 
     }
