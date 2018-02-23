@@ -62,7 +62,9 @@ public final class Bits {
     }
     
     public static int signExtend8(int b) {
-        return 0;
+        Preconditions.checkBits8(b);
+        byte a = (byte)b;
+        return (int)a;
     }
     
     public static int reverse8(int b) {
