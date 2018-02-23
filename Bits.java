@@ -78,7 +78,7 @@ public final class Bits {
     
     public static int complement8(int b) {
         Preconditions.checkBits8(b);
-        return ~b;
+        return clip(8, ~b);
     }
     
     public static int make16(int highB, int lowB) {
