@@ -29,7 +29,6 @@ public final class Bits {
     }
     
     public int set(int bits, int index, boolean newValue) {
-        index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
         if (newValue) {
             return bits | mask;
@@ -41,20 +40,19 @@ public final class Bits {
     
     public int clip(int size, int bits) {
         size = Objects.checkIndex(size, 33);
-        int clipBits = bits << size;
-        clipBits = bits >>> size;
-        return clipBits;
+        return bits & (~(-1 << size));
     }
     
     public int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
-        int extractBits = bits << start;
-        extractBits = bits >>> start + size;
-        return extractBits;
+        return bits & ((~(-1 << size)) << start);
     }
     
     public int rotate(int size, int bits, int distance) {
-        return 0;
+        size = Objects.checkIndex(size, 33);
+        int reducedDistance = Math.floorMod(distance,size);
+        int rotatedBit = bits << reducedDistance | bits >>> reducedDistance - size;
+        return rotatedBit;
     }
     
     public int signExtend8(int b) {
