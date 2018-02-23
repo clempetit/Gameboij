@@ -45,7 +45,7 @@ public final class Bits {
         if (size == Integer.SIZE) {
             return bits;
         }
-        size = Objects.checkIndex(size, 33);
+        Preconditions.checkArgument(size >= 0 && size <= 32);
         return bits & (mask(size) - 1);
     }
     

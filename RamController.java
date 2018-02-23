@@ -26,14 +26,14 @@ public final class RamController implements Component {
     }
     
     RamController(Ram ram, int startAddress) {
-        this(ram, startAddress, startAddress + ram.size() - 1);
+        this(ram, startAddress, startAddress + ram.size());
     }
 
     @Override
     public int read(int address) {
-        int index = Preconditions.checkBits16(address) - start;
-        if (ctrldRam.read(index) != 0) {
-            return ctrldRam.read(index);
+        Preconditions.checkBits16(address);
+        if (address >= start && address < end) {
+            return ctrldRam.read(address - start);
         }
         else {
             return Component.NO_DATA;
@@ -44,8 +44,8 @@ public final class RamController implements Component {
     public void write(int address, int data) {
         int index = Preconditions.checkBits16(address) - start;
         int verifData = Preconditions.checkBits8(data);
-        if (address > start && address < end) {
-            ctrldRam.write(index, data);
+        if (address >= start && address < end) {
+            ctrldRam.write(index, verifData);
         }
 
     }
