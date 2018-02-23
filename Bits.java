@@ -45,7 +45,7 @@ public final class Bits {
     
     public int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
-        return bits & ((~(-1 << size)) << start);
+        return (bits & ((~(-1 << size)) << start)) >>> start;
     }
     
     public int rotate(int size, int bits, int distance) {
