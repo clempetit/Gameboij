@@ -30,7 +30,7 @@ public final class Bits {
         return test(bits, bit.index());
     }
     
-    public int set(int bits, int index, boolean newValue) {
+    public static int set(int bits, int index, boolean newValue) {
         index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
         if (newValue) {
@@ -41,36 +41,36 @@ public final class Bits {
         }
     }
     
-    public int clip(int size, int bits) {
+    public static int clip(int size, int bits) {
         size = Objects.checkIndex(size, 33);
         return bits & (~(-1 << size));
     }
     
-    public int extract(int bits, int start, int size) {
+    public static int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
         return (bits & ((~(-1 << size)) << start)) >>> start;
     }
     
-    public int rotate(int size, int bits, int distance) {
+    public static int rotate(int size, int bits, int distance) {
         Preconditions.checkArgument(size > 0 && size <= 32 && bits < Math.pow(2,size));
         int reducedDistance = Math.floorMod(distance,size);
         int rotatedBits = (bits << reducedDistance) | (bits >>> (size - reducedDistance));
         return rotatedBits & (~(-1 << size));
     }
     
-    public int signExtend8(int b) {
+    public static int signExtend8(int b) {
         return 0;
     }
     
-    public int reverse8(int b) {
+    public static int reverse8(int b) {
         return 0;
     }
     
-    public int complement8(int b) {
+    public static int complement8(int b) {
         return 0;
     }
     
-    public int make16(int highB, int lowB) {
+    public static int make16(int highB, int lowB) {
         return 0;
     }
 
