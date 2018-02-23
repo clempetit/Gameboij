@@ -51,8 +51,7 @@ public final class Bits {
     public int rotate(int size, int bits, int distance) {
         size = Objects.checkIndex(size, 33);
         int reducedDistance = Math.floorMod(distance,size);
-        int rotatedBit = bits << reducedDistance | bits >>> reducedDistance - size;
-        return rotatedBit;
+        return bits << reducedDistance | bits >>> reducedDistance - size;
     }
     
     public int signExtend8(int b) {
