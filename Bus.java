@@ -26,6 +26,7 @@ public final class Bus {
 	 * @param address the address to look for
 	 */
     public int read(int address) {
+        Preconditions.checkBits16(address);
         for (Component c : attachedComp) {
             if (c.read(address) != Component.NO_DATA) {
                 return c.read(address);
@@ -39,6 +40,8 @@ public final class Bus {
 	 * @param data the data to write at the given address
 	 */
     public void write(int address, int data) {
+        Preconditions.checkBits16(address);
+        Preconditions.checkBits8(data);
         for (Component c : attachedComp) {
             c.write(address, data);
         }
