@@ -42,8 +42,11 @@ public final class Bits {
     }
     
     public static int clip(int size, int bits) {
+        if (size == Integer.SIZE) {
+            return bits;
+        }
         size = Objects.checkIndex(size, 33);
-        return bits & (~(-1 << size));
+        return bits & (mask(size) - 1);
     }
     
     public static int extract(int bits, int start, int size) {
