@@ -51,7 +51,10 @@ public final class Bits {
     
     public static int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
-        return (bits & ((~(-1 << size)) << start)) >>> start;
+        if (size == Integer.SIZE) {
+            return bits;
+        }
+        return (bits >> start) & (mask(size) - 1);
     }
     
     public static int rotate(int size, int bits, int distance) {
@@ -68,14 +71,18 @@ public final class Bits {
     }
     
     public static int reverse8(int b) {
+        Preconditions.checkBits8(b);
         return 0;
     }
     
     public static int complement8(int b) {
+        Preconditions.checkBits8(b);
         return 0;
     }
     
     public static int make16(int highB, int lowB) {
+        Preconditions.checkBits8(highB);
+        Preconditions.checkBits8(lowB);
         return 0;
     }
 
