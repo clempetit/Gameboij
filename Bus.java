@@ -3,6 +3,7 @@
  *	Date:        21 Feb 2018      
  */
 
+
 package ch.epfl.gameboj;
 
 import java.util.ArrayList;
@@ -12,25 +13,28 @@ import ch.epfl.gameboj.component.Component;
 
 /**
  * 
- * @author Yanis Berkani (
- * @author Clément Petit (
+ * @author Clément Petit (282626)
+ * @author Yanis Berkani (271348)
+ * 
  */
 public final class Bus {
     /** ArrayList containing components attached to the bus */
     private ArrayList<Component> attachedComp = new ArrayList<Component>();
     
-    /** attaches a new component to the bus
-     * @param component the new component to be attached
+    /** attaches the given component to the bus
+     * @param component the component to be attached (must not be null)
+     * @throws NullPointerException if the component is null
      */
     public void attach(Component component) {
         attachedComp.add(Objects.requireNonNull(component));
     }
     
     /** return the value stored at the given address if at least one component has a value at this address
-     *  return 0x100 if not
-     * @param address the address to look for
-     * @return the value stored at the given address if at least one component has a value at this address,
-     * 0x100 if not
+     *  or return 0xFF if not
+     * @param address the address to look for (must be a 16 bits value)
+     * @throws IllegalArgumentException if the address is invalid
+     * @return the value stored at the given address if at least one component has a value at this address
+     * or return 0xFF if not
      */
     public int read(int address) {
         Preconditions.checkBits16(address);
@@ -43,8 +47,10 @@ public final class Bus {
     }
     
     /** writes the given value at the given address for each component attached to the bus
-     * @param address the address where to write
-     * @param data the data to write at the given address
+     * @param address the address where to write (must be a 16 bits value)
+     * @param data the data to write at the given address (must be an 8 bits value)
+     * @throws IllegalArgumentException if the address is invalid
+     * @throws IllegalArgumentException if the data is invalid
      */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
