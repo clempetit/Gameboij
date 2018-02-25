@@ -10,21 +10,28 @@ import java.util.Objects;
 
 import ch.epfl.gameboj.component.Component;
 
+/**
+ * 
+ * @author Yanis Berkani (
+ * @author Clément Petit (
+ */
 public final class Bus {
     /** ArrayList containing components attached to the bus */
     private ArrayList<Component> attachedComp = new ArrayList<Component>();
     
     /** attaches a new component to the bus
-	 * @param component the new component to be attached
-	 */
+     * @param component the new component to be attached
+     */
     public void attach(Component component) {
         attachedComp.add(Objects.requireNonNull(component));
     }
     
     /** return the value stored at the given address if at least one component has a value at this address
-	 *  return 0x100 if not
-	 * @param address the address to look for
-	 */
+     *  return 0x100 if not
+     * @param address the address to look for
+     * @return the value stored at the given address if at least one component has a value at this address,
+     * 0x100 if not
+     */
     public int read(int address) {
         Preconditions.checkBits16(address);
         for (Component c : attachedComp) {
@@ -36,9 +43,9 @@ public final class Bus {
     }
     
     /** writes the given value at the given address for each component attached to the bus
-	 * @param address the address where to write
-	 * @param data the data to write at the given address
-	 */
+     * @param address the address where to write
+     * @param data the data to write at the given address
+     */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
