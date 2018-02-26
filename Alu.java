@@ -47,11 +47,13 @@ public final class Alu {
     public static int add(int l, int r, boolean c0) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
+        int somme = 0;
+        int z, n, h, c = 0;
         if (c0) {
-            return l + r + 1;
+            somme = l + r + 1;
         }
         else {
-            return l + r;
+            somme = l + r;
         }
     }
     
