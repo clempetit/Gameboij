@@ -20,7 +20,7 @@ public final class Alu {
             boolean n,
             boolean h,
             boolean c) {
-        return maskZNHC(z, n, h, c) | v << 8;
+        return v << 8 | maskZNHC(z, n, h, c);
     }
     
     public static int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
@@ -47,8 +47,12 @@ public final class Alu {
     public static int add(int l, int r, boolean c0) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
-        
-        return 0;
+        if (c0) {
+            return l + r + 1;
+        }
+        else {
+            return l + r;
+        }
     }
     
     public static int add(int l, int r) {
