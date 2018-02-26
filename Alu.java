@@ -47,18 +47,31 @@ public final class Alu {
     public static int add(int l, int r, boolean c0) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
-        int somme = 0;
+        int sum = 0;
+        int sum4 = 0;
         boolean z = false, n = false, h = false, c = false;
         if (c0) {
-            somme = l + r + 1;
+            sum = l + r + 1;
+            sum4 = Bits.clip(4, l) + Bits.clip(4, r) + 1;
         }
         else {
-            somme = l + r;
+            sum = l + r;
+            sum4 = Bits.clip(4, l) + Bits.clip(4, r);
         }
-        if ((Bits.mask(9) & somme) == somme) {
+        if (sum == 0) {
+            z = true;
+        }
+        if (sum < 0) {
+            n = true;
+        }
+        if ((Bits.mask(5) & sum4) == sum4 ) {
+            h = true;
+        }
+        if ((Bits.mask(9) & sum) == sum) {
             c = true;
         }
-        return packValueZNHC(somme, z, n, h, c);
+        
+        return packValueZNHC(sum, z, n, h, c);
     }
     
     public static int add(int l, int r) {
