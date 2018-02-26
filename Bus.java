@@ -1,8 +1,7 @@
-/*
- *	Author:      Clément Petit
- *	Date:        21 Feb 2018      
+/**
+ *  @autor Clément Petit (282626)
+ *  @autor Yanis Berkani (271348)
  */
-
 
 package ch.epfl.gameboj;
 
@@ -11,12 +10,6 @@ import java.util.Objects;
 
 import ch.epfl.gameboj.component.Component;
 
-/**
- * 
- * @author Clément Petit (282626)
- * @author Yanis Berkani (271348)
- * 
- */
 public final class Bus {
     /** ArrayList containing components attached to the bus */
     private ArrayList<Component> attachedComp = new ArrayList<Component>();
@@ -49,8 +42,7 @@ public final class Bus {
     /** writes the given value at the given address for each component attached to the bus
      * @param address the address where to write (must be a 16 bits value)
      * @param data the data to write at the given address (must be an 8 bits value)
-     * @throws IllegalArgumentException if the address is invalid
-     * @throws IllegalArgumentException if the data is invalid
+     * @throws IllegalArgumentException if the address or the data are invalid
      */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
