@@ -20,6 +20,7 @@ public final class Alu {
             boolean n,
             boolean h,
             boolean c) {
+        Preconditions.checkBits16(v);
         return v << 8 | maskZNHC(z, n, h, c);
     }
     
@@ -37,41 +38,32 @@ public final class Alu {
     }
     
     public static int unpackValue(int valueFlags) {
+        if(Bits.extract(valueFlags, 3, 12) << 3 != valueFlags &&
+                Bits.extract(valueFlags, 3, 20) << 3 != valueFlags) {
+            throw new IllegalArgumentException();
+        }
         return valueFlags >>> 8;
     }
     
     public static int unpackFlags(int valueFlags) {
+        if(Bits.extract(valueFlags, 3, 12) << 3 != valueFlags &&
+                Bits.extract(valueFlags, 3, 20) << 3 != valueFlags) {
+            throw new IllegalArgumentException();
+        }
         return Bits.clip(8, valueFlags);
     }
     
     public static int add(int l, int r, boolean c0) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
-        int sum = 0;
-        int sum4 = 0;
-        boolean z = false, n = false, h = false, c = false;
-        if (c0) {
-            sum = l + r + 1;
-            sum4 = Bits.clip(4, l) + Bits.clip(4, r) + 1;
-        }
-        else {
-            sum = l + r;
-            sum4 = Bits.clip(4, l) + Bits.clip(4, r);
-        }
-        if (sum == 0) {
-            z = true;
-        }
-        if (sum < 0) {
-            n = true;
-        }
-        if ((Bits.mask(5) & sum4) == sum4 ) {
-            h = true;
-        }
-        if ((Bits.mask(9) & sum) == sum) {
-            c = true;
-        }
-        
-        return packValueZNHC(sum, z, n, h, c);
+        int initCarry = c0 ? 1 : 0;
+        int sum = l + r + initCarry;
+        int sum4 = Bits.clip(4, l) + Bits.clip(4, r) + initCarry;
+        boolean h = (sum4 > 0xF);
+        boolean c = (sum > 0xFF);
+        sum = Bits.clip(8,sum);
+        boolean z = (sum == 0);
+        return packValueZNHC(sum, z, false, h, c);
     }
     
     public static int add(int l, int r) {
@@ -81,21 +73,35 @@ public final class Alu {
     public static int add16L(int l, int r) {
         Preconditions.checkBits16(l);
         Preconditions.checkBits16(r);
-        return 0;
+        int sum = l + r;
+        int sum4 = Bits.clip(4, l) + Bits.clip(4, r);
+        int sum8 = Bits.clip(8, l) + Bits.clip(8, r);
+        boolean h = (sum4 > 0xF);
+        boolean c = (sum8 > 0xFF);
+        return packValueZNHC(Bits.clip(16,sum), false, false, h, c);
     }
     
     public static int add16H(int l, int r) {
         Preconditions.checkBits16(l);
         Preconditions.checkBits16(r);
-        
-        return 0;
+        int sum = l + r;
+        int sum12 = Bits.clip(12, l) + Bits.clip(12, r);
+        boolean h = (sum12 > 0xFFF);
+        boolean c = (sum > 0xFFFF);
+        return packValueZNHC(Bits.clip(16,sum), false, false, h, c);
     }
     
     public static int sub(int l, int r, boolean b0) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
-        
-        return 0;
+        int initBorrow = b0 ? 1 : 0;
+        int sum = l - r - initBorrow;
+        int sum4 = Bits.clip(4, l) - Bits.clip(4, r) - initBorrow;
+        boolean h = (sum4 < 0);
+        boolean c = (sum < 0);
+        sum = Bits.clip(8,sum);
+        boolean z = (sum == 0);
+        return packValueZNHC(sum, z, true, h, c);
     }
     
     public static int sub(int l, int r) {
@@ -107,15 +113,27 @@ public final class Alu {
     }
     
     public static int and(int l, int r) {
-        return 0;
+        Preconditions.checkBits8(l);
+        Preconditions.checkBits8(r);
+        int inter = l & r;
+        boolean z = (inter == 0);
+        return packValueZNHC(inter, z, false, true, false);
     }
     
     public static int or(int l, int r) {
-        return 0;
+        Preconditions.checkBits8(l);
+        Preconditions.checkBits8(r);
+        int union = l | r;
+        boolean z = (union == 0);
+        return packValueZNHC(union, z, false, false, false);
     }
     
     public static int xor(int l, int r) {
-        return 0;
+        Preconditions.checkBits8(l);
+        Preconditions.checkBits8(r);
+        int xUnion = l ^ r;
+        boolean z = (xUnion == 0);
+        return packValueZNHC(xUnion, z, false, false, false);
     }
     
     public static int shiftLeft(int v) {
