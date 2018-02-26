@@ -1,6 +1,6 @@
 /**
- *  @autor Clément Petit (282626)
- *  @autor Yanis Berkani (271348)
+ *	@autor Clément Petit (282626)
+ *	@autor Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj.component.cpu;
@@ -14,6 +14,14 @@ public final class Alu {
     public enum Flag implements Bit{ UNUSED_0, UNUSED_1, UNUSED_2, UNUSED_3, C, H, N, Z };
     
     public enum RotDir { LEFT, RIGHT };
+    
+    private int packValueZNHC(int v,
+            boolean z,
+            boolean n,
+            boolean h,
+            boolean c) {
+        return maskZNHC(z, n, h, c) | v << 8;
+    }
     
     public static int maskZNHC(boolean z, boolean n, boolean h, boolean c) {
         int mask = 0;
