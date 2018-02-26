@@ -15,7 +15,7 @@ public final class Alu {
     
     public enum RotDir { LEFT, RIGHT };
     
-    private int packValueZNHC(int v,
+    private static int packValueZNHC(int v,
             boolean z,
             boolean n,
             boolean h,
@@ -48,13 +48,17 @@ public final class Alu {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
         int somme = 0;
-        int z, n, h, c = 0;
+        boolean z = false, n = false, h = false, c = false;
         if (c0) {
             somme = l + r + 1;
         }
         else {
             somme = l + r;
         }
+        if ((Bits.mask(9) & somme) == somme) {
+            c = true;
+        }
+        return packValueZNHC(somme, z, n, h, c);
     }
     
     public static int add(int l, int r) {
