@@ -1,6 +1,6 @@
-/*
- *	Author:      Clément Petit
- *	Date:        22 Feb 2018      
+/**
+ *  @autor Clément Petit (282626)
+ *  @autor Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj.bits;
@@ -46,12 +46,26 @@ public final class Bits {
             0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF,
             0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF,
           };
+    
+    /**
+     * return an integer which has only the bit of index given equal to 1
+     * @param index the index (must be included between 0 and 31)
+     * @throws IndexOutOfBoundsException if the index is invalid
+     * @return an integer which has only the bit of index given equal to 1
+     */
     public static int mask(int index) {
         index = Objects.checkIndex(index, Integer.SIZE);
         int mask = 1 << index;
         return mask;
     }
     
+    /**
+     * return true if and only if the bit of index given of the integer bits equals 1
+     * @param bits the integer
+     * @param index the index (must be included between 0 and 31)
+     * @throws IndexOutOfBoundsException if the index is invalid
+     * @return true if and only if the bit of index given of the integer bits equals 1
+     */
     public static boolean test(int bits, int index) {
         index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
@@ -59,10 +73,24 @@ public final class Bits {
         return bitSet;
     }
     
+    /**
+     * return true if and only if the bit of index given of the integer bits equals 1
+     * and gets the index to test
+     * @param bits the integer
+     * @param bit the bit
+     * @return true if and only if the bit of index given of the integer bits equals 1
+     */
     public static boolean test(int bits, Bit bit) {
         return test(bits, bit.index());
     }
     
+    /**
+     * 
+     * @param bits the integer
+     * @param index the index (must be included between 0 and 31)
+     * @param newValue the new value (false is 0 and true is 1)
+     * @return
+     */
     public static int set(int bits, int index, boolean newValue) {
         index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
@@ -74,6 +102,12 @@ public final class Bits {
         }
     }
     
+    /**
+     * 
+     * @param size
+     * @param bits
+     * @return
+     */
     public static int clip(int size, int bits) {
         if (size == Integer.SIZE) {
             return bits;
@@ -82,6 +116,13 @@ public final class Bits {
         return bits & (mask(size) - 1);
     }
     
+    /**
+     * 
+     * @param bits
+     * @param start
+     * @param size
+     * @return
+     */
     public static int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
         if (size == Integer.SIZE) {
@@ -90,6 +131,13 @@ public final class Bits {
         return clip(size, (bits >> start));
     }
     
+    /**
+     * 
+     * @param size
+     * @param bits
+     * @param distance
+     * @return
+     */
     public static int rotate(int size, int bits, int distance) {
         Preconditions.checkArgument(size > 0 && size <= 32);
         Preconditions.checkArgument(clip(size, bits) == bits);
@@ -98,22 +146,43 @@ public final class Bits {
         return clip(size, rotatedBits);
     }
     
+    /**
+     * 
+     * @param b
+     * @return
+     */
     public static int signExtend8(int b) {
         Preconditions.checkBits8(b);
         byte a = (byte)b;
         return (int)a;
     }
     
+    /**
+     * 
+     * @param b
+     * @return
+     */
     public static int reverse8(int b) {
         Preconditions.checkBits8(b);
         return tab[b];
     }
     
+    /**
+     * 
+     * @param b
+     * @return
+     */
     public static int complement8(int b) {
         Preconditions.checkBits8(b);
         return clip(8, ~b);
     }
     
+    /**
+     * 
+     * @param highB
+     * @param lowB
+     * @return
+     */
     public static int make16(int highB, int lowB) {
         Preconditions.checkBits8(highB);
         Preconditions.checkBits8(lowB);
