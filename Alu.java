@@ -109,31 +109,33 @@ public final class Alu {
     }
     
     public static int bcdAdjust(int v, boolean n, boolean h, boolean c) {
-        return 0;
+        Preconditions.checkBits8(v);
+        boolean fixL = h || (!n && Bits.clip(4, v) > 0x9);
+        boolean fixH = c || (!n && v > 0x99);
+        int fix = 0x60 * (fixH ? 1 : 0) + 0x06 * (fixL ? 1 : 0);
+        int va = n ? (v - fix) : (v + fix);
+        return packValueZNHC(va, va == 0, n, false, fixH);
     }
     
     public static int and(int l, int r) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
         int inter = l & r;
-        boolean z = (inter == 0);
-        return packValueZNHC(inter, z, false, true, false);
+        return packValueZNHC(inter, inter == 0, false, true, false);
     }
     
     public static int or(int l, int r) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
         int union = l | r;
-        boolean z = (union == 0);
-        return packValueZNHC(union, z, false, false, false);
+        return packValueZNHC(union, union == 0, false, false, false);
     }
     
     public static int xor(int l, int r) {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
         int xUnion = l ^ r;
-        boolean z = (xUnion == 0);
-        return packValueZNHC(xUnion, z, false, false, false);
+        return packValueZNHC(xUnion, xUnion == 0, false, false, false);
     }
     
     public static int shiftLeft(int v) {
