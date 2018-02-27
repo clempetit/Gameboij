@@ -1,6 +1,6 @@
 /**
- *  @autor Clément Petit (282626)
- *  @autor Yanis Berkani (271348)
+ *  @author Clément Petit (282626)
+ *  @author Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj.bits;
@@ -48,19 +48,18 @@ public final class Bits {
           };
     
     /**
-     * return an integer which has only the bit of index given equal to 1
+     * return an integer which has only the bit of index given equal to 1.
      * @param index the index (must be included between 0 and 31)
      * @throws IndexOutOfBoundsException if the index is invalid
      * @return an integer which has only the bit of index given equal to 1
      */
     public static int mask(int index) {
         index = Objects.checkIndex(index, Integer.SIZE);
-        int mask = 1 << index;
-        return mask;
+        return 1 << index;
     }
     
     /**
-     * return true if and only if the bit of index given of the integer bits equals 1
+     * return true if and only if the bit of index given of the integer bits equals 1.
      * @param bits the integer
      * @param index the index (must be included between 0 and 31)
      * @throws IndexOutOfBoundsException if the index is invalid
@@ -69,12 +68,11 @@ public final class Bits {
     public static boolean test(int bits, int index) {
         index = Objects.checkIndex(index, Integer.SIZE);
         int mask = mask(index);
-        boolean bitSet = (bits & mask) == mask;
-        return bitSet;
+        return (bits & mask) == mask;
     }
     
     /**
-     * return true if and only if the bit of index given of the integer bits equals 1
+     * return true if and only if the bit of index given of the integer bits equals 1.
      * and gets the index to test
      * @param bits the integer
      * @param bit the bit
