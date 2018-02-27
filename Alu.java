@@ -1,6 +1,6 @@
 /**
- *	@autor Clément Petit (282626)
- *	@autor Yanis Berkani (271348)
+ *	@author Clément Petit (282626)
+ *	@author Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj.component.cpu;
@@ -38,16 +38,16 @@ public final class Alu {
     }
     
     public static int unpackValue(int valueFlags) {
-        if(Bits.extract(valueFlags, 3, 12) << 3 != valueFlags &&
-                Bits.extract(valueFlags, 3, 20) << 3 != valueFlags) {
+        if(Bits.extract(valueFlags, 3, 12) << 4 != valueFlags &&
+                Bits.extract(valueFlags, 3, 20) << 4 != valueFlags) {
             throw new IllegalArgumentException();
         }
         return valueFlags >>> 8;
     }
     
     public static int unpackFlags(int valueFlags) {
-        if(Bits.extract(valueFlags, 3, 12) << 3 != valueFlags &&
-                Bits.extract(valueFlags, 3, 20) << 3 != valueFlags) {
+        if(Bits.extract(valueFlags, 3, 12) << 4 != valueFlags &&
+                Bits.extract(valueFlags, 3, 20) << 4 != valueFlags) {
             throw new IllegalArgumentException();
         }
         return Bits.clip(8, valueFlags);
@@ -77,7 +77,8 @@ public final class Alu {
         int sum8 = Bits.clip(8, l) + Bits.clip(8, r);
         boolean h = sum4 > 0xF;
         boolean c = sum8 > 0xFF;
-        return packValueZNHC(Bits.clip(16,sum), false, false, h, c);
+        sum = Bits.clip(16,sum);
+        return packValueZNHC(sum, false, false, h, c);
     }
     
     public static int add16H(int l, int r) {
@@ -87,7 +88,8 @@ public final class Alu {
         int sum12 = Bits.clip(12, l) + Bits.clip(12, r);
         boolean h = sum12 > 0xFFF;
         boolean c = sum > 0xFFFF;
-        return packValueZNHC(Bits.clip(16,sum), false, false, h, c);
+        sum = Bits.clip(16,sum);
+        return packValueZNHC(sum, false, false, h, c);
     }
     
     public static int sub(int l, int r, boolean b0) {
@@ -137,30 +139,54 @@ public final class Alu {
     }
     
     public static int shiftLeft(int v) {
-        return 0;
+        Preconditions.checkBits8(v);
+        boolean c = Bits.test(v, 8);
+        int shifted = v << 1;
+        return packValueZNHC(shifted, shifted == 0, false, false, c);
     }
     
     public static int shiftRightA(int v) {
-        return 0;
+        Preconditions.checkBits8(v);
+        boolean c = Bits.test(v, 0);
+        int shifted = Bits.set(v >>> 1, 8, Bits.test(v, 8));
+        return packValueZNHC(shifted, shifted == 0, false, false, c);
     }
     
     public static int shiftRightL(int v) {
-        return 0;
+        Preconditions.checkBits8(v);
+        boolean c = (1 & v) == 1;
+        int shifted = v >>> 1;
+        return packValueZNHC(shifted, shifted == 0, false, false, c);
     }
     
     public static int rotate(RotDir d, int v) {
-        return 0;
+        Preconditions.checkBits8(v);
+        boolean throughLEFT = d.equals(RotDir.LEFT);
+        boolean c = throughLEFT ? Bits.test(v, 8) : Bits.test(v, 0);
+        int rotated = Bits.rotate(8, v, (throughLEFT ? 1 : -1));
+        return packValueZNHC(rotated, rotated == 0, false, false, c);
     }
     
     public static int rotate(RotDir d, int v, boolean c) {
-        return 0;
+        Preconditions.checkBits8(v);
+        boolean throughLEFT = d.equals(RotDir.LEFT);
+        int combi = Bits.set(v, 9, c);
+        int rotated = Bits.rotate(9, combi, (throughLEFT ? 1 : -1));
+        boolean carry = rotated > 0xFF;
+        rotated = Bits.clip(8, rotated);
+        return packValueZNHC(rotated, rotated == 0, false, false, carry);
     }
     
     public static int swap(int v) {
-        return 0;
+        Preconditions.checkBits8(v);
+        return packValueZNHC(Bits.rotate(8, v, 4), v == 0, false, false, false);
     }
     
     public static int testBit(int v, int bitIndex) {
-        return 0;
+        Preconditions.checkBits8(v);
+        if (bitIndex < 0 || bitIndex > 7) {
+            throw new IndexOutOfBoundsException();
+        }
+        return packValueZNHC(0, Bits.test(v, bitIndex), false, true, false);
     }
 }
