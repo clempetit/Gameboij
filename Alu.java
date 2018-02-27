@@ -59,11 +59,10 @@ public final class Alu {
         int initCarry = c0 ? 1 : 0;
         int sum = l + r + initCarry;
         int sum4 = Bits.clip(4, l) + Bits.clip(4, r) + initCarry;
-        boolean h = (sum4 > 0xF);
-        boolean c = (sum > 0xFF);
+        boolean h = sum4 > 0xF;
+        boolean c = sum > 0xFF;
         sum = Bits.clip(8,sum);
-        boolean z = (sum == 0);
-        return packValueZNHC(sum, z, false, h, c);
+        return packValueZNHC(sum, sum == 0, false, h, c);
     }
     
     public static int add(int l, int r) {
@@ -76,8 +75,8 @@ public final class Alu {
         int sum = l + r;
         int sum4 = Bits.clip(4, l) + Bits.clip(4, r);
         int sum8 = Bits.clip(8, l) + Bits.clip(8, r);
-        boolean h = (sum4 > 0xF);
-        boolean c = (sum8 > 0xFF);
+        boolean h = sum4 > 0xF;
+        boolean c = sum8 > 0xFF;
         return packValueZNHC(Bits.clip(16,sum), false, false, h, c);
     }
     
@@ -86,8 +85,8 @@ public final class Alu {
         Preconditions.checkBits16(r);
         int sum = l + r;
         int sum12 = Bits.clip(12, l) + Bits.clip(12, r);
-        boolean h = (sum12 > 0xFFF);
-        boolean c = (sum > 0xFFFF);
+        boolean h = sum12 > 0xFFF;
+        boolean c = sum > 0xFFFF;
         return packValueZNHC(Bits.clip(16,sum), false, false, h, c);
     }
     
@@ -97,11 +96,10 @@ public final class Alu {
         int initBorrow = b0 ? 1 : 0;
         int sum = l - r - initBorrow;
         int sum4 = Bits.clip(4, l) - Bits.clip(4, r) - initBorrow;
-        boolean h = (sum4 < 0);
-        boolean c = (sum < 0);
+        boolean h = sum4 < 0;
+        boolean c = sum < 0;
         sum = Bits.clip(8,sum);
-        boolean z = (sum == 0);
-        return packValueZNHC(sum, z, true, h, c);
+        return packValueZNHC(sum, sum == 0, true, h, c);
     }
     
     public static int sub(int l, int r) {
