@@ -72,8 +72,7 @@ public final class Bits {
     }
     
     /**
-     * return true if and only if the bit of given index given of the integer bits equals 1
-     * and gets the index to test.
+     * gets the index of the given bit in the given integer and return true if and only if this bit equals 1
      * @param bits the integer
      * @param bit the bit
      * @return true if and only if the bit of given index of the integer bits equals 1
