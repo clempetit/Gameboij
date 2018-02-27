@@ -48,7 +48,7 @@ public final class Bits {
           };
     
     /**
-     * return an integer which has only the bit of index given equal to 1.
+     * return an integer which has only the bit of given index equal to 1.
      * @param index the index (must be included between 0 and 31)
      * @throws IndexOutOfBoundsException if the index is invalid
      * @return an integer which has only the bit of index given equal to 1
@@ -59,11 +59,11 @@ public final class Bits {
     }
     
     /**
-     * return true if and only if the bit of index given of the integer bits equals 1.
-     * @param bits the integer
+     * return true if and only if the bit of given index of the integer bits equals 1.
+     * @param bits the integer value
      * @param index the index (must be included between 0 and 31)
      * @throws IndexOutOfBoundsException if the index is invalid
-     * @return true if and only if the bit of index given of the integer bits equals 1
+     * @return true if and only if the bit of given index of the integer bits equals 1
      */
     public static boolean test(int bits, int index) {
         index = Objects.checkIndex(index, Integer.SIZE);
@@ -72,11 +72,11 @@ public final class Bits {
     }
     
     /**
-     * return true if and only if the bit of index given of the integer bits equals 1.
-     * and gets the index to test
+     * return true if and only if the bit of given index given of the integer bits equals 1
+     * and gets the index to test.
      * @param bits the integer
      * @param bit the bit
-     * @return true if and only if the bit of index given of the integer bits equals 1
+     * @return true if and only if the bit of given index of the integer bits equals 1
      */
     public static boolean test(int bits, Bit bit) {
         return test(bits, bit.index());
