@@ -38,18 +38,10 @@ public final class Alu {
     }
     
     public static int unpackValue(int valueFlags) {
-        if(Bits.extract(valueFlags, 3, 12) << 4 != valueFlags &&
-                Bits.extract(valueFlags, 3, 20) << 4 != valueFlags) {
-            throw new IllegalArgumentException();
-        }
         return valueFlags >>> 8;
     }
     
     public static int unpackFlags(int valueFlags) {
-        if(Bits.extract(valueFlags, 3, 12) << 4 != valueFlags &&
-                Bits.extract(valueFlags, 3, 20) << 4 != valueFlags) {
-            throw new IllegalArgumentException();
-        }
         return Bits.clip(8, valueFlags);
     }
     
