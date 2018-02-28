@@ -77,6 +77,22 @@ public class AluTest {
         assertEquals(0x9050 ,Alu.sub(0x10, 0x80));
     }
     
+    @Test
+    void bcdAdjustFailsForInvalidValue() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Alu.bcdAdjust(0x111, false, false, false));
+    }
     
+    @Test
+    void bcdAdjustWorks() {
+        assertEquals(0x7300, Alu.bcdAdjust(0x6D, false, false, false));
+        assertEquals(0x0940, Alu.bcdAdjust(0x0F, true, true, false));
+    }
+    
+    @Test
+    void andFailsForInvalidValue() {
+        
+    }
     
 }
+
