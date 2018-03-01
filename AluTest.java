@@ -1,6 +1,6 @@
 /**
- *  @autor Clément Petit (282626)
- *  @autor Yanis Berkani (271348)
+ *	@author Clément Petit (282626)
+ *	@author Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj.component.cpu;
@@ -90,9 +90,43 @@ public class AluTest {
     }
     
     @Test
-    void andFailsForInvalidValue() {
-        
+    void andWorks() {
+        assertEquals(0x0320, Alu.and(0x53, 0xA7));
     }
     
+    @Test
+    void orWorks() {
+        assertEquals(0xF700, Alu.or(0x53, 0xA7));
+    }
+    
+    @Test
+    void xorWorks() {
+        assertEquals(0xF400, Alu.xor(0x53, 0xA7));
+    }
+    
+    @Test
+    void shiftLeftWorks() {
+        assertEquals(0x90, Alu.shiftLeft(0x80));
+    }
+    
+    @Test
+    void shiftRightLWorks() {
+        assertEquals(0x4000, Alu.shiftRightL(0x80));
+    }
+    
+    @Test
+    void shiftRightAWorks() {
+        assertEquals(0xC000, Alu.shiftRightA(0x80));
+    }
+    
+    @Test
+    void RotateWorks() {
+        assertEquals(0x0110, Alu.rotate(Alu.RotDir.LEFT, 0x80));
+        assertEquals(0x90, Alu.rotate(Alu.RotDir.LEFT, 0x80, false));
+        assertEquals(0x0100, Alu.rotate(Alu.RotDir.LEFT, 0x00, true));
+    }
+    
+    
+    
+    
 }
-

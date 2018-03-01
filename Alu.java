@@ -132,21 +132,21 @@ public final class Alu {
     
     public static int shiftLeft(int v) {
         Preconditions.checkBits8(v);
-        boolean c = Bits.test(v, 8);
-        int shifted = v << 1;
+        boolean c = Bits.test(v, 7);
+        int shifted = Bits.clip(8, v << 1);
         return packValueZNHC(shifted, shifted == 0, false, false, c);
     }
     
     public static int shiftRightA(int v) {
         Preconditions.checkBits8(v);
         boolean c = Bits.test(v, 0);
-        int shifted = Bits.set(v >>> 1, 8, Bits.test(v, 8));
+        int shifted = Bits.set(v >>> 1, 7, Bits.test(v, 7));
         return packValueZNHC(shifted, shifted == 0, false, false, c);
     }
     
     public static int shiftRightL(int v) {
         Preconditions.checkBits8(v);
-        boolean c = (1 & v) == 1;
+        boolean c = Bits.test(v, 0);
         int shifted = v >>> 1;
         return packValueZNHC(shifted, shifted == 0, false, false, c);
     }
@@ -154,16 +154,14 @@ public final class Alu {
     public static int rotate(RotDir d, int v) {
         Preconditions.checkBits8(v);
         boolean throughLEFT = d.equals(RotDir.LEFT);
-        boolean c = throughLEFT ? Bits.test(v, 8) : Bits.test(v, 0);
+        boolean c = throughLEFT ? Bits.test(v, 7) : Bits.test(v, 0);
         int rotated = Bits.rotate(8, v, (throughLEFT ? 1 : -1));
         return packValueZNHC(rotated, rotated == 0, false, false, c);
     }
     
     public static int rotate(RotDir d, int v, boolean c) {
         Preconditions.checkBits8(v);
-        boolean throughLEFT = d.equals(RotDir.LEFT);
-        int combi = Bits.set(v, 9, c);
-        int rotated = Bits.rotate(9, combi, (throughLEFT ? 1 : -1));
+        int rotated = Bits.rotate(9, Bits.set(v, 8, c), (d.equals(RotDir.LEFT) ? 1 : -1));
         boolean carry = rotated > 0xFF;
         rotated = Bits.clip(8, rotated);
         return packValueZNHC(rotated, rotated == 0, false, false, carry);
