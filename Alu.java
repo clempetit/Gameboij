@@ -88,12 +88,12 @@ public final class Alu {
         Preconditions.checkBits8(l);
         Preconditions.checkBits8(r);
         int initBorrow = b0 ? 1 : 0;
-        int sum = l - r - initBorrow;
-        int sum4 = Bits.clip(4, l) - Bits.clip(4, r) - initBorrow;
-        boolean h = sum4 < 0;
-        boolean c = sum < 0;
-        sum = Bits.clip(8,sum);
-        return packValueZNHC(sum, sum == 0, true, h, c);
+        int sub = l - r - initBorrow;
+        int sub4 = Bits.clip(4, l) - Bits.clip(4, r) - initBorrow;
+        boolean h = sub4 < 0;
+        boolean c = sub < 0;
+        sub = Bits.clip(8,sub);
+        return packValueZNHC(sub, sub == 0, true, h, c);
     }
     
     public static int sub(int l, int r) {
