@@ -38,7 +38,7 @@ public final class Alu {
     }
     
     public static int unpackValue(int valueFlags) {
-        return valueFlags >>> 8;
+        return Bits.extract(valueFlags, 8, 24);
     }
     
     public static int unpackFlags(int valueFlags) {
@@ -177,6 +177,6 @@ public final class Alu {
         if (bitIndex < 0 || bitIndex > 7) {
             throw new IndexOutOfBoundsException();
         }
-        return packValueZNHC(0, Bits.test(v, bitIndex), false, true, false);
+        return packValueZNHC(0, !Bits.test(v, bitIndex), false, true, false);
     }
 }
