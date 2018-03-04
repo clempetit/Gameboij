@@ -93,7 +93,7 @@ public final class Cpu implements Component, Clocked {
             
     @Override
     public void cycle(long cycle) {
-        if (cycle == nextNonIdleCycle ) {
+        if (cycle != nextNonIdleCycle ) {
             
         }
     }
