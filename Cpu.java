@@ -93,8 +93,6 @@ public final class Cpu implements Component, Clocked {
        case PUSH_R16: {
        } break;
        }
-       PC += op.totalBytes;
-       nextNonIdleCycle += op.cycles;
     }
             
     @Override
@@ -134,23 +132,24 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read8(int address) {
-        return 0;
+        return bus.read(address);
     }
     
     private int read8AtHl() {
-        return 0;
+        int address16 = (banc8.get(Reg.H)) << 8 | (banc8.get(Reg.L));
+        return bus.read(address16);
     }
     
     private int read8AfterOpcode() {
-        return 0;
+        return bus.read(PC + 1);
     }
     
     private int read16(int address) {
-        return 0;
+        return bus.read(address) | bus.read(address + 1) << 8;
     }
     
     private int read16AfterOpcode() {
-        return 0;
+        return bus.read(PC + 1) | bus.read(PC + 2);
     }
     
     private void write8(int address, int v) {
