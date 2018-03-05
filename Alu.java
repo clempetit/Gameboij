@@ -105,7 +105,7 @@ public final class Alu {
         boolean fixL = h || (!n && Bits.clip(4, v) > 0x9);
         boolean fixH = c || (!n && v > 0x99);
         int fix = 0x60 * (fixH ? 1 : 0) + 0x06 * (fixL ? 1 : 0);
-        int va = n ? (v - fix) : (v + fix);
+        int va = Bits.clip(8, n ? (v - fix) : (v + fix));
         return packValueZNHC(va, va == 0, n, false, fixH);
     }
     

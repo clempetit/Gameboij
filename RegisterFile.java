@@ -17,12 +17,12 @@ public final class RegisterFile<E extends Register> {
     }
     
     public int get(E reg) {
-        return (byte)reg.index();
+        return Byte.toUnsignedInt(banc[reg.index()]);
     }
     
     public void set(E reg, int newValue) {
         Preconditions.checkBits8(newValue);
-        reg = newValue;
+        banc[reg.index()] = (byte)newValue;
     }
     
     public boolean testBit(E reg, Bit b) {

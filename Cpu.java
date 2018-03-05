@@ -23,8 +23,8 @@ public final class Cpu implements Component, Clocked {
         AF, BC, DE, HL
     }
     
-    private Register PC;
-    private Register SP;
+    private int PC;
+    private int SP;
     
     private int nextNonIdleCycle;
     private Bus bus;
@@ -37,13 +37,15 @@ public final class Cpu implements Component, Clocked {
         int i = 0;
         for (Opcode o: Opcode.values()) {
             if (o.kind == k) {
-                table[i++] = o;
+                table[o.encoding] = o;
             }
         }
         return table;
     }
-    private void dispatch() {
-       switch (DIRECT_OPCODE_TABLE[PC.index()].family) {
+    private void dispatch(Opcode op) {
+        PC += op.totalBytes;
+        nextNonIdleCycle += op.cycles;
+       switch (op.family) {
        case NOP: {
        } break;
        case LD_R8_HLR: {
@@ -91,12 +93,14 @@ public final class Cpu implements Component, Clocked {
        case PUSH_R16: {
        } break;
        }
+       PC += op.totalBytes;
+       nextNonIdleCycle += op.cycles;
     }
             
     @Override
     public void cycle(long cycle) {
         if (cycle == nextNonIdleCycle ) {
-            dispatch();
+            dispatch(DIRECT_OPCODE_TABLE[bus.read(PC)]);  
         }
     }
     
@@ -116,9 +120,9 @@ public final class Cpu implements Component, Clocked {
         tab[0] = PC;
         tab[1] = SP;
         for (int i = 0; i < 10; i++) {
-            tab[i+2] = Reg.values()[i];
+            tab[i+2] = banc8.get(Reg.values()[i]);
         }
-        return new int[0];
+        return tab;
     }
     
     // ACCES AU BUS 
@@ -186,11 +190,11 @@ public final class Cpu implements Component, Clocked {
     // EXTRACTION DES PARAMETRES
     
     private Reg extractReg(Opcode opcode, int startBit) {
-        
+        return Reg.A;
     }
     
     private Reg16 extractReg16(Opcode opcode) {
-        
+        return Reg16.AF;
     }
     
     private int extractHlIncrement(Opcode opcode) {
