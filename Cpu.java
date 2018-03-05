@@ -146,11 +146,15 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read16(int address) {
-        return Preconditions.checkBits16(bus.read(address) | bus.read(address + 1) << 8);
+        int lsb = Preconditions.checkBits8(bus.read(address));
+        int msb = Preconditions.checkBits8(bus.read(address + 1));
+        return lsb | msb << 8;
     }
     
     private int read16AfterOpcode() {
-        return Preconditions.checkBits16(bus.read(PC + 1) | bus.read(PC + 2));
+        int lsb = Preconditions.checkBits8(bus.read(PC + 1));
+        int msb = Preconditions.checkBits8(bus.read(PC + 2));
+        return lsb | msb << 8;
     }
     
     private void write8(int address, int v) {
