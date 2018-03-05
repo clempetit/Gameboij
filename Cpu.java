@@ -32,16 +32,18 @@ public final class Cpu implements Component, Clocked {
     private static final Opcode[] DIRECT_OPCODE_TABLE =
             buildOpcodeTable(Opcode.Kind.DIRECT);
     
-    private static final Opcode[] buildOpcodeTable(Opcode k) {
-        Opcode[] table = new Opcode[];
+    private static final Opcode[] buildOpcodeTable(Opcode.Kind k) {
+        Opcode[] table = new Opcode[256];
+        int i = 0;
         for (Opcode o: Opcode.values()) {
             if (o.kind == k) {
-                table.add(o);
+                table[i++] = o;
             }
         }
+        return table;
     }
     private void dispatch() {
-       switch (PC.family) {
+       switch (DIRECT_OPCODE_TABLE[PC.index()].family) {
        case NOP: {
        } break;
        case LD_R8_HLR: {
@@ -93,8 +95,8 @@ public final class Cpu implements Component, Clocked {
             
     @Override
     public void cycle(long cycle) {
-        if (cycle != nextNonIdleCycle ) {
-            
+        if (cycle == nextNonIdleCycle ) {
+            dispatch();
         }
     }
     
@@ -110,6 +112,12 @@ public final class Cpu implements Component, Clocked {
     }
     
     public int[] _testGetPcSpAFBCDEHL() {
+        int[] tab = new int[10];
+        tab[0] = PC;
+        tab[1] = SP;
+        for (int i = 0; i < 10; i++) {
+            tab[i+2] = Reg.values()[i];
+        }
         return new int[0];
     }
     
