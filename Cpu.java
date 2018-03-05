@@ -6,6 +6,7 @@
 package ch.epfl.gameboj.component.cpu;
 
 import ch.epfl.gameboj.Bus;
+import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
 import ch.epfl.gameboj.bits.Bits;
@@ -132,44 +133,53 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read8(int address) {
-        return bus.read(address);
+        return Preconditions.checkBits8(bus.read(address));
     }
     
     private int read8AtHl() {
-        int address16 = (banc8.get(Reg.H)) << 8 | (banc8.get(Reg.L));
-        return bus.read(address16);
+        int addressHL = (banc8.get(Reg.H)) << 8 | (banc8.get(Reg.L));
+        return Preconditions.checkBits8(bus.read(addressHL));
     }
     
     private int read8AfterOpcode() {
-        return bus.read(PC + 1);
+        return Preconditions.checkBits8(bus.read(PC + 1));
     }
     
     private int read16(int address) {
-        return bus.read(address) | bus.read(address + 1) << 8;
+        return Preconditions.checkBits16(bus.read(address) | bus.read(address + 1) << 8);
     }
     
     private int read16AfterOpcode() {
-        return bus.read(PC + 1) | bus.read(PC + 2);
+        return Preconditions.checkBits16(bus.read(PC + 1) | bus.read(PC + 2));
     }
     
     private void write8(int address, int v) {
-        
+        Preconditions.checkBits8(v);
+        bus.write(address, v);
     }
     
     private void write16(int address, int v) {
-        
+        Preconditions.checkBits16(v);
+        bus.write(address, Bits.clip(8, v));
+        bus.write(address + 1, Bits.extract(v, 8, 8));
     }
     
     private void write8AtHl(int v) {
-        
+        Preconditions.checkBits8(v);
+        int addressHL = (banc8.get(Reg.H)) << 8 | (banc8.get(Reg.L));
+        bus.write(addressHL, v);
     }
     
     private void push16(int v) {
-        
+        Preconditions.checkBits16(v);
+        SP -= 2;
+        bus.write(SP, Bits.clip(8, v));
+        bus.write(SP + 1, Bits.extract(v, 8, 8));
     }
     
     private int pop16() {
-        return 0;
+        SP +=2;
+        return read16(SP - 2);
     }
     
     // GESTION DES PAIRES DE REGISTRES
