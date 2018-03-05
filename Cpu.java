@@ -166,7 +166,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int pop16() {
-        
+        return 0;
     }
     
     // GESTION DES PAIRES DE REGISTRES
