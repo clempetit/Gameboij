@@ -118,7 +118,7 @@ public final class Cpu implements Component, Clocked {
         int[] tab = new int[10];
         tab[0] = PC;
         tab[1] = SP;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 8; i++) {
             tab[i+2] = banc8.get(Reg.values()[i]);
         }
         return tab;
@@ -148,13 +148,13 @@ public final class Cpu implements Component, Clocked {
     private int read16(int address) {
         int lsb = Preconditions.checkBits8(bus.read(address));
         int msb = Preconditions.checkBits8(bus.read(address + 1));
-        return msb << 8| lsb;
+        return Bits.make16(msb, lsb);
     }
     
     private int read16AfterOpcode() {
         int lsb = Preconditions.checkBits8(bus.read(PC + 1));
         int msb = Preconditions.checkBits8(bus.read(PC + 2));
-        return msb << 8| lsb;
+        return Bits.make16(msb, lsb);
     }
     
     private void write8(int address, int v) {
@@ -191,14 +191,14 @@ public final class Cpu implements Component, Clocked {
     private int reg16(Reg16 r) {
         int msb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index() - 1]));
         int lsb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index()]));
-        return msb << 8| lsb;
+        return Bits.make16(msb, lsb);
     }
     
     private void setReg16(Reg16 r, int newV) {
         if (r == Reg16.AF) {
             Preconditions.checkBits8(newV);
-            banc8.set(Reg.values()[2 * r.index() - 1], newV);
-            banc8.set(Reg.values()[2 * r.index()], 0);
+            banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
+            banc8.set(Reg.values()[2 * r.index()], Bits.clip(8, newV & (-1 << 4)));
         } else {
             Preconditions.checkBits16(newV);
             banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
@@ -218,15 +218,39 @@ public final class Cpu implements Component, Clocked {
     // EXTRACTION DES PARAMETRES
     
     private Reg extractReg(Opcode opcode, int startBit) {
-        return Reg.A;
+        switch(Bits.extract(opcode.encoding, startBit, 3)) {
+        case 000:
+            return Reg.B;
+        case 001:
+            return Reg.C;
+        case 010:
+            return Reg.D;
+        case 011:
+            return Reg.E;
+        case 100:
+            return Reg.H;
+        case 101:
+            return Reg.L;
+        case 111:
+            return Reg.A;
+        };
     }
     
     private Reg16 extractReg16(Opcode opcode) {
-        return Reg16.AF;
+        switch(Bits.extract(opcode.encoding, 4, 2)) {
+        case 00:
+            return Reg16.BC;
+        case 01:
+            return Reg16.DE;
+        case 10:
+            return Reg16.HL;
+        case 11:
+            return Reg16.AF;
+        };
     }
     
     private int extractHlIncrement(Opcode opcode) {
-        return Bits.test(opcode.encoding, 4) ? 1 : -1;
+        return Bits.test(opcode.encoding, 4) ? -1 : 1;
     }
     
 }
