@@ -148,13 +148,13 @@ public final class Cpu implements Component, Clocked {
     private int read16(int address) {
         int lsb = Preconditions.checkBits8(bus.read(address));
         int msb = Preconditions.checkBits8(bus.read(address + 1));
-        return lsb | msb << 8;
+        return msb << 8| lsb;
     }
     
     private int read16AfterOpcode() {
         int lsb = Preconditions.checkBits8(bus.read(PC + 1));
         int msb = Preconditions.checkBits8(bus.read(PC + 2));
-        return lsb | msb << 8;
+        return msb << 8| lsb;
     }
     
     private void write8(int address, int v) {
@@ -189,15 +189,30 @@ public final class Cpu implements Component, Clocked {
     // GESTION DES PAIRES DE REGISTRES
     
     private int reg16(Reg16 r) {
-        return 0;
+        int msb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index() - 1]));
+        int lsb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index()]));
+        return msb << 8| lsb;
     }
     
     private void setReg16(Reg16 r, int newV) {
-        
+        if (r == Reg16.AF) {
+            Preconditions.checkBits8(newV);
+            banc8.set(Reg.values()[2 * r.index() - 1], newV);
+            banc8.set(Reg.values()[2 * r.index()], 0);
+        } else {
+            Preconditions.checkBits16(newV);
+            banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
+            banc8.set(Reg.values()[2 * r.index()], Bits.clip(8, newV));
+            }
     }
     
     private void setReg16SP(Reg16 r, int newV) {
-        
+        Preconditions.checkBits16(newV);
+        if (r == Reg16.AF) {
+            SP = newV;
+        } else {
+            setReg16(r, newV);
+        }
     }
     
     // EXTRACTION DES PARAMETRES
