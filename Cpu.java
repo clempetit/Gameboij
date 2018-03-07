@@ -50,10 +50,14 @@ public final class Cpu implements Component, Clocked {
        case NOP: {
        } break;
        case LD_R8_HLR: {
+           banc8.set(extractReg(op, 3), read8AtHl());
        } break;
        case LD_A_HLRU: {
+           banc8.set(Reg.A, read8AtHl());
+           extractHlIncrement(op);
        } break;
        case LD_A_N8R: {
+           
        } break;
        case LD_A_CR: {
        } break;
@@ -233,7 +237,9 @@ public final class Cpu implements Component, Clocked {
             return Reg.L;
         case 111:
             return Reg.A;
-        };
+        default : // choix arbitraire de A, le cas par défaut n'est jamais atteint.
+            return Reg.A;
+        }
     }
     
     private Reg16 extractReg16(Opcode opcode) {
@@ -246,7 +252,9 @@ public final class Cpu implements Component, Clocked {
             return Reg16.HL;
         case 11:
             return Reg16.AF;
-        };
+        default : // choix arbitraire de AF, le cas par défaut n'est jamais atteint.
+            return Reg16.AF;
+        }
     }
     
     private int extractHlIncrement(Opcode opcode) {
