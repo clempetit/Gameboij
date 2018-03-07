@@ -5,6 +5,7 @@
 
 package ch.epfl.gameboj.component.cpu;
 
+import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
@@ -57,23 +58,31 @@ public final class Cpu implements Component, Clocked {
            extractHlIncrement(op);
        } break;
        case LD_A_N8R: {
-           
+           banc8.set(Reg.A, bus.read(AddressMap.REGS_START + read8AfterOpcode()));
        } break;
        case LD_A_CR: {
+           banc8.set(Reg.A, bus.read(AddressMap.REGS_START + banc8.get(Reg.C)));
        } break;
        case LD_A_N16R: {
+           banc8.set(Reg.A, bus.read(read16AfterOpcode()));
        } break;
        case LD_A_BCR: {
+           banc8.set(Reg.A, bus.read(reg16(Reg16.BC)));
        } break;
        case LD_A_DER: {
+           banc8.set(Reg.A, bus.read(reg16(Reg16.DE)));
        } break;
        case LD_R8_N8: {
+           banc8.set(extractReg(op, 3), bus.read(read8AfterOpcode()));
        } break;
        case LD_R16SP_N16: {
+           setReg16(extractReg16(op), bus.read(read16AfterOpcode()));
        } break;
        case POP_R16: {
+           banc8.set(extractReg(op, 3), bus.read(pop16()));
        } break;
        case LD_HLR_R8: {
+           
        } break;
        case LD_HLRU_A: {
        } break;
@@ -141,7 +150,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read8AtHl() {
-        int addressHL = (banc8.get(Reg.H)) << 8 | (banc8.get(Reg.L));
+        int addressHL = Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L));
         return Preconditions.checkBits8(bus.read(addressHL));
     }
     
