@@ -252,19 +252,19 @@ public final class Cpu implements Component, Clocked {
     
     private Reg extractReg(Opcode opcode, int startBit) {
         switch(Bits.extract(opcode.encoding, startBit, 3)) {
-        case 000:
+        case 0b000:
             return Reg.B;
-        case 001:
+        case 0b001:
             return Reg.C;
-        case 010:
+        case 0b010:
             return Reg.D;
-        case 011:
+        case 0b011:
             return Reg.E;
-        case 100:
+        case 0b100:
             return Reg.H;
-        case 101:
+        case 0b101:
             return Reg.L;
-        case 111:
+        case 0b111:
             return Reg.A;
         default : // choix arbitraire de A, le cas par défaut n'est jamais atteint.
             return Reg.A;
@@ -273,13 +273,13 @@ public final class Cpu implements Component, Clocked {
     
     private Reg16 extractReg16(Opcode opcode) {
         switch(Bits.extract(opcode.encoding, 4, 2)) {
-        case 00:
+        case 0b00:
             return Reg16.BC;
-        case 01:
+        case 0b01:
             return Reg16.DE;
-        case 10:
+        case 0b10:
             return Reg16.HL;
-        case 11:
+        case 0b11:
             return Reg16.AF;
         default : // choix arbitraire de AF, le cas par défaut n'est jamais atteint.
             return Reg16.AF;
