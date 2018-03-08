@@ -75,7 +75,7 @@ public final class Cpu implements Component, Clocked {
            banc8.set(extractReg(op, 3), read8(read8AfterOpcode()));
        } break;
        case LD_R16SP_N16: {
-           setReg16(extractReg16(op), read8(read16AfterOpcode()));
+           setReg16SP(extractReg16(op), read8(read16AfterOpcode()));
        } break;
        case POP_R16: {
            banc8.set(extractReg(op, 3), bus.read(pop16()));
@@ -223,20 +223,20 @@ public final class Cpu implements Component, Clocked {
     // GESTION DES PAIRES DE REGISTRES
     
     private int reg16(Reg16 r) {
-        int msb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index() - 1]));
-        int lsb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index()]));
+        int msb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index()]));
+        int lsb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index() + 1]));
         return Bits.make16(msb, lsb);
     }
     
     private void setReg16(Reg16 r, int newV) {
         if (r == Reg16.AF) {
             Preconditions.checkBits16(newV);
-            banc8.set(Reg.values()[0], Bits.extract(newV, 8, 8));
-            banc8.set(Reg.values()[1], Bits.clip(8, newV & (-1 << 4)));
+            banc8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
+            banc8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV & (-1 << 4)));
         } else {
             Preconditions.checkBits16(newV);
-            banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
-            banc8.set(Reg.values()[2 * r.index()], Bits.clip(8, newV));
+            banc8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
+            banc8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV));
             }
     }
     
