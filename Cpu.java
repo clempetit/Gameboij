@@ -53,7 +53,7 @@ public final class Cpu implements Component, Clocked {
        } break;
        case LD_A_HLRU: {
            banc8.set(Reg.A, read8AtHl());
-           extractHlIncrement(op);
+           setReg16(Reg16.HL, Bits.clip(16, reg16(Reg16.HL) + extractHlIncrement(op)));
        } break;
        case LD_A_N8R: {
            banc8.set(Reg.A, read8(AddressMap.REGS_START + read8AfterOpcode()));
@@ -77,14 +77,14 @@ public final class Cpu implements Component, Clocked {
            setReg16SP(extractReg16(op), read16AfterOpcode());
        } break;
        case POP_R16: {
-           setReg16(extractReg16(op), bus.read(pop16()));
+           setReg16(extractReg16(op), pop16());
        } break;
        case LD_HLR_R8: {
            write8AtHl(banc8.get(extractReg(op, 0)));
        } break;
        case LD_HLRU_A: {
            write8AtHl(banc8.get(Reg.A));
-           extractHlIncrement(op);
+           setReg16(Reg16.HL, Bits.clip(16, reg16(Reg16.HL) + extractHlIncrement(op)));
        } break;
        case LD_N8R_A: {
            write8(AddressMap.REGS_START + read8AfterOpcode(), banc8.get(Reg.A));
