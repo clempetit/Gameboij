@@ -36,7 +36,6 @@ public final class Cpu implements Component, Clocked {
     
     private static final Opcode[] buildOpcodeTable(Opcode.Kind k) {
         Opcode[] table = new Opcode[256];
-        int i = 0;
         for (Opcode o: Opcode.values()) {
             if (o.kind == k) {
                 table[o.encoding] = o;
@@ -45,8 +44,8 @@ public final class Cpu implements Component, Clocked {
         return table;
     }
     private void dispatch(Opcode op) {
-        PC += op.totalBytes;
-        nextNonIdleCycle += op.cycles;
+        
+        
        switch (op.family) {
        case NOP: {
        } break;
@@ -123,12 +122,14 @@ public final class Cpu implements Component, Clocked {
            push16(reg16(extractReg16(op)));
        } break;
        }
+       PC += op.totalBytes;
+       nextNonIdleCycle += op.cycles;
     }
             
     @Override
     public void cycle(long cycle) {
         if (cycle == nextNonIdleCycle ) {
-            dispatch(DIRECT_OPCODE_TABLE[bus.read(PC)]);  
+            dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);  
         }
     }
     
@@ -230,8 +231,8 @@ public final class Cpu implements Component, Clocked {
     private void setReg16(Reg16 r, int newV) {
         if (r == Reg16.AF) {
             Preconditions.checkBits16(newV);
-            banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
-            banc8.set(Reg.values()[2 * r.index()], Bits.clip(8, newV & (-1 << 4)));
+            banc8.set(Reg.values()[0], Bits.extract(newV, 8, 8));
+            banc8.set(Reg.values()[1], Bits.clip(8, newV & (-1 << 4)));
         } else {
             Preconditions.checkBits16(newV);
             banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
