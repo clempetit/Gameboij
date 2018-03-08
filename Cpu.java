@@ -19,7 +19,7 @@ public final class Cpu implements Component, Clocked {
     private enum Reg implements Register {
         A, F, B, C, D, E, H, L
       }
-    private RegisterFile<Reg> banc8 = new RegisterFile<>(Reg.values());
+    private final RegisterFile<Reg> banc8 = new RegisterFile<>(Reg.values());
     
     private enum Reg16 implements Register {
         AF, BC, DE, HL
@@ -58,37 +58,41 @@ public final class Cpu implements Component, Clocked {
            extractHlIncrement(op);
        } break;
        case LD_A_N8R: {
-           banc8.set(Reg.A, bus.read(AddressMap.REGS_START + read8AfterOpcode()));
+           banc8.set(Reg.A, read8(AddressMap.REGS_START + read8AfterOpcode()));
        } break;
        case LD_A_CR: {
-           banc8.set(Reg.A, bus.read(AddressMap.REGS_START + banc8.get(Reg.C)));
+           banc8.set(Reg.A, read8(AddressMap.REGS_START + banc8.get(Reg.C)));
        } break;
        case LD_A_N16R: {
-           banc8.set(Reg.A, bus.read(read16AfterOpcode()));
+           banc8.set(Reg.A, read8(read16AfterOpcode()));
        } break;
        case LD_A_BCR: {
-           banc8.set(Reg.A, bus.read(reg16(Reg16.BC)));
+           banc8.set(Reg.A, read8(reg16(Reg16.BC)));
        } break;
        case LD_A_DER: {
-           banc8.set(Reg.A, bus.read(reg16(Reg16.DE)));
+           banc8.set(Reg.A, read8(reg16(Reg16.DE)));
        } break;
        case LD_R8_N8: {
-           banc8.set(extractReg(op, 3), bus.read(read8AfterOpcode()));
+           banc8.set(extractReg(op, 3), read8(read8AfterOpcode()));
        } break;
        case LD_R16SP_N16: {
-           setReg16(extractReg16(op), bus.read(read16AfterOpcode()));
+           setReg16(extractReg16(op), read8(read16AfterOpcode()));
        } break;
        case POP_R16: {
            banc8.set(extractReg(op, 3), bus.read(pop16()));
        } break;
        case LD_HLR_R8: {
-           
+           write8AtHl(banc8.get(extractReg(op, 0)));
        } break;
        case LD_HLRU_A: {
+           write8AtHl(banc8.get(Reg.A));
+           extractHlIncrement(op);
        } break;
        case LD_N8R_A: {
+           write8(AddressMap.REGS_START + read8AfterOpcode(), banc8.get(Reg.A));
        } break;
        case LD_CR_A: {
+           write8(AddressMap.REGS_START + banc8.get(Reg.C), banc8.get(Reg.A));
        } break;
        case LD_N16R_A: {
        } break;
@@ -150,8 +154,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read8AtHl() {
-        int addressHL = Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L));
-        return Preconditions.checkBits8(bus.read(addressHL));
+        return Preconditions.checkBits8(bus.read(Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L))));
     }
     
     private int read8AfterOpcode() {
@@ -183,8 +186,7 @@ public final class Cpu implements Component, Clocked {
     
     private void write8AtHl(int v) {
         Preconditions.checkBits8(v);
-        int addressHL = (banc8.get(Reg.H)) << 8 | (banc8.get(Reg.L));
-        bus.write(addressHL, v);
+        bus.write(Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L)), v);
     }
     
     private void push16(int v) {
