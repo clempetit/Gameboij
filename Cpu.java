@@ -109,6 +109,7 @@ public final class Cpu implements Component, Clocked {
        case LD_SP_HL: {
        } break;
        case PUSH_R16: {
+           push16(reg16(extractReg16(op)));
        } break;
        }
     }
