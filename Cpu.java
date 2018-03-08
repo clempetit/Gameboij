@@ -98,13 +98,13 @@ public final class Cpu implements Component, Clocked {
            write8(read16AfterOpcode(), banc8.get(Reg.A));
        } break;
        case LD_BCR_A: {
-           write8(read8(reg16(Reg16.BC)), banc8.get(Reg.A));
+           write8(reg16(Reg16.BC), banc8.get(Reg.A));
        } break;
        case LD_DER_A: {
-           write8(read8(reg16(Reg16.DE)), banc8.get(Reg.A));
+           write8(reg16(Reg16.DE), banc8.get(Reg.A));
        } break;
        case LD_HLR_N8: {
-           write8(read8(reg16(Reg16.HL)), read8AfterOpcode());
+           write8(reg16(Reg16.HL), read8AfterOpcode());
        } break;
        case LD_N16R_SP: {
            write8(read16AfterOpcode(), SP);
@@ -229,7 +229,7 @@ public final class Cpu implements Component, Clocked {
     
     private void setReg16(Reg16 r, int newV) {
         if (r == Reg16.AF) {
-            Preconditions.checkBits8(newV);
+            Preconditions.checkBits16(newV);
             banc8.set(Reg.values()[2 * r.index() - 1], Bits.extract(newV, 8, 8));
             banc8.set(Reg.values()[2 * r.index()], Bits.clip(8, newV & (-1 << 4)));
         } else {
