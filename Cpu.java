@@ -95,18 +95,29 @@ public final class Cpu implements Component, Clocked {
            write8(AddressMap.REGS_START + banc8.get(Reg.C), banc8.get(Reg.A));
        } break;
        case LD_N16R_A: {
+           write8(read16AfterOpcode(), banc8.get(Reg.A));
        } break;
        case LD_BCR_A: {
+           write8(read8(reg16(Reg16.BC)), banc8.get(Reg.A));
        } break;
        case LD_DER_A: {
+           write8(read8(reg16(Reg16.DE)), banc8.get(Reg.A));
        } break;
        case LD_HLR_N8: {
+           write8(read8(reg16(Reg16.HL)), read8AfterOpcode());
        } break;
        case LD_N16R_SP: {
+           write8(read16AfterOpcode(), SP);
        } break;
        case LD_R8_R8: {
+           Reg r = extractReg(op, 3);
+           Reg s = extractReg(op, 0);
+           if (r != s) {
+               banc8.set(r, banc8.get(s));
+           }
        } break;
        case LD_SP_HL: {
+           SP = reg16(Reg16.HL);
        } break;
        case PUSH_R16: {
            push16(reg16(extractReg16(op)));
