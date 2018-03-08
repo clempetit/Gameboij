@@ -25,10 +25,10 @@ public final class Cpu implements Component, Clocked {
         AF, BC, DE, HL
     }
     
-    private int PC;
-    private int SP;
+    private int PC = 0;
+    private int SP = 0;
     
-    private int nextNonIdleCycle;
+    private int nextNonIdleCycle = 0;
     private Bus bus;
     
     private static final Opcode[] DIRECT_OPCODE_TABLE =
