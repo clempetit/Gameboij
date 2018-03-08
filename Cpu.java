@@ -174,12 +174,14 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read16(int address) {
+        assert address != 0xFFFF;
         int lsb = Preconditions.checkBits8(bus.read(address));
         int msb = Preconditions.checkBits8(bus.read(address + 1));
         return Bits.make16(msb, lsb);
     }
     
     private int read16AfterOpcode() {
+        assert PC < 0xFFFE;
         int lsb = Preconditions.checkBits8(bus.read(PC + 1));
         int msb = Preconditions.checkBits8(bus.read(PC + 2));
         return Bits.make16(msb, lsb);
@@ -191,6 +193,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     private void write16(int address, int v) {
+        assert address != 0xFFFF;
         Preconditions.checkBits16(v);
         bus.write(address, Bits.clip(8, v));
         bus.write(address + 1, Bits.extract(v, 8, 8));
@@ -202,15 +205,18 @@ public final class Cpu implements Component, Clocked {
     }
     
     private void push16(int v) {
+        assert SP != 0x1;
         Preconditions.checkBits16(v);
-        SP -= 2;
+        SP = Bits.clip(16, SP - 2);
         bus.write(SP, Bits.clip(8, v));
         bus.write(SP + 1, Bits.extract(v, 8, 8));
     }
     
     private int pop16() {
-        SP +=2;
-        return read16(SP - 2);
+        assert SP != 0xFFFF;
+        int address = SP;
+        SP = Bits.clip(16, SP + 2);
+        return read16(address);
     }
     
     // GESTION DES PAIRES DE REGISTRES
