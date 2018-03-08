@@ -45,7 +45,6 @@ public final class Cpu implements Component, Clocked {
     }
     private void dispatch(Opcode op) {
         
-        
        switch (op.family) {
        case NOP: {
        } break;
@@ -72,13 +71,13 @@ public final class Cpu implements Component, Clocked {
            banc8.set(Reg.A, read8(reg16(Reg16.DE)));
        } break;
        case LD_R8_N8: {
-           banc8.set(extractReg(op, 3), read8(read8AfterOpcode()));
+           banc8.set(extractReg(op, 3), read8AfterOpcode());
        } break;
        case LD_R16SP_N16: {
-           setReg16SP(extractReg16(op), read8(read16AfterOpcode()));
+           setReg16SP(extractReg16(op), read16AfterOpcode());
        } break;
        case POP_R16: {
-           banc8.set(extractReg(op, 3), bus.read(pop16()));
+           setReg16(extractReg16(op), bus.read(pop16()));
        } break;
        case LD_HLR_R8: {
            write8AtHl(banc8.get(extractReg(op, 0)));
@@ -167,24 +166,24 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read8AtHl() {
-        return Preconditions.checkBits8(bus.read(Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L))));
+        return Preconditions.checkBits8(read8(Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L))));
     }
     
     private int read8AfterOpcode() {
-        return Preconditions.checkBits8(bus.read(PC + 1));
+        return Preconditions.checkBits8(read8(PC + 1));
     }
     
     private int read16(int address) {
         assert address != 0xFFFF;
-        int lsb = Preconditions.checkBits8(bus.read(address));
-        int msb = Preconditions.checkBits8(bus.read(address + 1));
+        int lsb = Preconditions.checkBits8(read8(address));
+        int msb = Preconditions.checkBits8(read8(address + 1));
         return Bits.make16(msb, lsb);
     }
     
     private int read16AfterOpcode() {
         assert PC < 0xFFFE;
-        int lsb = Preconditions.checkBits8(bus.read(PC + 1));
-        int msb = Preconditions.checkBits8(bus.read(PC + 2));
+        int lsb = Preconditions.checkBits8(read8(PC + 1));
+        int msb = Preconditions.checkBits8(read8(PC + 2));
         return Bits.make16(msb, lsb);
     }
     
