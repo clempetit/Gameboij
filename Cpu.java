@@ -34,7 +34,7 @@ public final class Cpu implements Component, Clocked {
     private static final Opcode[] DIRECT_OPCODE_TABLE =
             buildOpcodeTable(Opcode.Kind.DIRECT);
     
-    private static final Opcode[] buildOpcodeTable(Opcode.Kind k) {
+    private static Opcode[] buildOpcodeTable(Opcode.Kind k) {
         Opcode[] table = new Opcode[256];
         for (Opcode o: Opcode.values()) {
             if (o.kind == k) {
@@ -127,6 +127,7 @@ public final class Cpu implements Component, Clocked {
             
     @Override
     public void cycle(long cycle) {
+        
         if (cycle == nextNonIdleCycle ) {
             dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);  
         }
