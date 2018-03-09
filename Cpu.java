@@ -252,39 +252,13 @@ public final class Cpu implements Component, Clocked {
     // EXTRACTION DES PARAMETRES
     
     private Reg extractReg(Opcode opcode, int startBit) {
-        switch(Bits.extract(opcode.encoding, startBit, 3)) {
-        case 0b000:
-            return Reg.B;
-        case 0b001:
-            return Reg.C;
-        case 0b010:
-            return Reg.D;
-        case 0b011:
-            return Reg.E;
-        case 0b100:
-            return Reg.H;
-        case 0b101:
-            return Reg.L;
-        case 0b111:
-            return Reg.A;
-        default : // choix arbitraire de A, le cas par défaut n'est jamais atteint.
-            return Reg.A;
-        }
+        Reg[] regTab = {Reg.B, Reg.C, Reg.D, Reg.E, Reg.H, Reg.L, null, Reg.A};
+        return regTab[Bits.extract(opcode.encoding, startBit, 3)];
     }
     
     private Reg16 extractReg16(Opcode opcode) {
-        switch(Bits.extract(opcode.encoding, 4, 2)) {
-        case 0b00:
-            return Reg16.BC;
-        case 0b01:
-            return Reg16.DE;
-        case 0b10:
-            return Reg16.HL;
-        case 0b11:
-            return Reg16.AF;
-        default : // choix arbitraire de AF, le cas par défaut n'est jamais atteint.
-            return Reg16.AF;
-        }
+        Reg16[] reg16Tab = {Reg16.BC, Reg16.DE, Reg16.HL, Reg16.AF};
+        return reg16Tab[Bits.extract(opcode.encoding, 4, 2)];
     }
     
     private int extractHlIncrement(Opcode opcode) {
