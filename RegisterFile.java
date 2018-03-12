@@ -26,10 +26,10 @@ public final class RegisterFile<E extends Register> {
     }
     
     public boolean testBit(E reg, Bit b) {
-        return Bits.test((byte)reg.index(), b.index());
+        return Bits.test(get(reg), b.index());
     }
     
     public void setBit(E reg, Bit bit, boolean newValue) {
-        Bits.set((byte)reg.index(), bit.index(), newValue);
+        Bits.set(banc[reg.index()], bit.index(), newValue);
     }
 }
