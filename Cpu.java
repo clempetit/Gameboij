@@ -31,8 +31,15 @@ public final class Cpu implements Component, Clocked {
     private int nextNonIdleCycle = 0;
     private Bus bus;
     
+    private enum FlagSrc {
+        V0, V1, ALU, CPU
+    }
+    
     private static final Opcode[] DIRECT_OPCODE_TABLE =
             buildOpcodeTable(Opcode.Kind.DIRECT);
+    
+    private static final Opcode[] PREFIXED_OPCODE_TABLE =
+            buildOpcodeTable(Opcode.Kind.PREFIXED);
     
     private static Opcode[] buildOpcodeTable(Opcode.Kind k) {
         Opcode[] table = new Opcode[256];
@@ -370,5 +377,30 @@ public final class Cpu implements Component, Clocked {
     private int extractHlIncrement(Opcode opcode) {
         return Bits.test(opcode.encoding, 4) ? -1 : 1;
     }
+    
+    // GESTION  DES FANIONS
+    
+    void setRegFromAlu(Reg r, int vf) {
+        banc8.set(r, Alu.unpackValue(vf));
+    }
+    
+    void setFlags(int valueFlags) {
+        banc8.set(Reg.F, Alu.unpackFlags(valueFlags));
+    }
+    
+    void setRegFlags(Reg r, int vf) {
+        setRegFromAlu(r, vf);
+        setFlags(vf);
+    }
+    
+    void write8AtHlAndSetFlags(int vf) {
+        write8AtHl(Alu.unpackValue(vf));
+        setFlags(vf);
+    }
+    
+    void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
+        
+    }
+    
     
 }
