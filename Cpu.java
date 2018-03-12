@@ -105,7 +105,7 @@ public final class Cpu implements Component, Clocked {
            write8(reg16(Reg16.HL), read8AfterOpcode());
        } break;
        case LD_N16R_SP: {
-           write8(read16AfterOpcode(), SP);
+           write16(read16AfterOpcode(), SP);
        } break;
        case LD_R8_R8: {
            Reg r = extractReg(op, 3);
@@ -119,6 +119,112 @@ public final class Cpu implements Component, Clocked {
        } break;
        case PUSH_R16: {
            push16(reg16(extractReg16(op)));
+       } break;
+       
+       // Add
+       case ADD_A_R8: {
+       } break;
+       case ADD_A_N8: {
+       } break;
+       case ADD_A_HLR: {
+       } break;
+       case INC_R8: {
+       } break;
+       case INC_HLR: {
+       } break;
+       case INC_R16SP: {
+       } break;
+       case ADD_HL_R16SP: {
+       } break;
+       case LD_HLSP_S8: {
+       } break;
+
+       // Subtract
+       case SUB_A_R8: {
+       } break;
+       case SUB_A_N8: {
+       } break;
+       case SUB_A_HLR: {
+       } break;
+       case DEC_R8: {
+       } break;
+       case DEC_HLR: {
+       } break;
+       case CP_A_R8: {
+       } break;
+       case CP_A_N8: {
+       } break;
+       case CP_A_HLR: {
+       } break;
+       case DEC_R16SP: {
+       } break;
+
+       // And, or, xor, complement
+       case AND_A_N8: {
+       } break;
+       case AND_A_R8: {
+       } break;
+       case AND_A_HLR: {
+       } break;
+       case OR_A_R8: {
+       } break;
+       case OR_A_N8: {
+       } break;
+       case OR_A_HLR: {
+       } break;
+       case XOR_A_R8: {
+       } break;
+       case XOR_A_N8: {
+       } break;
+       case XOR_A_HLR: {
+       } break;
+       case CPL: {
+       } break;
+
+       // Rotate, shift
+       case ROTCA: {
+       } break;
+       case ROTA: {
+       } break;
+       case ROTC_R8: {
+       } break;
+       case ROT_R8: {
+       } break;
+       case ROTC_HLR: {
+       } break;
+       case ROT_HLR: {
+       } break;
+       case SWAP_R8: {
+       } break;
+       case SWAP_HLR: {
+       } break;
+       case SLA_R8: {
+       } break;
+       case SRA_R8: {
+       } break;
+       case SRL_R8: {
+       } break;
+       case SLA_HLR: {
+       } break;
+       case SRA_HLR: {
+       } break;
+       case SRL_HLR: {
+       } break;
+
+       // Bit test and set
+       case BIT_U3_R8: {
+       } break;
+       case BIT_U3_HLR: {
+       } break;
+       case CHG_U3_R8: {
+       } break;
+       case CHG_U3_HLR: {
+       } break;
+
+       // Misc. ALU
+       case DAA: {
+       } break;
+       case SCCF: {
        } break;
        }
        PC += op.totalBytes;
