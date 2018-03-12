@@ -26,7 +26,7 @@ public final class RegisterFile<E extends Register> {
     }
     
     public boolean testBit(E reg, Bit b) {
-        return Bits.test(get(reg), b.index());
+        return Bits.test(get(reg), b);
     }
     
     public void setBit(E reg, Bit bit, boolean newValue) {
