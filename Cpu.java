@@ -380,26 +380,47 @@ public final class Cpu implements Component, Clocked {
     
     // GESTION  DES FANIONS
     
-    void setRegFromAlu(Reg r, int vf) {
+    private void setRegFromAlu(Reg r, int vf) {
         banc8.set(r, Alu.unpackValue(vf));
     }
     
-    void setFlags(int valueFlags) {
+    private void setFlags(int valueFlags) {
         banc8.set(Reg.F, Alu.unpackFlags(valueFlags));
     }
     
-    void setRegFlags(Reg r, int vf) {
+    private void setRegFlags(Reg r, int vf) {
         setRegFromAlu(r, vf);
         setFlags(vf);
     }
     
-    void write8AtHlAndSetFlags(int vf) {
+    private void write8AtHlAndSetFlags(int vf) {
         write8AtHl(Alu.unpackValue(vf));
         setFlags(vf);
     }
     
-    void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
-        
+    private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
+        int flags = Alu.unpackFlags(vf);
+        int zIndex = Alu.Flag.Z.index(), nIndex = Alu.Flag.N.index(), hIndex = Alu.Flag.H.index(), cIndex = Alu.Flag.C.index();
+        Bits.set(flags, zIndex, fanTreat(flags, zIndex, z));
+        Bits.set(flags, nIndex, fanTreat(flags, nIndex, n));
+        Bits.set(flags, hIndex, fanTreat(flags, hIndex, h));
+        Bits.set(flags, cIndex, fanTreat(flags, cIndex, c));
+        banc8.set(Reg.F, flags);
+    }
+    
+    private boolean fanTreat (int flags, int index, FlagSrc fanion) {
+        switch(fanion) {
+        case V0 :
+            return false;
+        case V1 :
+            return true;
+        case ALU :
+            return Bits.test(flags, index);
+        case CPU :
+            return Bits.test(banc8.get(Reg.F), index);
+        default : 
+            return false;
+        }
     }
     
     
