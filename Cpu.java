@@ -400,24 +400,22 @@ public final class Cpu implements Component, Clocked {
     
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
         int flags = Alu.unpackFlags(vf);
-        int zIndex = Alu.Flag.Z.index(), nIndex = Alu.Flag.N.index(), hIndex = Alu.Flag.H.index(), cIndex = Alu.Flag.C.index();
-        Bits.set(flags, zIndex, fanTreat(flags, zIndex, z));
-        Bits.set(flags, nIndex, fanTreat(flags, nIndex, n));
-        Bits.set(flags, hIndex, fanTreat(flags, hIndex, h));
-        Bits.set(flags, cIndex, fanTreat(flags, cIndex, c));
-        banc8.set(Reg.F, flags);
+        banc8.setBit(Reg.F, Alu.Flag.Z, fanTreat(flags, Alu.Flag.Z, z));
+        banc8.setBit(Reg.F, Alu.Flag.N, fanTreat(flags, Alu.Flag.N, n));
+        banc8.setBit(Reg.F, Alu.Flag.H, fanTreat(flags, Alu.Flag.H, h));
+        banc8.setBit(Reg.F, Alu.Flag.C, fanTreat(flags, Alu.Flag.C, c));
     }
     
-    private boolean fanTreat (int flags, int index, FlagSrc fanion) {
-        switch(fanion) {
+    private boolean fanTreat (int flags, Alu.Flag fanion, FlagSrc treat) {
+        switch(treat) {
         case V0 :
             return false;
         case V1 :
             return true;
         case ALU :
-            return Bits.test(flags, index);
+            return Bits.test(flags, fanion);
         case CPU :
-            return Bits.test(banc8.get(Reg.F), index);
+            return banc8.testBit(Reg.F, fanion);
         default : 
             return false;
         }
@@ -427,15 +425,11 @@ public final class Cpu implements Component, Clocked {
     // à faire au moment de coder les instructions rotation, BIT, RES, SET;
     
     private boolean carry (Opcode opcode, boolean addOrSub) {
-        boolean c = Bits.test(opcode.encoding, 3) && Bits.test(banc8.get(Reg.F), Alu.Flag.C.index());
+        boolean c = Bits.test(opcode.encoding, 3) && banc8.testBit(Reg.F, Alu.Flag.C);
         if (addOrSub) { 
         return c;
         } else {
             return !c;
         }
-    }
-    
-    private boolean carryforCHandling (Opcode opcode) {
-        return !carry(opcode);
     }
 }
