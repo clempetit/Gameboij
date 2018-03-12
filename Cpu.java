@@ -423,5 +423,19 @@ public final class Cpu implements Component, Clocked {
         }
     }
     
+    // EXTRACTION DES PARAMETRES
+    // à faire au moment de coder les instructions rotation, BIT, RES, SET;
     
+    private boolean carry (Opcode opcode, boolean addOrSub) {
+        boolean c = Bits.test(opcode.encoding, 3) && Bits.test(banc8.get(Reg.F), Alu.Flag.C.index());
+        if (addOrSub) { 
+        return c;
+        } else {
+            return !c;
+        }
+    }
+    
+    private boolean carryforCHandling (Opcode opcode) {
+        return !carry(opcode);
+    }
 }
