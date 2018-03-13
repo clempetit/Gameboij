@@ -145,14 +145,34 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case INC_R8: {
+           Reg r = extractReg(op, 3);
+           int vf = Alu.add(banc8.get(r), 1);
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
        } break;
        case INC_HLR: {
+           int vf = Alu.add(read8AtHl(), 1);
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
        } break;
        case INC_R16SP: {
+           Reg16 r = extractReg16(op);
+           incrementReg16SP(r);
        } break;
        case ADD_HL_R16SP: {
+           int vf = Alu.add16H(reg16(Reg16.HL), reg16SP(extractReg16(op)));
+           setReg16(Reg16.HL, Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case LD_HLSP_S8: {
+           int vf = Alu.add16L(SP, (byte)read8AfterOpcode()); // read8afterOpcode ne devrait il pas lire SP+2 pour une instruction préfixée ?
+           combineAluFlags(vf, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+           int v = Alu.unpackValue(vf);
+           if (Bits.test(op.encoding, 4)) {
+               setReg16(Reg16.HL, v);
+           } else {
+               SP = v;
+           }
        } break;
 
        // Subtract
@@ -363,6 +383,19 @@ public final class Cpu implements Component, Clocked {
         return Bits.make16(msb, lsb);
     }
     
+    /**
+     * return the value contained in the given 16 bits register just like reg16, but return SP if the register AF is given.
+     * @param r the 1§ bits register 
+     * @return the value contained in the 16 bits register, or SP if the register AF is given.
+     */
+    private int reg16SP(Reg16 r) {
+        if (r == Reg16.AF) {
+            return SP;
+        } else {
+            return reg16(r);
+        }
+    }
+    
     private void setReg16(Reg16 r, int newV) {
         if (r == Reg16.AF) {
             Preconditions.checkBits16(newV);
@@ -381,6 +414,17 @@ public final class Cpu implements Component, Clocked {
             SP = newV;
         } else {
             setReg16(r, newV);
+        }
+    }
+    /**
+     * increment the given 16 bits register. If the latter is AF, then the register SP is incremented instead.
+     * @param r the 16 bits register to increment
+     */
+    private void incrementReg16SP(Reg16 r) {
+        if (r == Reg16.AF) {
+            SP = Bits.clip(16, SP + 1);
+        } else {
+        setReg16(r, Bits.clip(16, reg16(r)+1));
         }
     }
     
@@ -422,25 +466,22 @@ public final class Cpu implements Component, Clocked {
     
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
         int flags = Alu.unpackFlags(vf);
-        banc8.setBit(Reg.F, Alu.Flag.Z, fanHandling(flags, Alu.Flag.Z, z));
-        banc8.setBit(Reg.F, Alu.Flag.N, fanHandling(flags, Alu.Flag.N, n));
-        banc8.setBit(Reg.F, Alu.Flag.H, fanHandling(flags, Alu.Flag.H, h));
-        banc8.setBit(Reg.F, Alu.Flag.C, fanHandling(flags, Alu.Flag.C, c));
+        int v1Vector = flagVector(FlagSrc.V1, z, n, h, c);
+        int aluVector = flagVector(FlagSrc.ALU, z, n, h, c) & flags;
+        int cpuVector = flagVector(FlagSrc.CPU, z, n, h, c) & banc8.get(Reg.F);
+        banc8.set(Reg.F, v1Vector | aluVector | cpuVector);
     }
-    
-    private boolean fanHandling (int flags, Alu.Flag fanion, FlagSrc hdling) {
-        switch(hdling) {
-        case V0 :
-            return false;
-        case V1 :
-            return true;
-        case ALU :
-            return Bits.test(flags, fanion);
-        case CPU :
-            return banc8.testBit(Reg.F, fanion);
-        default : 
-            return false;
-        }
+    /**
+     * return a mask representing the values of the flags corresponding to a given flag source.
+     * @param ref the flag source
+     * @param z the flag source of flag Z
+     * @param n the flag source of flag N
+     * @param h the flag source of flag H
+     * @param c the flag source of flag C
+     * @return a mask representing the values the flags corresponding to a given flag source.
+     */
+    private int flagVector (FlagSrc ref, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
+        return Alu.maskZNHC(ref == z, ref == n, ref == h, ref == c);
     }
     
     // EXTRACTION DES PARAMETRES
