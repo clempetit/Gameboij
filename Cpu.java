@@ -130,10 +130,19 @@ public final class Cpu implements Component, Clocked {
        
        // Add
        case ADD_A_R8: {
+           int vf = Alu.add(banc8.get(Reg.A), banc8.get(extractReg(op, 0)), carryASH(op, true));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case ADD_A_N8: {
+           int vf = Alu.add(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true)); // read8afterOpcode ne devrait il pas lire SP+2 pour une instruction préfixée ?
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case ADD_A_HLR: {
+           int vf = Alu.add(banc8.get(Reg.A), read8AtHl(), carryASH(op, true));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case INC_R8: {
        } break;
@@ -148,10 +157,19 @@ public final class Cpu implements Component, Clocked {
 
        // Subtract
        case SUB_A_R8: {
+           int vf = Alu.sub(banc8.get(Reg.A), banc8.get(extractReg(op, 0)), carryASH(op, true));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_N8: {
+           int vf = Alu.sub(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true)); // read8afterOpcode ne devrait il pas lire SP+2 pour une instruction préfixée ?
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_HLR: {
+           int vf = Alu.sub(banc8.get(Reg.A), read8AtHl(), carryASH(op, true));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case DEC_R8: {
        } break;
@@ -404,14 +422,14 @@ public final class Cpu implements Component, Clocked {
     
     private void combineAluFlags(int vf, FlagSrc z, FlagSrc n, FlagSrc h, FlagSrc c) {
         int flags = Alu.unpackFlags(vf);
-        banc8.setBit(Reg.F, Alu.Flag.Z, fanTreat(flags, Alu.Flag.Z, z));
-        banc8.setBit(Reg.F, Alu.Flag.N, fanTreat(flags, Alu.Flag.N, n));
-        banc8.setBit(Reg.F, Alu.Flag.H, fanTreat(flags, Alu.Flag.H, h));
-        banc8.setBit(Reg.F, Alu.Flag.C, fanTreat(flags, Alu.Flag.C, c));
+        banc8.setBit(Reg.F, Alu.Flag.Z, fanHandling(flags, Alu.Flag.Z, z));
+        banc8.setBit(Reg.F, Alu.Flag.N, fanHandling(flags, Alu.Flag.N, n));
+        banc8.setBit(Reg.F, Alu.Flag.H, fanHandling(flags, Alu.Flag.H, h));
+        banc8.setBit(Reg.F, Alu.Flag.C, fanHandling(flags, Alu.Flag.C, c));
     }
     
-    private boolean fanTreat (int flags, Alu.Flag fanion, FlagSrc treat) {
-        switch(treat) {
+    private boolean fanHandling (int flags, Alu.Flag fanion, FlagSrc hdling) {
+        switch(hdling) {
         case V0 :
             return false;
         case V1 :
@@ -428,7 +446,7 @@ public final class Cpu implements Component, Clocked {
     // EXTRACTION DES PARAMETRES
     // à faire au moment de coder les instructions rotation, BIT, RES, SET;
     
-    private boolean carry (Opcode opcode, boolean addOrSub) {
+    private boolean carryASH (Opcode opcode, boolean addOrSub) {
         boolean c = Bits.test(opcode.encoding, 3) && banc8.testBit(Reg.F, Alu.Flag.C);
         if (addOrSub) { 
         return c;
