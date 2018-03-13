@@ -242,7 +242,11 @@ public final class Cpu implements Component, Clocked {
     public void cycle(long cycle) {
         
         if (cycle == nextNonIdleCycle ) {
-            dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);  
+            if (read8(PC) != 0xCB) {
+            dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);
+            } else {
+                dispatch(PREFIXED_OPCODE_TABLE[read8(PC + 1)]);
+            }
         }
     }
     
