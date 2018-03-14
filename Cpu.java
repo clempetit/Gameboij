@@ -135,7 +135,7 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case ADD_A_N8: {
-           int vf = Alu.add(banc8.get(Reg.A), read8(PC+2), carryASH(op, true));
+           int vf = Alu.add(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
@@ -165,7 +165,7 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case LD_HLSP_S8: {
-           int vf = Alu.add16L(SP, (byte)read8(PC+2));
+           int vf = Alu.add16L(SP, (byte)read8AfterOpcode());
            combineAluFlags(vf, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
            int v = Alu.unpackValue(vf);
            if (Bits.test(op.encoding, 4)) {
@@ -182,7 +182,7 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_N8: {
-           int vf = Alu.sub(banc8.get(Reg.A), read8(PC+2), carryASH(op, true));
+           int vf = Alu.sub(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
