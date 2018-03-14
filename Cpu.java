@@ -216,9 +216,7 @@ public final class Cpu implements Component, Clocked {
        } break;
        case DEC_R16SP: {
            Reg16 r = extractReg16(op);
-           int vf = Alu.sub(bench8.get(r), 1);
-           setRegFromAlu(r,vf);
-           combineAluFlags(vf, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU);
+           decrementReg16SP(r);
        } break;
 
        // And, or, xor, complement
@@ -471,6 +469,18 @@ public final class Cpu implements Component, Clocked {
             SP = Bits.clip(16, SP + 1);
         } else {
         setReg16(r, Bits.clip(16, reg16(r)+1));
+        }
+    }
+    
+    /**
+     * Decrement the given 16 bits register. If the latter is AF, then the register SP is incremented instead.
+     * @param r the 16 bits register to decrement
+     */
+    private void decrementReg16SP(Reg16 r) {
+        if (r == Reg16.AF) {
+            SP = Bits.clip(16, SP - 1);
+        } else {
+        setReg16(r, Bits.clip(16, reg16(r)-1));
         }
     }
     
