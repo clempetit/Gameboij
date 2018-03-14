@@ -191,7 +191,7 @@ public final class Cpu implements Component, Clocked {
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
-        case DEC_R8: {
+       case DEC_R8: {
            Reg r = extractReg(op, 3);
            int vf = Alu.sub(bench8.get(r), 1);
            setRegFromAlu(r,vf);
@@ -328,21 +328,26 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
 
-
        // Bit test and set
        case BIT_U3_R8: {
        } break;
        case BIT_U3_HLR: {
        } break;
        case CHG_U3_R8: {
+           Reg r = extractReg(op, 0);
+           bench8.set(r, SetOrRes(op, extractIndexBRS(op), bench8.get(r)));
        } break;
        case CHG_U3_HLR: {
+           Reg r = extractReg(op, 0);
+           write8AtHl(SetOrRes(op, extractIndexBRS(op), bench8.get(r)));
        } break;
 
        // Misc. ALU
        case DAA: {
        } break;
        case SCCF: {
+       } break;
+       default: {
        } break;
        }
        PC += op.totalBytes;
@@ -571,6 +576,21 @@ public final class Cpu implements Component, Clocked {
     
     // EXTRACTION DES PARAMETRES
     // à faire au moment de coder les instructions rotation, BIT, RES, SET;
+    private boolean extractDirRot(Opcode opcode) {
+        return Bits.test(opcode.encoding, 3);
+    }
+    
+    private int extractIndexBRS(Opcode opcode) {
+        return Bits.extract(opcode.encoding, 3, 3);
+    }
+    
+    private int SetOrRes(Opcode opcode, int index, int regValue) {
+        if(Bits.test(opcode.encoding, 6)) {
+           return regValue | Bits.mask(index); 
+        } else {
+           return regValue & Bits.complement8(Bits.mask(index));
+        }
+    }
     
     private boolean carryASH (Opcode opcode, boolean addOrSub) {
         boolean c = Bits.test(opcode.encoding, 3) && bench8.testBit(Reg.F, Alu.Flag.C);
