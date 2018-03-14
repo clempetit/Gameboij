@@ -284,8 +284,15 @@ public final class Cpu implements Component, Clocked {
        case ROT_HLR: {
        } break;
        case SWAP_R8: {
+           Reg r = extractReg(op, 0);
+           int vf = Alu.swap(bench8.get(r));
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case SWAP_HLR: {
+           int vf = Alu.swap(read8AtHl());
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case SLA_R8: {
            Reg r = extractReg(op, 0);
