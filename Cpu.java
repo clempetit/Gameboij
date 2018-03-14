@@ -135,7 +135,7 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case ADD_A_N8: {
-           int vf = Alu.add(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true)); // read8afterOpcode ne devrait il pas lire SP+2 pour une instruction préfixée ?
+           int vf = Alu.add(banc8.get(Reg.A), read8(PC+2), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
@@ -165,7 +165,7 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case LD_HLSP_S8: {
-           int vf = Alu.add16L(SP, (byte)read8AfterOpcode()); // read8afterOpcode ne devrait il pas lire SP+2 pour une instruction préfixée ?
+           int vf = Alu.add16L(SP, (byte)read8(PC+2));
            combineAluFlags(vf, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
            int v = Alu.unpackValue(vf);
            if (Bits.test(op.encoding, 4)) {
@@ -179,17 +179,17 @@ public final class Cpu implements Component, Clocked {
        case SUB_A_R8: {
            int vf = Alu.sub(banc8.get(Reg.A), banc8.get(extractReg(op, 0)), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_N8: {
-           int vf = Alu.sub(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true)); // read8afterOpcode ne devrait il pas lire SP+2 pour une instruction préfixée ?
+           int vf = Alu.sub(banc8.get(Reg.A), read8(PC+2), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_HLR: {
            int vf = Alu.sub(banc8.get(Reg.A), read8AtHl(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case DEC_R8: {
        } break;
@@ -206,8 +206,10 @@ public final class Cpu implements Component, Clocked {
 
        // And, or, xor, complement
        case AND_A_N8: {
+           
        } break;
        case AND_A_R8: {
+           
        } break;
        case AND_A_HLR: {
        } break;
