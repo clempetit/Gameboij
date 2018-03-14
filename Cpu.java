@@ -10,6 +10,7 @@ import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
 import ch.epfl.gameboj.RegisterFile;
+import ch.epfl.gameboj.bits.Bit;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
@@ -330,8 +331,12 @@ public final class Cpu implements Component, Clocked {
 
        // Bit test and set
        case BIT_U3_R8: {
+           int f = Alu.testBit(bench8.get(extractReg(op, 0)), extractIndexBRS(op));
+           combineAluFlags(f, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V1, FlagSrc.CPU);
        } break;
        case BIT_U3_HLR: {
+           int f = Alu.testBit(read8AtHl(), extractIndexBRS(op));
+           combineAluFlags(f, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V1, FlagSrc.CPU);
        } break;
        case CHG_U3_R8: {
            Reg r = extractReg(op, 0);
@@ -344,11 +349,14 @@ public final class Cpu implements Component, Clocked {
 
        // Misc. ALU
        case DAA: {
-           int vf = Alu.bcdAdjust(bench8.get(Reg.A), bench8.testBit(Reg.F, Alu.Flag.N), bench8.testBit(Reg.F, Alu.Flag.H), bench8.testBit(Reg.F, Alu.Flag.C));
+           int vf = Alu.bcdAdjust(bench8.get(Reg.A), testFlag(Alu.Flag.N), testFlag(Alu.Flag.H), testFlag(Alu.Flag.C));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SCCF: {
+           bench8.setBit(Reg.F, Alu.Flag.C, carryASH(op, false));
+           bench8.setBit(Reg.F, Alu.Flag.N, false);
+           bench8.setBit(Reg.F, Alu.Flag.H, false);
        } break;
        default: {
        } break;
@@ -578,7 +586,6 @@ public final class Cpu implements Component, Clocked {
     }
     
     // EXTRACTION DES PARAMETRES
-    // à faire au moment de coder les instructions rotation, BIT, RES, SET;
     private boolean extractDirRot(Opcode opcode) {
         return Bits.test(opcode.encoding, 3);
     }
@@ -595,12 +602,16 @@ public final class Cpu implements Component, Clocked {
         }
     }
     
-    private boolean carryASH (Opcode opcode, boolean addOrSub) {
+    private boolean carryASH(Opcode opcode, boolean addOrSub) {
         boolean c = Bits.test(opcode.encoding, 3) && bench8.testBit(Reg.F, Alu.Flag.C);
         if (addOrSub) { 
         return c;
         } else {
             return !c;
         }
+    }
+    
+    private boolean testFlag(Alu.Flag f) {
+        return bench8.testBit(Reg.F, f);
     }
 }
