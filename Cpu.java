@@ -207,29 +207,56 @@ public final class Cpu implements Component, Clocked {
        // And, or, xor, complement
        case AND_A_N8: {
            int vf = Alu.and(bench8.get(Reg.A), read8AfterOpcode());
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
        } break;
        case AND_A_R8: {
-           
+           int vf = Alu.and(bench8.get(Reg.A), bench8.get(extractReg(op, 0)));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
        } break;
        case AND_A_HLR: {
+           int vf = Alu.and(bench8.get(Reg.A), read8AtHl());
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V1, FlagSrc.V0);
        } break;
        case OR_A_R8: {
+           int vf = Alu.or(bench8.get(Reg.A), bench8.get(extractReg(op, 0)));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case OR_A_N8: {
+           int vf = Alu.or(bench8.get(Reg.A), read8AfterOpcode());
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case OR_A_HLR: {
+           int vf = Alu.or(bench8.get(Reg.A), read8AtHl());
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case XOR_A_R8: {
+           int vf = Alu.xor(bench8.get(Reg.A), bench8.get(extractReg(op, 0)));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case XOR_A_N8: {
+           int vf = Alu.xor(bench8.get(Reg.A), read8AfterOpcode());
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case XOR_A_HLR: {
+           int vf = Alu.xor(bench8.get(Reg.A), read8AtHl());
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case CPL: {
+           setRegFromAlu(Reg.A, Bits.complement8(bench8.get(Reg.A)));
        } break;
 
        // Rotate, shift
        case ROTCA: {
+           
        } break;
        case ROTA: {
        } break;
