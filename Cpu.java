@@ -14,6 +14,7 @@ import ch.epfl.gameboj.bits.Bit;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
+import ch.epfl.gameboj.component.cpu.Alu.RotDir;
 
 public final class Cpu implements Component, Clocked {
     
@@ -272,17 +273,42 @@ public final class Cpu implements Component, Clocked {
 
        // Rotate, shift
        case ROTCA: {
-           
+           RotDir d = extractDirRot(op) ? RotDir.RIGHT : RotDir.LEFT;
+           int vf = Alu.rotate(d, bench8.get(Reg.A));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case ROTA: {
+           RotDir d = extractDirRot(op) ? RotDir.RIGHT : RotDir.LEFT;
+           int vf = Alu.rotate(d, bench8.get(Reg.A), bench8.testBit(Reg.F, Alu.Flag.C));
+           setRegFromAlu(Reg.A, vf);
+           combineAluFlags(vf,FlagSrc.V0, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case ROTC_R8: {
+           Reg r = extractReg(op, 0);
+           RotDir d = extractDirRot(op) ? RotDir.RIGHT : RotDir.LEFT;
+           int vf = Alu.rotate(d, bench8.get(r));
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case ROT_R8: {
+           Reg r = extractReg(op, 0);
+           RotDir d = extractDirRot(op) ? RotDir.RIGHT : RotDir.LEFT;
+           int vf = Alu.rotate(d, bench8.get(r), bench8.testBit(Reg.F, Alu.Flag.C));
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case ROTC_HLR: {
+           RotDir d = extractDirRot(op) ? RotDir.RIGHT : RotDir.LEFT;
+           int vf = Alu.rotate(d, read8AtHl());
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case ROT_HLR: {
+           RotDir d = extractDirRot(op) ? RotDir.RIGHT : RotDir.LEFT;
+           int vf = Alu.rotate(d, read8AtHl(), bench8.testBit(Reg.F, Alu.Flag.C));
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SWAP_R8: {
            Reg r = extractReg(op, 0);
