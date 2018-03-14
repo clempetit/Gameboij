@@ -19,7 +19,7 @@ public final class Cpu implements Component, Clocked {
     private enum Reg implements Register {
         A, F, B, C, D, E, H, L
       }
-    private final RegisterFile<Reg> banc8 = new RegisterFile<>(Reg.values());
+    private final RegisterFile<Reg> bench8 = new RegisterFile<>(Reg.values());
     
     private enum Reg16 implements Register {
         AF, BC, DE, HL
@@ -56,29 +56,29 @@ public final class Cpu implements Component, Clocked {
        case NOP: {
        } break;
        case LD_R8_HLR: {
-           banc8.set(extractReg(op, 3), read8AtHl());
+           bench8.set(extractReg(op, 3), read8AtHl());
        } break;
        case LD_A_HLRU: {
-           banc8.set(Reg.A, read8AtHl());
+           bench8.set(Reg.A, read8AtHl());
            setReg16(Reg16.HL, Bits.clip(16, reg16(Reg16.HL) + extractHlIncrement(op)));
        } break;
        case LD_A_N8R: {
-           banc8.set(Reg.A, read8(AddressMap.REGS_START + read8AfterOpcode()));
+           bench8.set(Reg.A, read8(AddressMap.REGS_START + read8AfterOpcode()));
        } break;
        case LD_A_CR: {
-           banc8.set(Reg.A, read8(AddressMap.REGS_START + banc8.get(Reg.C)));
+           bench8.set(Reg.A, read8(AddressMap.REGS_START + bench8.get(Reg.C)));
        } break;
        case LD_A_N16R: {
-           banc8.set(Reg.A, read8(read16AfterOpcode()));
+           bench8.set(Reg.A, read8(read16AfterOpcode()));
        } break;
        case LD_A_BCR: {
-           banc8.set(Reg.A, read8(reg16(Reg16.BC)));
+           bench8.set(Reg.A, read8(reg16(Reg16.BC)));
        } break;
        case LD_A_DER: {
-           banc8.set(Reg.A, read8(reg16(Reg16.DE)));
+           bench8.set(Reg.A, read8(reg16(Reg16.DE)));
        } break;
        case LD_R8_N8: {
-           banc8.set(extractReg(op, 3), read8AfterOpcode());
+           bench8.set(extractReg(op, 3), read8AfterOpcode());
        } break;
        case LD_R16SP_N16: {
            setReg16SP(extractReg16(op), read16AfterOpcode());
@@ -87,26 +87,26 @@ public final class Cpu implements Component, Clocked {
            setReg16(extractReg16(op), pop16());
        } break;
        case LD_HLR_R8: {
-           write8AtHl(banc8.get(extractReg(op, 0)));
+           write8AtHl(bench8.get(extractReg(op, 0)));
        } break;
        case LD_HLRU_A: {
-           write8AtHl(banc8.get(Reg.A));
+           write8AtHl(bench8.get(Reg.A));
            setReg16(Reg16.HL, Bits.clip(16, reg16(Reg16.HL) + extractHlIncrement(op)));
        } break;
        case LD_N8R_A: {
-           write8(AddressMap.REGS_START + read8AfterOpcode(), banc8.get(Reg.A));
+           write8(AddressMap.REGS_START + read8AfterOpcode(), bench8.get(Reg.A));
        } break;
        case LD_CR_A: {
-           write8(AddressMap.REGS_START + banc8.get(Reg.C), banc8.get(Reg.A));
+           write8(AddressMap.REGS_START + bench8.get(Reg.C), bench8.get(Reg.A));
        } break;
        case LD_N16R_A: {
-           write8(read16AfterOpcode(), banc8.get(Reg.A));
+           write8(read16AfterOpcode(), bench8.get(Reg.A));
        } break;
        case LD_BCR_A: {
-           write8(reg16(Reg16.BC), banc8.get(Reg.A));
+           write8(reg16(Reg16.BC), bench8.get(Reg.A));
        } break;
        case LD_DER_A: {
-           write8(reg16(Reg16.DE), banc8.get(Reg.A));
+           write8(reg16(Reg16.DE), bench8.get(Reg.A));
        } break;
        case LD_HLR_N8: {
            write8(reg16(Reg16.HL), read8AfterOpcode());
@@ -118,7 +118,7 @@ public final class Cpu implements Component, Clocked {
            Reg r = extractReg(op, 3);
            Reg s = extractReg(op, 0);
            if (r != s) {
-               banc8.set(r, banc8.get(s));
+               bench8.set(r, bench8.get(s));
            }
        } break;
        case LD_SP_HL: {
@@ -130,23 +130,23 @@ public final class Cpu implements Component, Clocked {
        
        // Add
        case ADD_A_R8: {
-           int vf = Alu.add(banc8.get(Reg.A), banc8.get(extractReg(op, 0)), carryASH(op, true));
+           int vf = Alu.add(bench8.get(Reg.A), bench8.get(extractReg(op, 0)), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case ADD_A_N8: {
-           int vf = Alu.add(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
+           int vf = Alu.add(bench8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case ADD_A_HLR: {
-           int vf = Alu.add(banc8.get(Reg.A), read8AtHl(), carryASH(op, true));
+           int vf = Alu.add(bench8.get(Reg.A), read8AtHl(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case INC_R8: {
            Reg r = extractReg(op, 3);
-           int vf = Alu.add(banc8.get(r), 1);
+           int vf = Alu.add(bench8.get(r), 1);
            setRegFromAlu(r, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.CPU);
        } break;
@@ -177,17 +177,17 @@ public final class Cpu implements Component, Clocked {
 
        // Subtract
        case SUB_A_R8: {
-           int vf = Alu.sub(banc8.get(Reg.A), banc8.get(extractReg(op, 0)), carryASH(op, true));
+           int vf = Alu.sub(bench8.get(Reg.A), bench8.get(extractReg(op, 0)), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_N8: {
-           int vf = Alu.sub(banc8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
+           int vf = Alu.sub(bench8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case SUB_A_HLR: {
-           int vf = Alu.sub(banc8.get(Reg.A), read8AtHl(), carryASH(op, true));
+           int vf = Alu.sub(bench8.get(Reg.A), read8AtHl(), carryASH(op, true));
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
@@ -206,7 +206,7 @@ public final class Cpu implements Component, Clocked {
 
        // And, or, xor, complement
        case AND_A_N8: {
-           
+           int vf = Alu.and(bench8.get(Reg.A), read8AfterOpcode());
        } break;
        case AND_A_R8: {
            
@@ -306,7 +306,7 @@ public final class Cpu implements Component, Clocked {
         tab[0] = PC;
         tab[1] = SP;
         for (int i = 0; i < 8; i++) {
-            tab[i+2] = banc8.get(Reg.values()[i]);
+            tab[i+2] = bench8.get(Reg.values()[i]);
         }
         return tab;
     }
@@ -324,7 +324,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int read8AtHl() {
-        return Preconditions.checkBits8(read8(Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L))));
+        return Preconditions.checkBits8(read8(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L))));
     }
     
     private int read8AfterOpcode() {
@@ -359,7 +359,7 @@ public final class Cpu implements Component, Clocked {
     
     private void write8AtHl(int v) {
         Preconditions.checkBits8(v);
-        bus.write(Bits.make16(banc8.get(Reg.H), banc8.get(Reg.L)), v);
+        bus.write(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L)), v);
     }
     
     private void push16(int v) {
@@ -380,8 +380,8 @@ public final class Cpu implements Component, Clocked {
     // GESTION DES PAIRES DE REGISTRES
     
     private int reg16(Reg16 r) {
-        int msb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index()]));
-        int lsb = Preconditions.checkBits8(banc8.get(Reg.values()[2 * r.index() + 1]));
+        int msb = Preconditions.checkBits8(bench8.get(Reg.values()[2 * r.index()]));
+        int lsb = Preconditions.checkBits8(bench8.get(Reg.values()[2 * r.index() + 1]));
         return Bits.make16(msb, lsb);
     }
     
@@ -401,12 +401,12 @@ public final class Cpu implements Component, Clocked {
     private void setReg16(Reg16 r, int newV) {
         if (r == Reg16.AF) {
             Preconditions.checkBits16(newV);
-            banc8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
-            banc8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV & (-1 << 4)));
+            bench8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
+            bench8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV & (-1 << 4)));
         } else {
             Preconditions.checkBits16(newV);
-            banc8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
-            banc8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV));
+            bench8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
+            bench8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV));
             }
     }
     
@@ -449,11 +449,11 @@ public final class Cpu implements Component, Clocked {
     // GESTION  DES FANIONS
     
     private void setRegFromAlu(Reg r, int vf) {
-        banc8.set(r, Alu.unpackValue(vf));
+        bench8.set(r, Alu.unpackValue(vf));
     }
     
     private void setFlags(int valueFlags) {
-        banc8.set(Reg.F, Alu.unpackFlags(valueFlags));
+        bench8.set(Reg.F, Alu.unpackFlags(valueFlags));
     }
     
     private void setRegFlags(Reg r, int vf) {
@@ -470,8 +470,8 @@ public final class Cpu implements Component, Clocked {
         int flags = Alu.unpackFlags(vf);
         int v1Vector = flagVector(FlagSrc.V1, z, n, h, c);
         int aluVector = flagVector(FlagSrc.ALU, z, n, h, c) & flags;
-        int cpuVector = flagVector(FlagSrc.CPU, z, n, h, c) & banc8.get(Reg.F);
-        banc8.set(Reg.F, v1Vector | aluVector | cpuVector);
+        int cpuVector = flagVector(FlagSrc.CPU, z, n, h, c) & bench8.get(Reg.F);
+        bench8.set(Reg.F, v1Vector | aluVector | cpuVector);
     }
     /**
      * return a mask representing the values of the flags corresponding to a given flag source.
@@ -490,7 +490,7 @@ public final class Cpu implements Component, Clocked {
     // à faire au moment de coder les instructions rotation, BIT, RES, SET;
     
     private boolean carryASH (Opcode opcode, boolean addOrSub) {
-        boolean c = Bits.test(opcode.encoding, 3) && banc8.testBit(Reg.F, Alu.Flag.C);
+        boolean c = Bits.test(opcode.encoding, 3) && bench8.testBit(Reg.F, Alu.Flag.C);
         if (addOrSub) { 
         return c;
         } else {
