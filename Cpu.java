@@ -191,17 +191,34 @@ public final class Cpu implements Component, Clocked {
            setRegFromAlu(Reg.A, vf);
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
-       case DEC_R8: {
+        case DEC_R8: {
+           Reg r = extractReg(op, 3);
+           int vf = Alu.sub(bench8.get(r), 1);
+           setRegFromAlu(r,vf);
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.CPU);
        } break;
        case DEC_HLR: {
+           int vf = Alu.sub(read8AtHl(), 1);
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.CPU);
        } break;
        case CP_A_R8: {
+           int vf = Alu.sub(bench8.get(Reg.A), bench8.get(extractReg(op, 0)), carryASH(op, true));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case CP_A_N8: {
+           int vf = Alu.sub(bench8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case CP_A_HLR: {
+           int vf = Alu.sub(bench8.get(Reg.A), read8AtHl(), carryASH(op, true));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case DEC_R16SP: {
+           Reg16 r = extractReg16(op);
+           int vf = Alu.sub(bench8.get(r), 1);
+           setRegFromAlu(r,vf);
+           combineAluFlags(vf, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU, FlagSrc.CPU);
        } break;
 
        // And, or, xor, complement
