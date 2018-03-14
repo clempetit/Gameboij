@@ -288,17 +288,39 @@ public final class Cpu implements Component, Clocked {
        case SWAP_HLR: {
        } break;
        case SLA_R8: {
+           Reg r = extractReg(op, 0);
+           int vf = Alu.shiftLeft(bench8.get(r));
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SRA_R8: {
+           Reg r = extractReg(op, 0);
+           int vf = Alu.shiftRightA(bench8.get(r));
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SRL_R8: {
+           Reg r = extractReg(op, 0);
+           int vf = Alu.shiftRightL(bench8.get(r));
+           setRegFromAlu(r, vf);
+           combineAluFlags(vf,FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SLA_HLR: {
+           int vf = Alu.shiftLeft(read8AtHl());
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SRA_HLR: {
+           int vf = Alu.shiftRightA(read8AtHl());
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
        case SRL_HLR: {
+           int vf = Alu.shiftRightL(read8AtHl());
+           write8AtHl(Alu.unpackValue(vf));
+           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU);
        } break;
+
 
        // Bit test and set
        case BIT_U3_R8: {
