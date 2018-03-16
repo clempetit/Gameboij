@@ -52,6 +52,19 @@ public final class Cpu implements Component, Clocked {
         }
         return table;
     }
+    
+    @Override
+    public void cycle(long cycle) {
+        
+        if (cycle == nextNonIdleCycle ) {
+            if (read8(PC) != 0xCB) {
+            dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);
+            } else {
+                dispatch(PREFIXED_OPCODE_TABLE[read8(PC + 1)]);
+            }
+        }
+    }
+    
     private void dispatch(Opcode op) {
         
        switch (op.family) {
@@ -167,7 +180,8 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.CPU, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
        } break;
        case LD_HLSP_S8: {
-           int vf = Alu.add16L(SP, (byte)read8AfterOpcode());
+           int e = Bits.clip(16, Bits.signExtend8(read8AfterOpcode()));
+           int vf = Alu.add16L(SP, e);
            combineAluFlags(vf, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU, FlagSrc.ALU);
            int v = Alu.unpackValue(vf);
            if (Bits.test(op.encoding, 4)) {
@@ -268,7 +282,8 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V0, FlagSrc.V0, FlagSrc.V0);
        } break;
        case CPL: {
-           setRegFromAlu(Reg.A, Bits.complement8(bench8.get(Reg.A)));
+           bench8.set(Reg.A, Bits.complement8(bench8.get(Reg.A)));
+           combineAluFlags(0, FlagSrc.CPU, FlagSrc.V1, FlagSrc.V1, FlagSrc.CPU);
        } break;
 
        // Rotate, shift
@@ -369,8 +384,7 @@ public final class Cpu implements Component, Clocked {
            bench8.set(r, SetOrRes(op, extractIndexBRS(op), bench8.get(r)));
        } break;
        case CHG_U3_HLR: {
-           Reg r = extractReg(op, 0);
-           write8AtHl(SetOrRes(op, extractIndexBRS(op), bench8.get(r)));
+           write8AtHl(SetOrRes(op, extractIndexBRS(op), read8AtHl()));
        } break;
 
        // Misc. ALU
@@ -389,18 +403,6 @@ public final class Cpu implements Component, Clocked {
        }
        PC += op.totalBytes;
        nextNonIdleCycle += op.cycles;
-    }
-            
-    @Override
-    public void cycle(long cycle) {
-        
-        if (cycle == nextNonIdleCycle ) {
-            if (read8(PC) != 0xCB) {
-            dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);
-            } else {
-                dispatch(PREFIXED_OPCODE_TABLE[read8(PC + 1)]);
-            }
-        }
     }
     
     @Override
@@ -640,4 +642,6 @@ public final class Cpu implements Component, Clocked {
     private boolean testFlag(Alu.Flag f) {
         return bench8.testBit(Reg.F, f);
     }
+    
 }
+
