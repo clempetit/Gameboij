@@ -194,18 +194,15 @@ public final class Cpu implements Component, Clocked {
        // Subtract
        case SUB_A_R8: {
            int vf = Alu.sub(bench8.get(Reg.A), bench8.get(extractReg(op, 0)), carryASH(op, true));
-           setRegFromAlu(Reg.A, vf);
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+           setRegFlags(Reg.A, vf);
        } break;
        case SUB_A_N8: {
            int vf = Alu.sub(bench8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
-           setRegFromAlu(Reg.A, vf);
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+           setRegFlags(Reg.A, vf);
        } break;
        case SUB_A_HLR: {
            int vf = Alu.sub(bench8.get(Reg.A), read8AtHl(), carryASH(op, true));
-           setRegFromAlu(Reg.A, vf);
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+           setRegFlags(Reg.A, vf);
        } break;
        case DEC_R8: {
            Reg r = extractReg(op, 3);
@@ -219,16 +216,16 @@ public final class Cpu implements Component, Clocked {
            combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.CPU);
        } break;
        case CP_A_R8: {
-           int vf = Alu.sub(bench8.get(Reg.A), bench8.get(extractReg(op, 0)), carryASH(op, true));
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+           int vf = Alu.sub(bench8.get(Reg.A), bench8.get(extractReg(op, 0)));
+           setFlags(vf);
        } break;
        case CP_A_N8: {
-           int vf = Alu.sub(bench8.get(Reg.A), read8AfterOpcode(), carryASH(op, true));
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+           int vf = Alu.sub(bench8.get(Reg.A), read8AfterOpcode());
+           setFlags(vf);
        } break;
        case CP_A_HLR: {
-           int vf = Alu.sub(bench8.get(Reg.A), read8AtHl(), carryASH(op, true));
-           combineAluFlags(vf, FlagSrc.ALU, FlagSrc.V1, FlagSrc.ALU, FlagSrc.ALU);
+           int vf = Alu.sub(bench8.get(Reg.A), read8AtHl());
+           setFlags(vf);
        } break;
        case DEC_R16SP: {
            Reg16 r = extractReg16(op);
