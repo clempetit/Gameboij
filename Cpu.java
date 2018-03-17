@@ -18,6 +18,12 @@ import ch.epfl.gameboj.component.cpu.Alu.RotDir;
 
 public final class Cpu implements Component, Clocked {
     
+    private Bus bus;
+    private int nextNonIdleCycle = 0;
+    
+    private int PC = 0;
+    private int SP = 0;
+    
     private enum Reg implements Register {
         A, F, B, C, D, E, H, L
       }
@@ -27,15 +33,13 @@ public final class Cpu implements Component, Clocked {
         AF, BC, DE, HL
     }
     
-    private int PC = 0;
-    private int SP = 0;
-    
-    private int nextNonIdleCycle = 0;
-    private Bus bus;
-    
     private enum FlagSrc {
         V0, V1, ALU, CPU
     }
+    
+    public enum Interrupt implements Bit {
+        VBLANK, LCD_STAT, TIMER, SERIAL, JOYPAD
+      }
     
     private static final Opcode[] DIRECT_OPCODE_TABLE =
             buildOpcodeTable(Opcode.Kind.DIRECT);
@@ -395,6 +399,42 @@ public final class Cpu implements Component, Clocked {
            bench8.setBit(Reg.F, Alu.Flag.N, false);
            bench8.setBit(Reg.F, Alu.Flag.H, false);
        } break;
+       
+       // Jumps
+       case JP_HL: {
+       } break;
+       case JP_N16: {
+       } break;
+       case JP_CC_N16: {
+       } break;
+       case JR_E8: {
+       } break;
+       case JR_CC_E8: {
+       } break;
+
+       // Calls and returns
+       case CALL_N16: {
+       } break;
+       case CALL_CC_N16: {
+       } break;
+       case RST_U3: {
+       } break;
+       case RET: {
+       } break;
+       case RET_CC: {
+       } break;
+
+       // Interrupts
+       case EDI: {
+       } break;
+       case RETI: {
+       } break;
+
+       // Misc control
+       case HALT: {
+       } break;
+       case STOP:
+         throw new Error("STOP is not implemented");
        default: {
        } break;
        }
@@ -402,15 +442,22 @@ public final class Cpu implements Component, Clocked {
        nextNonIdleCycle += op.cycles;
     }
     
-    @Override
+    public void requestInterrupt(Interrupt i) { // TO IMPLEMENT
+        
+    }
+    
+    @Override // A VERIFIER
     public int read(int address) {
-        return NO_DATA;
+        Preconditions.checkArgument(address >= AddressMap.HIGH_RAM_START && address < AddressMap.HIGH_RAM_END);
+        return read8(address);
     }
 
-    @Override
+    @Override // A VERIFIER
     public void write(int address, int data) {
-        // TODO Auto-generated method stub
-
+        Preconditions.checkArgument((address >= AddressMap.HIGH_RAM_START && address < AddressMap.HIGH_RAM_END)
+                || address == AddressMap.REG_IE || address == AddressMap.REG_IF);
+        Preconditions.checkBits8(data);
+        write8(address, data);
     }
     
     public int[] _testGetPcSpAFBCDEHL() {
@@ -554,22 +601,6 @@ public final class Cpu implements Component, Clocked {
         }
     }
     
-    // EXTRACTION DES PARAMETRES
-    
-    private Reg extractReg(Opcode opcode, int startBit) {
-        Reg[] regTab = {Reg.B, Reg.C, Reg.D, Reg.E, Reg.H, Reg.L, null, Reg.A};
-        return regTab[Bits.extract(opcode.encoding, startBit, 3)];
-    }
-    
-    private Reg16 extractReg16(Opcode opcode) {
-        Reg16[] reg16Tab = {Reg16.BC, Reg16.DE, Reg16.HL, Reg16.AF};
-        return reg16Tab[Bits.extract(opcode.encoding, 4, 2)];
-    }
-    
-    private int extractHlIncrement(Opcode opcode) {
-        return Bits.test(opcode.encoding, 4) ? -1 : 1;
-    }
-    
     // GESTION  DES FANIONS
     
     private void setRegFromAlu(Reg r, int vf) {
@@ -611,6 +642,21 @@ public final class Cpu implements Component, Clocked {
     }
     
     // EXTRACTION DES PARAMETRES
+    
+    private Reg extractReg(Opcode opcode, int startBit) {
+        Reg[] regTab = {Reg.B, Reg.C, Reg.D, Reg.E, Reg.H, Reg.L, null, Reg.A};
+        return regTab[Bits.extract(opcode.encoding, startBit, 3)];
+    }
+    
+    private Reg16 extractReg16(Opcode opcode) {
+        Reg16[] reg16Tab = {Reg16.BC, Reg16.DE, Reg16.HL, Reg16.AF};
+        return reg16Tab[Bits.extract(opcode.encoding, 4, 2)];
+    }
+    
+    private int extractHlIncrement(Opcode opcode) {
+        return Bits.test(opcode.encoding, 4) ? -1 : 1;
+    }
+    
     private boolean extractDirRot(Opcode opcode) {
         return Bits.test(opcode.encoding, 3);
     }
@@ -640,5 +686,11 @@ public final class Cpu implements Component, Clocked {
         return bench8.testBit(Reg.F, f);
     }
     
+    private boolean extractCondition(Opcode opcode) {
+        boolean z = bench8.testBit(Reg.F, Alu.Flag.Z);
+        boolean c = bench8.testBit(Reg.F, Alu.Flag.C);
+        boolean[] conditions = {!z, z, !c, c};
+        return conditions[Bits.extract(opcode.encoding, 3, 2)];
+    }
 }
 
