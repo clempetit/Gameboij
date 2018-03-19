@@ -426,27 +426,36 @@ public final class Cpu implements Component, Clocked {
        
        // Jumps
        case JP_HL: {
+           PC = reg16(Reg16.HL);
        } break;
        case JP_N16: {
+           PC = read16AfterOpcode();
        } break;
        case JP_CC_N16: {
+           if (extractCondition(op)) {
+               PC = read16AfterOpcode();
+           }
        } break;
        case JR_E8: {
+           PC += (op.totalBytes + Bits.clip(16, Bits.signExtend8(read8AfterOpcode())));
        } break;
        case JR_CC_E8: {
+           if (extractCondition(op)) {
+               PC += (op.totalBytes + Bits.clip(16, Bits.signExtend8(read8AfterOpcode())));
+           }
        } break;
 
        // Calls and returns
        case CALL_N16: {
+           push16(PC + op.totalBytes);
+           PC = read16AfterOpcode();
+       } break;
+       case CALL_CC_N16: {
            if (extractCondition(op)) {
                condition = true;
                push16(PC + op.totalBytes);
                PC = read16AfterOpcode();
            }
-       } break;
-       case CALL_CC_N16: {
-           push16(PC + op.totalBytes);
-           PC = read16AfterOpcode();
        } break;
        case RST_U3: {
            push16(PC + op.totalBytes);
@@ -464,8 +473,15 @@ public final class Cpu implements Component, Clocked {
 
        // Interrupts
        case EDI: {
+           if (Bits.test(op.encoding, 3)) {
+               IME = true;
+           } else {
+               IME = false;
+           }
        } break;
        case RETI: {
+           IME = true;
+           PC = pop16();
        } break;
 
        // Misc control
