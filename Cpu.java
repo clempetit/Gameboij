@@ -3,7 +3,7 @@
  *	@author Yanis Berkani (271348)
  */
 
-package ch.epfl.gameboj.component.cpu;
+package ch.epfl.gameboj.component.cpu;//////
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
@@ -15,14 +15,21 @@ import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Alu.RotDir;
+import ch.epfl.gameboj.component.memory.Ram;
 
 public final class Cpu implements Component, Clocked {
     
     private Bus bus;
     private int nextNonIdleCycle = 0;
     
+    private Ram highRam;
+    private int hRamStart = AddressMap.HIGH_RAM_START;
+    private int hRamEnd = AddressMap.HIGH_RAM_END;
+    
     private int PC = 0;
     private int SP = 0;
+    private int IE = 0;
+    private int IF = 0;
     
     private enum Reg implements Register {
         A, F, B, C, D, E, H, L
@@ -443,21 +450,36 @@ public final class Cpu implements Component, Clocked {
     }
     
     public void requestInterrupt(Interrupt i) { // TO IMPLEMENT
-        
+        Bits.set(IF, i.index(), true);
     }
     
-    @Override // A VERIFIER
+    @Override
     public int read(int address) {
-        Preconditions.checkArgument(address >= AddressMap.HIGH_RAM_START && address < AddressMap.HIGH_RAM_END);
-        return read8(address);
+        Preconditions.checkBits16(address);
+        if (address == AddressMap.REG_IE) {
+            return IE;
+        } else if (address == AddressMap.REG_IF) {
+            return IF;
+        }
+        else if (address >= hRamStart && address < hRamEnd) {
+            return highRam.read(address - hRamStart);
+        } else {
+            return NO_DATA;
+        }
     }
 
-    @Override // A VERIFIER
+    @Override
     public void write(int address, int data) {
-        Preconditions.checkArgument((address >= AddressMap.HIGH_RAM_START && address < AddressMap.HIGH_RAM_END)
-                || address == AddressMap.REG_IE || address == AddressMap.REG_IF);
+        Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
-        write8(address, data);
+        if (address == AddressMap.REG_IE) {
+            IE = data;
+        } else if (address == AddressMap.REG_IF) {
+            IF = data;
+        }
+        else if (address >= hRamStart && address < hRamEnd) {
+            highRam.write(address - hRamStart, data);
+        }
     }
     
     public int[] _testGetPcSpAFBCDEHL() {
