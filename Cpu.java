@@ -28,6 +28,7 @@ public final class Cpu implements Component, Clocked {
     
     private int PC = 0;
     private int SP = 0;
+    private boolean IME = false;
     private int IE = 0;
     private int IF = 0;
     
@@ -66,18 +67,31 @@ public final class Cpu implements Component, Clocked {
     
     @Override
     public void cycle(long cycle) {
-        
         if (cycle == nextNonIdleCycle ) {
-            if (read8(PC) != 0xCB) {
-            dispatch(DIRECT_OPCODE_TABLE[read8(PC)]);
-            } else {
-                dispatch(PREFIXED_OPCODE_TABLE[read8(PC + 1)]);
-            }
+            reallyCycle(cycle);
         }
     }
     
+    public void reallyCycle(long cycle) {
+        if (IME) {
+            int i = Integer.lowestOneBit(IF & IE);
+            Bits.set(IF, i, false);
+            push16(PC);
+            PC = 0x40 +8*i;
+            // AdressMap.INTERRUPTS[i];
+        }
+        Opcode opcode;
+        if (read8(PC) != 0xCB) {
+            opcode = DIRECT_OPCODE_TABLE[read8(PC)];
+            } else {
+                opcode = PREFIXED_OPCODE_TABLE[read8(PC + 1)];
+            }
+        dispatch(opcode);
+    }
+    
+    
     private void dispatch(Opcode op) {
-        
+       boolean condition = false;
        switch (op.family) {
        case NOP: {
        } break;
@@ -447,6 +461,9 @@ public final class Cpu implements Component, Clocked {
        }
        PC += op.totalBytes;
        nextNonIdleCycle += op.cycles;
+       if (condition) {
+           nextNonIdleCycle += op.additionalCycles;
+       }
     }
     
     public void requestInterrupt(Interrupt i) { // TO IMPLEMENT
