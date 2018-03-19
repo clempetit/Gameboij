@@ -20,7 +20,7 @@ import ch.epfl.gameboj.component.memory.Ram;
 public final class Cpu implements Component, Clocked {
     
     private Bus bus;
-    private int nextNonIdleCycle = 0;
+    private long nextNonIdleCycle = 0;
     
     private Ram highRam;
     private int hRamStart = AddressMap.HIGH_RAM_START;
@@ -67,18 +67,21 @@ public final class Cpu implements Component, Clocked {
     
     @Override
     public void cycle(long cycle) {
+        if (nextNonIdleCycle == Long.MAX_VALUE && interruptionNumber() != 0) {
+            cycle = nextNonIdleCycle;
+        }
         if (cycle == nextNonIdleCycle ) {
             reallyCycle(cycle);
-        }
+        }  
     }
     
     public void reallyCycle(long cycle) {
-        if (IME) {
-            int i = Integer.lowestOneBit(IF & IE);
+        int i = interruptionNumber();
+        if (IME & i !=0) {
+            IME = false;
             Bits.set(IF, i, false);
             push16(PC);
-            PC = 0x40 +8*i;
-            // AdressMap.INTERRUPTS[i];
+            PC = AddressMap.INTERRUPTS[i];
         }
         Opcode opcode;
         if (read8(PC) != 0xCB) {
@@ -435,14 +438,28 @@ public final class Cpu implements Component, Clocked {
 
        // Calls and returns
        case CALL_N16: {
+           if (extractCondition(op)) {
+               condition = true;
+               push16(PC + op.totalBytes);
+               PC = read16AfterOpcode();
+           }
        } break;
        case CALL_CC_N16: {
+           push16(PC + op.totalBytes);
+           PC = read16AfterOpcode();
        } break;
        case RST_U3: {
+           push16(PC + op.totalBytes);
+           PC = AddressMap.RESETS[Bits.extract(op.encoding, 3, 3)];
        } break;
        case RET: {
+           PC = pop16();
        } break;
        case RET_CC: {
+           if (extractCondition(op)) {
+               condition = true;
+               PC = pop16();
+           }
        } break;
 
        // Interrupts
@@ -453,6 +470,7 @@ public final class Cpu implements Component, Clocked {
 
        // Misc control
        case HALT: {
+           nextNonIdleCycle = Long.MAX_VALUE;
        } break;
        case STOP:
          throw new Error("STOP is not implemented");
@@ -730,6 +748,10 @@ public final class Cpu implements Component, Clocked {
         boolean c = bench8.testBit(Reg.F, Alu.Flag.C);
         boolean[] conditions = {!z, z, !c, c};
         return conditions[Bits.extract(opcode.encoding, 3, 2)];
+    }
+    
+    private int interruptionNumber() {
+        return Byte.SIZE - Integer.numberOfLeadingZeros(Integer.lowestOneBit(IF & IE));
     }
 }
 
