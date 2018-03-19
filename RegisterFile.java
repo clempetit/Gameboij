@@ -30,6 +30,6 @@ public final class RegisterFile<E extends Register> {
     }
     
     public void setBit(E reg, Bit bit, boolean newValue) {
-        set(reg, Bits.set(banc[reg.index()], bit.index(), newValue));
+        set(reg, Bits.set(get(reg), bit.index(), newValue));
     }
 }
