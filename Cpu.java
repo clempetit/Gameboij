@@ -19,6 +19,13 @@ import ch.epfl.gameboj.component.memory.Ram;
 
 public final class Cpu implements Component, Clocked {
     
+    public void writeInF(int i) {
+        bench8.set(Reg.F, i); ; 
+    }
+    
+    public boolean getIME() {
+        return IME;
+    }
     private Bus bus;
     private long nextNonIdleCycle = 0;
     
@@ -67,7 +74,7 @@ public final class Cpu implements Component, Clocked {
     
     @Override
     public void cycle(long cycle) {
-        if (nextNonIdleCycle == Long.MAX_VALUE && interruptionNumber() != 0) {
+        if ((nextNonIdleCycle == Long.MAX_VALUE) && (interruptionNumber() >= 0)) {
             cycle = nextNonIdleCycle;
         }
         if (cycle == nextNonIdleCycle ) {
@@ -77,9 +84,10 @@ public final class Cpu implements Component, Clocked {
     
     public void reallyCycle(long cycle) {
         int i = interruptionNumber();
-        if (IME & i !=0) {
+        if (IME & i >= 0) {
             IME = false;
             Bits.set(IF, i, false);
+            nextNonIdleCycle += 5;
             push16(PC);
             PC = AddressMap.INTERRUPTS[i];
         }
@@ -95,6 +103,7 @@ public final class Cpu implements Component, Clocked {
     
     private void dispatch(Opcode op) {
        boolean condition = false;
+       int PC2 = PC+op.totalBytes;
        switch (op.family) {
        case NOP: {
        } break;
@@ -426,48 +435,50 @@ public final class Cpu implements Component, Clocked {
        
        // Jumps
        case JP_HL: {
-           PC = reg16(Reg16.HL);
+           PC2 = reg16(Reg16.HL);
        } break;
        case JP_N16: {
-           PC = read16AfterOpcode();
+           PC2 = read16AfterOpcode();
        } break;
        case JP_CC_N16: {
            if (extractCondition(op)) {
-               PC = read16AfterOpcode();
+               condition = true;
+               PC2 = read16AfterOpcode();
            }
        } break;
        case JR_E8: {
-           PC += (op.totalBytes + Bits.clip(16, Bits.signExtend8(read8AfterOpcode())));
+           PC2 += Bits.signExtend8(read8AfterOpcode());
        } break;
        case JR_CC_E8: {
            if (extractCondition(op)) {
-               PC += (op.totalBytes + Bits.clip(16, Bits.signExtend8(read8AfterOpcode())));
+               condition = true;
+               PC2 += Bits.signExtend8(read8AfterOpcode());
            }
        } break;
 
        // Calls and returns
        case CALL_N16: {
            push16(PC + op.totalBytes);
-           PC = read16AfterOpcode();
+           PC2 = read16AfterOpcode();
        } break;
        case CALL_CC_N16: {
            if (extractCondition(op)) {
                condition = true;
                push16(PC + op.totalBytes);
-               PC = read16AfterOpcode();
+               PC2 = read16AfterOpcode();
            }
        } break;
        case RST_U3: {
            push16(PC + op.totalBytes);
-           PC = AddressMap.RESETS[Bits.extract(op.encoding, 3, 3)];
+           PC2 = AddressMap.RESETS[Bits.extract(op.encoding, 3, 3)];
        } break;
        case RET: {
-           PC = pop16();
+           PC2 = pop16();
        } break;
        case RET_CC: {
            if (extractCondition(op)) {
                condition = true;
-               PC = pop16();
+               PC2 = pop16();
            }
        } break;
 
@@ -481,7 +492,7 @@ public final class Cpu implements Component, Clocked {
        } break;
        case RETI: {
            IME = true;
-           PC = pop16();
+           PC2 = pop16();
        } break;
 
        // Misc control
@@ -493,7 +504,7 @@ public final class Cpu implements Component, Clocked {
        default: {
        } break;
        }
-       PC += op.totalBytes;
+       PC = PC2;
        nextNonIdleCycle += op.cycles;
        if (condition) {
            nextNonIdleCycle += op.additionalCycles;
@@ -767,7 +778,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     private int interruptionNumber() {
-        return Byte.SIZE - Integer.numberOfLeadingZeros(Integer.lowestOneBit(IF & IE));
+        return Integer.SIZE - 1 - Integer.numberOfLeadingZeros(Integer.lowestOneBit(IF & IE));
     }
 }
 
