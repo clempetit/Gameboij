@@ -22,7 +22,7 @@ public final class Cpu implements Component, Clocked {
     private Bus bus;
     private long nextNonIdleCycle = 0;
     
-    private Ram highRam;
+    private Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
     private int hRamStart = AddressMap.HIGH_RAM_START;
     private int hRamEnd = AddressMap.HIGH_RAM_END;
     
