@@ -6,6 +6,8 @@
 package ch.epfl.gameboj.component.cartridge;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.component.Component;
@@ -19,8 +21,14 @@ public final class Cartridge implements Component {
        this.mbc = mbc;
     }
     
-    public static Cartridge ofFile(File romFile) { // A VOIR  COMMENT METTRE romFile  DANS UN []Byte + GESTION IOexception.
-        byte[] b = {0};
+    public static Cartridge ofFile(File romFile) { // A VOIR  COMMENT METTRE romFile  DANS UN []Byte.
+        byte[] b = new byte[(int)romFile.length()];
+        try {
+        FileInputStream in = new FileInputStream(romFile);
+        in.read(b);
+        } catch(IOException e) { //GESTION IOException
+            
+        }
         Rom rom = new Rom(b);
         return new Cartridge(new MBC0(rom));
     }
