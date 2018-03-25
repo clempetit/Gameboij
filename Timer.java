@@ -16,8 +16,9 @@ import ch.epfl.gameboj.component.cpu.Cpu;
 public final class Timer implements Component, Clocked {
 
     private Cpu cpu;
-    private Bus bus;
+    private Bus bus; // PROCEDER DE CETTE MANIERE ?
     private boolean v0 = false;
+    private int mainCounter = 0;
     
     // Declaration of registers addresses.
     int DIV = AddressMap.REG_DIV;
@@ -31,21 +32,24 @@ public final class Timer implements Component, Clocked {
     }
     
     @Override
-    public void cycle(long cycle) {
-        // TODO Auto-generated method stub
-
+    public void cycle(long cycle) { // COMMENT S'INCREMENTE LA TOTALITE DU COMPTEUR PRINCIPAL ?
+        v0 = state();
+        
+        mainCounter = (mainCounter + 4) % 0xFFFF;
+        bus.write(DIV, Bits.clip(8, mainCounter));
+        
+        incIfChange(v0);
     }
 
     @Override
     public int read(int address) { // VERIFIER QUE L'ADRESSE ET CELLE D'UN REGISTRE OU NON ?
         Preconditions.checkBits16(address);
         
-        
         return bus.read(address);
     }
 
     @Override
-    public void write(int address, int data) { //QUELLES VERIFICATIONS EFFECTUER
+    public void write(int address, int data) { //QUELLES VERIFICATIONS EFFECTUER ?
         Preconditions.checkBits8(data);
         Preconditions.checkBits16(address);
         if (address == TIMA || address == TAC) {
@@ -83,9 +87,9 @@ public final class Timer implements Component, Clocked {
     
     private void incIfChange(boolean v0) {
         if (v0 && !state()) {
-            // INCREMENTE COMPTEUR SECONDAIRE
             int c2 = bus.read(TIMA);
             if (c2 == 0xFFFF) {
+                cpu.requestInterrupt(Cpu.Interrupt.TIMER);
                 bus.write(TIMA, bus.read(TMA));
             } else {
                 bus.write(TIMA, c2 + 1);
