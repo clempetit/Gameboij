@@ -8,13 +8,22 @@ package ch.epfl.gameboj.component;
 import java.util.Objects;
 
 import ch.epfl.gameboj.AddressMap;
+import ch.epfl.gameboj.Bus;
+import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
 
 public final class Timer implements Component, Clocked {
 
     private Cpu cpu;
+    private Bus bus;
     private boolean v0 = false;
+    
+    // Declaration of registers addresses.
+    int DIV = AddressMap.REG_DIV;
+    int TIMA = AddressMap.REG_TIMA;
+    int TMA = AddressMap.REG_TMA;
+    int TAC = AddressMap.REG_TAC;
     
     public Timer(Cpu cpu) {
         Objects.requireNonNull(cpu);
@@ -28,24 +37,38 @@ public final class Timer implements Component, Clocked {
     }
 
     @Override
-    public int read(int address) {
-        int a = AddressMap.REG_DIV;
-        int b = AddressMap.REG_TIMA;
-        int c = AddressMap.REG_TMA;
-        int d = AddressMap.REG_TAC;
+    public int read(int address) { // VERIFIER QUE L'ADRESSE ET CELLE D'UN REGISTRE OU NON ?
+        Preconditions.checkBits16(address);
         
-        return 0;
+        
+        return bus.read(address);
     }
 
     @Override
-    public void write(int address, int data) {
-        // TODO Auto-generated method stub
+    public void write(int address, int data) { //QUELLES VERIFICATIONS EFFECTUER
+        Preconditions.checkBits8(data);
+        Preconditions.checkBits16(address);
+        if (address == TIMA || address == TAC) {
+            v0 = state();
+            bus.write(address, data);
+            incIfChange(v0);
+        }
+        else {
+            bus.write(address, data);
+        }
 
+    }
+    
+    @Override
+    public void attachTo(Bus bus) {
+        Component.super.attachTo(bus);
+        this.bus = bus;
     }
 
     private boolean state() {
         int i = 0;
-        switch (1) {
+        
+        switch (Bits.extract(bus.read(TAC), 0, 2)) {
         case 0b00:
             i = 9;
         case 0b01:
@@ -55,14 +78,18 @@ public final class Timer implements Component, Clocked {
         case 0b11:
             i = 7;
         }
-        int c1 = 0; // CHANGER AVEC VALEUR A L'ADRESSE REG.DIV
-        int c2 = 0; // CHANGER AVEC VALEUR A L'ADRESSE REG.TIMA
-        return Bits.test(c2, 2) & Bits.test(c1, i);
+        return Bits.test(bus.read(TAC), 2) & Bits.test(bus.read(DIV), i);
     }
     
     private void incIfChange(boolean v0) {
         if (v0 && !state()) {
             // INCREMENTE COMPTEUR SECONDAIRE
+            int c2 = bus.read(TIMA);
+            if (c2 == 0xFFFF) {
+                bus.write(TIMA, bus.read(TMA));
+            } else {
+                bus.write(TIMA, c2 + 1);
+            }
         }
     }
 }
