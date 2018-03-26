@@ -20,6 +20,7 @@ public final class MBC0 implements Component {
         Preconditions.checkArgument(rom.size() == 32768);
         this.rom = rom;
     }
+    
     @Override
     public int read(int address) {
         return rom.read(address);

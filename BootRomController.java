@@ -15,7 +15,7 @@ import ch.epfl.gameboj.component.cartridge.Cartridge;
 public final class BootRomController implements Component {
 
     private Cartridge cartridge;
-    private boolean desactivated = false;
+    private boolean disabled = false;
     
     public BootRomController(Cartridge cartridge) {
         Objects.requireNonNull(cartridge);
@@ -23,20 +23,22 @@ public final class BootRomController implements Component {
     }
     @Override
     public int read(int address) {
-        Preconditions.checkArgument(address >= 0 && address < 0xFF);
-        if (desactivated) {
-            return cartridge.read(address);
-        } else {
+        Preconditions.checkArgument(address >= 0 && address < 0xFFFF);
+        if (!disabled && address < 0xFF) {
             return BootRom.DATA[address];
-        }
+        } else {
+            return cartridge.read(address);
+        }     
     }
 
     @Override
     public void write(int address, int data) {
-        if (address== AddressMap.REG_BOOT_ROM_DISABLE) {
-            desactivated = true;
-        }
-        if (desactivated) {
+        Preconditions.checkBits16(address);
+        Preconditions.checkBits8(data);
+        
+        if (!disabled && address == AddressMap.REG_BOOT_ROM_DISABLE) {
+            disabled = true;
+        } else {
             cartridge.write(address, data);
         }
 
