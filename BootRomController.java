@@ -36,8 +36,12 @@ public final class BootRomController implements Component {
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
-        if (!disabled && address == AddressMap.REG_BOOT_ROM_DISABLE) {
+        if (!disabled) {
+            if (address == AddressMap.REG_BOOT_ROM_DISABLE) {
             disabled = true;
+            } else if (address > 0xFF) {
+                cartridge.write(address, data);
+            }
         } else {
             cartridge.write(address, data);
         }

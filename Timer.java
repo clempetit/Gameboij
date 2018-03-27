@@ -32,10 +32,7 @@ public final class Timer implements Component, Clocked {
     public void cycle(long cycle) { 
         v0 = state();              
         
-        DIV += 4;
-        if (DIV > 0xFFFF) {
-            DIV %= 0xFFFF; 
-        }
+        DIV = Bits.clip(16, DIV + 4);
         
         incIfChange(v0);
     }
@@ -80,25 +77,27 @@ public final class Timer implements Component, Clocked {
         int i = 0;
         
         switch (Bits.extract(TAC, 0, 2)) {
-        case 0b00:
+        case 0b00: {
             i = 9;
-            break;
-        case 0b01:
+        } break;
+        case 0b01: {
             i = 3;
-            break;
-        case 0b10:
+        } break;
+        case 0b10: {
             i = 5;
-            break;
-        case 0b11:
+        } break;
+        case 0b11: {
             i = 7;
-            break;
+        } break;
+        default: {
+        } break;
         }
-        return Bits.test(TAC, 2) & Bits.test(DIV, i);
+        return (Bits.test(TAC, 2) && Bits.test(DIV, i));
     }
     
     private void incIfChange(boolean v0) {
         if (v0 && !state()) {;
-            if (TIMA == 0xFFFF) {
+            if (TIMA == 0xFF) {
                 cpu.requestInterrupt(Cpu.Interrupt.TIMER);
                 TIMA = TMA;
             } else {
