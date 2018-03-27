@@ -3,13 +3,14 @@
  *  @author Yanis Berkani (271348)
  */
 
+
 package ch.epfl.gameboj.bits;
 
 public interface Bit {
     
     /**
-     * automatically given by the type enum.
-     * @return
+     * automatically given by the enum type.
+     * @return the index of the receptor
      */
     public abstract int ordinal();
     
