@@ -25,6 +25,11 @@ public class GameBoy {
     private Timer timer;
     private int SimulatedCycles = 0;
     
+    /**
+     * builds a Game Boy by creating the necessary components 
+     * and attaching them to a common bus.
+     * @param cartridge the cartridge attached to the Game Boy
+     */
     public GameBoy(Cartridge cartridge){
         Objects.requireNonNull(cartridge);
         bus = new Bus();
@@ -46,6 +51,9 @@ public class GameBoy {
         timer.attachTo(bus);
     }
     
+    /**
+     * @return the bus of the Game Boy
+     */
     public Bus bus() {
         return bus;
     }
