@@ -23,8 +23,8 @@ public final class BootRomController implements Component {
     }
     @Override
     public int read(int address) {
-        Preconditions.checkArgument(address >= 0 && address < 0xFFFF);
-        if (!disabled && address < 0xFF) {
+        Preconditions.checkBits16(address);
+        if (!disabled && address <= 0xFF) {
             return BootRom.DATA[address];
         } else {
             return cartridge.read(address);

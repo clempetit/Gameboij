@@ -3,7 +3,7 @@
  *	@author Yanis Berkani (271348)
  */
 
-package ch.epfl.gameboj.component.cpu;//////
+package ch.epfl.gameboj.component.cpu;
 
 import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
@@ -19,13 +19,6 @@ import ch.epfl.gameboj.component.memory.Ram;
 
 public final class Cpu implements Component, Clocked {
     
-    public void writeInF(int i) {
-        bench8.set(Reg.F, i); ; 
-    }
-    
-    public boolean getIME() {
-        return IME;
-    }
     private Bus bus;
     private long nextNonIdleCycle = 0;
     
@@ -75,7 +68,7 @@ public final class Cpu implements Component, Clocked {
     @Override
     public void cycle(long cycle) {
         if ((nextNonIdleCycle == Long.MAX_VALUE) && (interruptionNumber() >= 0)) {
-            cycle = nextNonIdleCycle;
+            nextNonIdleCycle = cycle;
         }
         if (cycle == nextNonIdleCycle ) {
             reallyCycle(cycle);
@@ -90,7 +83,7 @@ public final class Cpu implements Component, Clocked {
             nextNonIdleCycle += 5;
             push16(PC);
             PC = AddressMap.INTERRUPTS[i];
-        }
+        } else {
         Opcode opcode;
         if (read8(PC) != 0xCB) {
             opcode = DIRECT_OPCODE_TABLE[read8(PC)];
@@ -98,12 +91,13 @@ public final class Cpu implements Component, Clocked {
                 opcode = PREFIXED_OPCODE_TABLE[read8(PC + 1)];
             }
         dispatch(opcode);
+        }
     }
     
     
     private void dispatch(Opcode op) {
        boolean condition = false;
-       int PC2 = PC+op.totalBytes;
+       int PC2 = PC + op.totalBytes;
        switch (op.family) {
        case NOP: {
        } break;
@@ -458,13 +452,13 @@ public final class Cpu implements Component, Clocked {
 
        // Calls and returns
        case CALL_N16: {
-           push16(PC + op.totalBytes);
+           push16(PC2);
            PC2 = read16AfterOpcode();
        } break;
        case CALL_CC_N16: {
            if (extractCondition(op)) {
                condition = true;
-               push16(PC + op.totalBytes);
+               push16(PC2);
                PC2 = read16AfterOpcode();
            }
        } break;
@@ -511,8 +505,8 @@ public final class Cpu implements Component, Clocked {
        }
     }
     
-    public void requestInterrupt(Interrupt i) { // TO IMPLEMENT
-        Bits.set(IF, i.index(), true);
+    public void requestInterrupt(Interrupt i) {
+        IF = Bits.set(IF, i.index(), true);
     }
     
     @Override
@@ -583,8 +577,8 @@ public final class Cpu implements Component, Clocked {
     
     private int read16AfterOpcode() {
         assert PC < 0xFFFE;
-        int lsb = Preconditions.checkBits8(read8(PC + 1));
-        int msb = Preconditions.checkBits8(read8(PC + 2));
+        int lsb = read8(PC + 1);
+        int msb = read8(PC + 2);
         return Bits.make16(msb, lsb);
     }
     
