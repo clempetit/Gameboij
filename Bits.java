@@ -60,7 +60,7 @@ public final class Bits {
     
     /**
      * return true if and only if the bit of given index of the integer bits equals 1.
-     * @param bits the integer value
+     * @param bits the integer
      * @param index the index (must be included between 0 and 31)
      * @throws IndexOutOfBoundsException if the index is invalid
      * @return true if and only if the bit of given index of the integer bits equals 1
@@ -72,21 +72,24 @@ public final class Bits {
     }
     
     /**
-     * gets the index of the given bit in the given integer and return true if and only if this bit equals 1
+     * gets the index to test of the given bit and return true if and only if it's equal to 1.
      * @param bits the integer
      * @param bit the bit
-     * @return true if and only if the bit of given index of the integer bits equals 1
+     * @return true if and only if the bit of the found index of the integer bits equals 1
      */
     public static boolean test(int bits, Bit bit) {
         return test(bits, bit.index());
     }
     
     /**
-     * 
+     * return an integer which has the same bits than the given integer bits,
+     * except the one of given index which takes a value depending on newValue.
      * @param bits the integer
      * @param index the index (must be included between 0 and 31)
      * @param newValue the new value (false is 0 and true is 1)
-     * @return
+     * @throws IndexOutOfBoundsException if the index is invalid
+     * @return an integer that has the same bits than the given integer bits except
+     * the one of given index which takes a value depending on the boolean given.
      */
     public static int set(int bits, int index, boolean newValue) {
         index = Objects.checkIndex(index, Integer.SIZE);
@@ -100,10 +103,14 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param size
-     * @param bits
-     * @return
+     * return an integer whose size less significant bits are equal 
+     * to those of the given integer bits, and the others are 0.
+     * @param size the number of bits to copy from the given integer bits 
+     *  (must be included between 0 and 32)
+     * @param bits the integer
+     * @throws IllegalArgumentException if size is invalid
+     * @return an integer whose size less significant bits are equal 
+     *  to those of the given integer bits and the others are 0
      */
     public static int clip(int size, int bits) {
         if (size == Integer.SIZE) {
@@ -114,11 +121,16 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param bits
-     * @param start
-     * @param size
-     * @return
+     * return an integer whose size less significant bits are equal to those 
+     * from the index start (included) to the index start+size (excluded)
+     * of the given integer bits, and the others are 0.
+     * @param bits the integer
+     * @param start the index from which we start to copy the given integer bits
+     * @param size the number of bits to copy from the given integer bits
+     * @throws IndexOutOfBoundsException if start+size is not included between 0 and 32
+     * @return an integer whose size less significant bits are equal to those 
+     * from the index start (included) to the index start+size (excluded)
+     * of the given integer bits
      */
     public static int extract(int bits, int start, int size) {
         start = Objects.checkFromIndexSize(start, size, Integer.SIZE);
@@ -129,11 +141,16 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param size
-     * @param bits
-     * @param distance
-     * @return
+     * return an integer whose size less significant bits are equal to those of the 
+     * given integer bits, but to which a rotation of the distance has been applied; 
+     * if the distance is positive the rotation is to the left, and to the right otherwise .
+     * @param size the number of bits to copy from the given integer bits
+     *  (must be included between 0 and 32)
+     * @param bits the integer
+     * @param distance the distance (must be a size bits value)
+     * @throws IllegalArgumentException if size or distance is invalid
+     * @return return an integer whose size less significant bits are equal to those of the 
+     * given integer bits but to which a rotation of the distance has been applied 
      */
     public static int rotate(int size, int bits, int distance) {
         Preconditions.checkArgument(size > 0 && size <= 32);
@@ -144,9 +161,11 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param b
-     * @return
+     * extends the sign of the given 8 bits value.
+     * @param b the integer (must be an 8 bits value)
+     * @throws IllegalArgumentException if b is invalid
+     * @return an integer whose bits from the index 8 to 31 
+     * are equals to the bit of index 7 of the given integer
      */
     public static int signExtend8(int b) {
         Preconditions.checkBits8(b);
@@ -155,9 +174,14 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param b
-     * @return
+     * return a value equal to the given integer b, on which the
+     * 8 less significant bits has been reversed :
+     * the bits of index 0 and 7 has been exchanged, as well 
+     * as those of index 1 and 6, 2 and 5, 3 and 4.
+     * @param b the integer (must be an 8 bits value)
+     * @throws IllegalArgumentException if b is invalid
+     * @return a value equal to the given integer b on which
+     *  the 8 less significant bits has been reversed
      */
     public static int reverse8(int b) {
         Preconditions.checkBits8(b);
@@ -165,9 +189,13 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param b
-     * @return
+     * return a value equal to the given integer b, on which the
+     * 8 less significant bits has been replaced by their complement :
+     * the 0 and the 1 has been exchanged.
+     * @param b the integer (must be an 8 bits value)
+     * @throws IllegalArgumentException if b is invalid
+     * @return return a value equal to the given integer b on which the
+     * 8 less significant bits has been replaced by their complement
      */
     public static int complement8(int b) {
         Preconditions.checkBits8(b);
@@ -175,10 +203,15 @@ public final class Bits {
     }
     
     /**
-     * 
-     * @param highB
-     * @param lowB
-     * @return
+     * return a 16 bits value whose 8 most significant bits are the 8 
+     * less significant bits of the given integer highB, and the 8 less
+     * significant bits are those of lowB.
+     * @param highB the integer (must be an 8 bits value)
+     * @param lowB the integer (must be an 8 bits value)
+     * @throws IllegalArgumentException if highB or lowB is invalid
+     * @return a 16 bits value whose 8 most significant bits are the 8 
+     * less significant bits of the given integer highB and the 8 less
+     * significant bits are those of lowB
      */
     public static int make16(int highB, int lowB) {
         Preconditions.checkBits8(highB);
