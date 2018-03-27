@@ -16,11 +16,11 @@ import ch.epfl.gameboj.component.memory.Rom;
 
 public final class Cartridge implements Component {
     
-    private final Component mbc0;
+    private final Component mbc;
     private static Rom rom;
     
     private Cartridge(Component mbc) {
-       this.mbc0 = mbc;
+       this.mbc = mbc;
     }
     
     public static Cartridge ofFile(File romFile) throws IOException { // A VOIR  COMMENT METTRE romFile  DANS UN []Byte.
@@ -30,7 +30,7 @@ public final class Cartridge implements Component {
         
         int read = in.read(b);
         if (read != (int) romFile.length()) {
-            throw new IOException("abcdefg");
+            throw new IOException();
         }
         rom = new Rom(b);
         Preconditions.checkArgument(b[0x147] == 0);
@@ -42,14 +42,14 @@ public final class Cartridge implements Component {
     @Override
     public int read(int address) {
         Preconditions.checkArgument(address >= 0 && address < 32768);
-        return mbc0.read(address);
+        return Preconditions.checkBits8(mbc.read(address));
     }
 
     @Override
     public void write(int address, int data) { // CAS OU LA CARTOUCHE POSSEDE MEMOIRE VIVE A CERTAINES ADRESSES ?
-        Preconditions.checkArgument(address >= 0 && address < 32768);
+        Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
-        mbc0.write(address, data);
+        mbc.write(address, data);
     }
 
 }

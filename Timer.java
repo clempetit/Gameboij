@@ -32,7 +32,10 @@ public final class Timer implements Component, Clocked {
     public void cycle(long cycle) { 
         v0 = state();              
         
-        DIV = (DIV + 4) % 0xFFFF;
+        DIV += 4;
+        if (DIV > 0xFFFF) {
+            DIV %= 0xFFFF; 
+        }
         
         incIfChange(v0);
     }
