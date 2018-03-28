@@ -64,7 +64,7 @@ public final class Cpu implements Component, Clocked {
         }
         return table;
     }
-    
+  
     @Override
     public void cycle(long cycle) {
         if ((nextNonIdleCycle == Long.MAX_VALUE) && (interruptionNumber() >= 0)) {
@@ -538,6 +538,10 @@ public final class Cpu implements Component, Clocked {
         }
     }
     
+    /**
+     * @return an array containing in order the value of the registers:
+     *  PC, SP, A, F, B, C, D, E, H and L
+     */
     public int[] _testGetPcSpAFBCDEHL() {
         int[] tab = new int[10];
         tab[0] = PC;
@@ -556,18 +560,38 @@ public final class Cpu implements Component, Clocked {
         this.bus = bus;
     }
     
+    /**
+     * reads from the bus the 8 bits value at the given address.
+     * @param address the address
+     * @return the 8 bits value at the given address
+     */
     private int read8(int address) {
         return Preconditions.checkBits8(bus.read(address));
     }
     
+    /**
+     * reads from the bus the 8 bits value at the address 
+     * contained in the the pair of registers HL.
+     * @return the 8 bits value at the address contained in HL
+     */
     private int read8AtHl() {
         return Preconditions.checkBits8(read8(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L))));
     }
     
+    /**
+     * reads from the bus the 8 bits value at the address contained 
+     * right next to the register PC, hence at PC+1.
+     * @return the 8 bits value at the address contained in PC+1
+     */
     private int read8AfterOpcode() {
         return Preconditions.checkBits8(read8(PC + 1));
     }
     
+    /**
+     * reads from the bus the 16 bits value at the given address.
+     * @param address the address
+     * @return the 16 bits value at the given address
+     */
     private int read16(int address) {
         assert address != 0xFFFF;
         int lsb = Preconditions.checkBits8(read8(address));
@@ -575,6 +599,11 @@ public final class Cpu implements Component, Clocked {
         return Bits.make16(msb, lsb);
     }
     
+    /**
+     * reads from the bus the 16 bits value at the address contained 
+     * right next to the register PC, hence at PC+1.
+     * @return the 16 bits value at the address contained in PC+1
+     */
     private int read16AfterOpcode() {
         assert PC < 0xFFFE;
         int lsb = read8(PC + 1);
@@ -582,11 +611,23 @@ public final class Cpu implements Component, Clocked {
         return Bits.make16(msb, lsb);
     }
     
+    /**
+     * writes in the bus the given 8 bits value at the given address.
+     * @param address the address
+     * @param v the integer (must be an 8 bits value)
+     * @throws IllegalArgumentException if v is invalid
+     */
     private void write8(int address, int v) {
         Preconditions.checkBits8(v);
         bus.write(address, v);
     }
     
+    /**
+     * writes in the bus the given 16 bits value at the given address.
+     * @param address the address
+     * @param v the integer (must be a 16 bits value)
+     * @throws IllegalArgumentException if v is invalid
+     */
     private void write16(int address, int v) {
         assert address != 0xFFFF;
         Preconditions.checkBits16(v);
@@ -594,6 +635,12 @@ public final class Cpu implements Component, Clocked {
         bus.write(address + 1, Bits.extract(v, 8, 8));
     }
     
+    /**
+     * writes in the bus the given 8 bits value at the address 
+     * contained in the pair of registers HL.
+     * @param v the integer (must be an 8 bits value)
+     * @throws IllegalArgumentException if v is invalid
+     */
     private void write8AtHl(int v) {
         Preconditions.checkBits8(v);
         bus.write(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L)), v);
