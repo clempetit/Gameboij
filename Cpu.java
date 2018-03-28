@@ -75,6 +75,12 @@ public final class Cpu implements Component, Clocked {
         }  
     }
     
+    /**
+     * checks if the interruptions are activated and if an interruption
+     * is waiting, in which case it manages as described in 1.7.3 .
+     * Otherwise it executes normally the next instruction.
+     * @param cycle the cycle
+     */
     public void reallyCycle(long cycle) {
         int i = interruptionNumber();
         if (IME & i >= 0) {
