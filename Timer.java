@@ -15,7 +15,6 @@ import ch.epfl.gameboj.component.cpu.Cpu;
 public final class Timer implements Component, Clocked {
 
     private Cpu cpu;
-    private boolean v0 = false;
     
     // Declaration of registers addresses.
     int DIV = 0;
@@ -30,11 +29,9 @@ public final class Timer implements Component, Clocked {
     
     @Override
     public void cycle(long cycle) { 
-        v0 = state();              
-        
+        boolean s0 = state();              
         DIV = Bits.clip(16, DIV + 4);
-        
-        incIfChange(v0);
+        incIfChange(s0);
     }
 
     @Override
@@ -55,22 +52,20 @@ public final class Timer implements Component, Clocked {
     }
 
     @Override
-    public void write(int address, int data) { // ECRITURE EN FF04 PROVOQUE LA MISE A ZERO DU COMPTEUR PRINCIPAL
+    public void write(int address, int data) {
         Preconditions.checkBits8(data);
         Preconditions.checkBits16(address);
+        boolean s0 = state();
         if (address == AddressMap.REG_DIV) {
-            v0 = state();
             DIV = 0;
-            incIfChange(v0);
         } else if(address == AddressMap.REG_TIMA) {
             TIMA = data;
         } else if(address == AddressMap.REG_TMA) {
             TMA = data;
         } else if(address == AddressMap.REG_TAC) {
-            v0 = state();
             TAC = data;
-            incIfChange(v0);
         }
+        incIfChange(s0);
     }
     
     private boolean state() {
@@ -95,8 +90,8 @@ public final class Timer implements Component, Clocked {
         return (Bits.test(TAC, 2) && Bits.test(DIV, i));
     }
     
-    private void incIfChange(boolean v0) {
-        if (v0 && !state()) {;
+    private void incIfChange(boolean s0) {
+        if (s0 && !state()) {
             if (TIMA == 0xFF) {
                 cpu.requestInterrupt(Cpu.Interrupt.TIMER);
                 TIMA = TMA;

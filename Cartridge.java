@@ -23,25 +23,23 @@ public final class Cartridge implements Component {
        this.mbc = mbc;
     }
     
-    public static Cartridge ofFile(File romFile) throws IOException { // A VOIR  COMMENT METTRE romFile  DANS UN []Byte.
+    public static Cartridge ofFile(File romFile) throws IOException {
         
         try (InputStream in = new FileInputStream(romFile)) {
-        byte[] b = new byte[(int) romFile.length()];
-        
+        byte[] b = new byte[0x8000];
         int read = in.read(b);
-        if (read != (int) romFile.length()) {
+        if (read != 0x8000) {
             throw new IOException();
         }
         rom = new Rom(b);
         Preconditions.checkArgument(b[0x147] == 0);
-        
         return new Cartridge(new MBC0(rom));
         }
     }
     
     @Override
     public int read(int address) {
-        Preconditions.checkArgument(address >= 0 && address < 32768);
+        Preconditions.checkBits16(address);
         return Preconditions.checkBits8(mbc.read(address));
     }
 

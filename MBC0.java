@@ -23,7 +23,11 @@ public final class MBC0 implements Component {
     
     @Override
     public int read(int address) {
+        if (address >= 0 && address < 32768) {
         return rom.read(address);
+        } else {
+            return NO_DATA;
+        }
     }
 
     @Override

@@ -64,7 +64,7 @@ public final class Cpu implements Component, Clocked {
         }
         return table;
     }
-  
+    
     @Override
     public void cycle(long cycle) {
         if ((nextNonIdleCycle == Long.MAX_VALUE) && (interruptionNumber() >= 0)) {
@@ -73,6 +73,7 @@ public final class Cpu implements Component, Clocked {
         if (cycle == nextNonIdleCycle ) {
             reallyCycle(cycle);
         }  
+        //System.out.println(PC);
     }
     
     /**
@@ -83,9 +84,9 @@ public final class Cpu implements Component, Clocked {
      */
     public void reallyCycle(long cycle) {
         int i = interruptionNumber();
-        if (IME & i >= 0) {
+        if (IME && i >= 0) {
             IME = false;
-            Bits.set(IF, i, false);
+            IF = Bits.set(IF, i, false);
             nextNonIdleCycle += 5;
             push16(PC);
             PC = AddressMap.INTERRUPTS[i];
@@ -96,6 +97,10 @@ public final class Cpu implements Component, Clocked {
             } else {
                 opcode = PREFIXED_OPCODE_TABLE[read8(PC + 1)];
             }
+        //if ((opcode.family == Opcode.Family.POP_R16 || opcode.family == Opcode.Family.LD_HLR_R8 || opcode.family == Opcode.Family.CHG_U3_HLR
+             //   || opcode.family == Opcode.Family.RET || opcode.family == Opcode.Family.DEC_R8 || opcode.family == Opcode.Family.PUSH_R16 || opcode.encoding == 0x20)&&cycle >10000000)  {
+       // System.out.println(opcode + "   PC = "+ PC);
+        //}
         dispatch(opcode);
         }
     }
@@ -103,6 +108,7 @@ public final class Cpu implements Component, Clocked {
     
     private void dispatch(Opcode op) {
        boolean condition = false;
+       boolean halt = false;
        int PC2 = PC + op.totalBytes;
        switch (op.family) {
        case NOP: {
@@ -447,12 +453,12 @@ public final class Cpu implements Component, Clocked {
            }
        } break;
        case JR_E8: {
-           PC2 += Bits.signExtend8(read8AfterOpcode());
+           PC2 = Bits.clip(16, PC2 + Bits.signExtend8(read8AfterOpcode()));
        } break;
        case JR_CC_E8: {
            if (extractCondition(op)) {
                condition = true;
-               PC2 += Bits.signExtend8(read8AfterOpcode());
+               PC2 = Bits.clip(16, PC2 + Bits.signExtend8(read8AfterOpcode()));
            }
        } break;
 
@@ -469,8 +475,8 @@ public final class Cpu implements Component, Clocked {
            }
        } break;
        case RST_U3: {
-           push16(PC + op.totalBytes);
-           PC2 = AddressMap.RESETS[Bits.extract(op.encoding, 3, 3)];
+           push16(PC2);
+           PC2 = 8*Bits.extract(op.encoding, 3, 3);
        } break;
        case RET: {
            PC2 = pop16();
@@ -484,11 +490,7 @@ public final class Cpu implements Component, Clocked {
 
        // Interrupts
        case EDI: {
-           if (Bits.test(op.encoding, 3)) {
-               IME = true;
-           } else {
-               IME = false;
-           }
+           IME = Bits.test(op.encoding, 3);
        } break;
        case RETI: {
            IME = true;
@@ -498,6 +500,7 @@ public final class Cpu implements Component, Clocked {
        // Misc control
        case HALT: {
            nextNonIdleCycle = Long.MAX_VALUE;
+           halt = true;
        } break;
        case STOP:
          throw new Error("STOP is not implemented");
@@ -505,9 +508,11 @@ public final class Cpu implements Component, Clocked {
        } break;
        }
        PC = PC2;
-       nextNonIdleCycle += op.cycles;
-       if (condition) {
-           nextNonIdleCycle += op.additionalCycles;
+       if (!halt) {
+           nextNonIdleCycle += op.cycles;
+           if (condition) {
+               nextNonIdleCycle += op.additionalCycles;
+           }
        }
     }
     
@@ -546,7 +551,7 @@ public final class Cpu implements Component, Clocked {
     
     /**
      * @return an array containing in order the value of the registers:
-     *  PC, SP, A, F, B, C, D, E, H and L
+     * PC, SP, A, F, B, C, D, E, H and L
      */
     public int[] _testGetPcSpAFBCDEHL() {
         int[] tab = new int[10];
@@ -576,7 +581,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     /**
-     * reads from the bus the 8 bits value at the address 
+     * reads from the bus the 8 bits value at the address
      * contained in the the pair of registers HL.
      * @return the 8 bits value at the address contained in HL
      */
@@ -585,7 +590,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     /**
-     * reads from the bus the 8 bits value at the address contained 
+     * reads from the bus the 8 bits value at the address contained
      * right next to the register PC, hence at PC+1.
      * @return the 8 bits value at the address contained in PC+1
      */
@@ -606,7 +611,7 @@ public final class Cpu implements Component, Clocked {
     }
     
     /**
-     * reads from the bus the 16 bits value at the address contained 
+     * reads from the bus the 16 bits value at the address contained
      * right next to the register PC, hence at PC+1.
      * @return the 16 bits value at the address contained in PC+1
      */
@@ -642,26 +647,24 @@ public final class Cpu implements Component, Clocked {
     }
     
     /**
-     * writes in the bus the given 8 bits value at the address 
+     * writes in the bus the given 8 bits value at the address
      * contained in the pair of registers HL.
      * @param v the integer (must be an 8 bits value)
      * @throws IllegalArgumentException if v is invalid
      */
     private void write8AtHl(int v) {
         Preconditions.checkBits8(v);
-        bus.write(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L)), v);
+        write8(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L)), v);
     }
     
     private void push16(int v) {
-        assert SP != 0x1;
         Preconditions.checkBits16(v);
         SP = Bits.clip(16, SP - 2);
-        bus.write(SP, Bits.clip(8, v));
-        bus.write(SP + 1, Bits.extract(v, 8, 8));
+        write16(SP, v);
     }
     
     private int pop16() {
-        assert SP != 0xFFFF;
+        Preconditions.checkArgument(SP != 0xFFFF);
         int address = SP;
         SP = Bits.clip(16, SP + 2);
         return read16(address);
@@ -759,6 +762,7 @@ public final class Cpu implements Component, Clocked {
         int cpuVector = flagVector(FlagSrc.CPU, z, n, h, c) & bench8.get(Reg.F);
         bench8.set(Reg.F, v1Vector | aluVector | cpuVector);
     }
+    
     /**
      * return a mask representing the values of the flags corresponding to a given flag source.
      * @param ref the flag source
