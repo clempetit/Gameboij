@@ -40,7 +40,7 @@ public final class Cartridge implements Component {
     @Override
     public int read(int address) {
         Preconditions.checkBits16(address);
-        return Preconditions.checkBits8(mbc.read(address));
+        return mbc.read(address);
     }
 
     @Override

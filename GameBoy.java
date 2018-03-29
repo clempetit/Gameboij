@@ -23,7 +23,7 @@ public class GameBoy {
     private Cpu cpu;
     private BootRomController bcr;
     private Timer timer;
-    private int SimulatedCycles = 0;
+    private long SimulatedCycles = 0;
     
     public GameBoy(Cartridge cartridge){
         Objects.requireNonNull(cartridge);
@@ -60,10 +60,9 @@ public class GameBoy {
     
     public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle >= cycles());
-        for (int i = 0; i<cycle; i++) {
-            timer.cycle(i);
+        while (cycles() < cycle) {
+            timer.cycle(SimulatedCycles);
             cpu.cycle(SimulatedCycles++);
-            
         }
     }
     
