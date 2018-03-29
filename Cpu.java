@@ -72,8 +72,7 @@ public final class Cpu implements Component, Clocked {
         }
         if (cycle == nextNonIdleCycle ) {
             reallyCycle(cycle);
-        }  
-        //System.out.println(PC);
+        }
     }
     
     /**
@@ -87,9 +86,9 @@ public final class Cpu implements Component, Clocked {
         if (IME && i >= 0) {
             IME = false;
             IF = Bits.set(IF, i, false);
-            nextNonIdleCycle += 5;
             push16(PC);
             PC = AddressMap.INTERRUPTS[i];
+            nextNonIdleCycle += 5;
         } else {
         Opcode opcode;
         if (read8(PC) != 0xCB) {
@@ -97,10 +96,6 @@ public final class Cpu implements Component, Clocked {
             } else {
                 opcode = PREFIXED_OPCODE_TABLE[read8(PC + 1)];
             }
-        //if ((opcode.family == Opcode.Family.POP_R16 || opcode.family == Opcode.Family.LD_HLR_R8 || opcode.family == Opcode.Family.CHG_U3_HLR
-             //   || opcode.family == Opcode.Family.RET || opcode.family == Opcode.Family.DEC_R8 || opcode.family == Opcode.Family.PUSH_R16 || opcode.encoding == 0x20)&&cycle >10000000)  {
-       // System.out.println(opcode + "   PC = "+ PC);
-        //}
         dispatch(opcode);
         }
     }
@@ -476,7 +471,7 @@ public final class Cpu implements Component, Clocked {
        } break;
        case RST_U3: {
            push16(PC2);
-           PC2 = 8*Bits.extract(op.encoding, 3, 3);
+           PC2 = AddressMap.RESETS[Bits.extract(op.encoding, 3, 3)];
        } break;
        case RET: {
            PC2 = pop16();
