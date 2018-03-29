@@ -572,6 +572,7 @@ public final class Cpu implements Component, Clocked {
      * @return the 8 bits value at the given address
      */
     private int read8(int address) {
+        Preconditions.checkBits16(address);
         return Preconditions.checkBits8(bus.read(address));
     }
     
@@ -581,7 +582,7 @@ public final class Cpu implements Component, Clocked {
      * @return the 8 bits value at the address contained in HL
      */
     private int read8AtHl() {
-        return Preconditions.checkBits8(read8(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L))));
+        return read8(Bits.make16(bench8.get(Reg.H), bench8.get(Reg.L)));
     }
     
     /**
@@ -590,7 +591,7 @@ public final class Cpu implements Component, Clocked {
      * @return the 8 bits value at the address contained in PC+1
      */
     private int read8AfterOpcode() {
-        return Preconditions.checkBits8(read8(PC + 1));
+        return read8(PC + 1);
     }
     
     /**
@@ -599,9 +600,11 @@ public final class Cpu implements Component, Clocked {
      * @return the 16 bits value at the given address
      */
     private int read16(int address) {
+        Preconditions.checkBits16(address);
+        Preconditions.checkArgument(address != 0xFFFF);
         assert address != 0xFFFF;
-        int lsb = Preconditions.checkBits8(read8(address));
-        int msb = Preconditions.checkBits8(read8(address + 1));
+        int lsb = read8(address);
+        int msb = read8(address + 1);
         return Bits.make16(msb, lsb);
     }
     
@@ -611,7 +614,7 @@ public final class Cpu implements Component, Clocked {
      * @return the 16 bits value at the address contained in PC+1
      */
     private int read16AfterOpcode() {
-        assert PC < 0xFFFE;
+        Preconditions.checkArgument(PC < 0xFFFE);
         int lsb = read8(PC + 1);
         int msb = read8(PC + 2);
         return Bits.make16(msb, lsb);
@@ -624,6 +627,7 @@ public final class Cpu implements Component, Clocked {
      * @throws IllegalArgumentException if v is invalid
      */
     private void write8(int address, int v) {
+        Preconditions.checkBits16(address);
         Preconditions.checkBits8(v);
         bus.write(address, v);
     }
@@ -635,7 +639,8 @@ public final class Cpu implements Component, Clocked {
      * @throws IllegalArgumentException if v is invalid
      */
     private void write16(int address, int v) {
-        assert address != 0xFFFF;
+        Preconditions.checkArgument(address != 0xFFFF);
+        Preconditions.checkBits16(address);
         Preconditions.checkBits16(v);
         bus.write(address, Bits.clip(8, v));
         bus.write(address + 1, Bits.extract(v, 8, 8));
@@ -668,8 +673,8 @@ public final class Cpu implements Component, Clocked {
     // GESTION DES PAIRES DE REGISTRES
     
     private int reg16(Reg16 r) {
-        int msb = Preconditions.checkBits8(bench8.get(Reg.values()[2 * r.index()]));
-        int lsb = Preconditions.checkBits8(bench8.get(Reg.values()[2 * r.index() + 1]));
+        int msb = bench8.get(Reg.values()[2 * r.index()]);
+        int lsb = bench8.get(Reg.values()[2 * r.index() + 1]);
         return Bits.make16(msb, lsb);
     }
     
@@ -687,12 +692,11 @@ public final class Cpu implements Component, Clocked {
     }
     
     private void setReg16(Reg16 r, int newV) {
+        Preconditions.checkBits16(newV);
         if (r == Reg16.AF) {
-            Preconditions.checkBits16(newV);
             bench8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
             bench8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV & (-1 << 4)));
         } else {
-            Preconditions.checkBits16(newV);
             bench8.set(Reg.values()[2 * r.index()], Bits.extract(newV, 8, 8));
             bench8.set(Reg.values()[2 * r.index() + 1], Bits.clip(8, newV));
             }
