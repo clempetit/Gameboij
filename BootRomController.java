@@ -26,7 +26,7 @@ public final class BootRomController implements Component {
     @Override
     public int read(int address) {
         Preconditions.checkBits16(address);
-        if (!disabled &&  address < bootRom.size()) {
+        if (!disabled && address < bootRom.size()) {
             return bootRom.read(address);
         } else {
             return cartridge.read(address);
@@ -37,7 +37,7 @@ public final class BootRomController implements Component {
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
-        if (address == AddressMap.REG_BOOT_ROM_DISABLE) {
+        if (!disabled && address == AddressMap.REG_BOOT_ROM_DISABLE) {
             disabled = true;
         } else {
         cartridge.write(address, data);
