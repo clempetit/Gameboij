@@ -26,11 +26,8 @@ public final class Cartridge implements Component {
     public static Cartridge ofFile(File romFile) throws IOException {
         
         try (InputStream in = new FileInputStream(romFile)) {
-        byte[] b = new byte[0x8000];
-        int read = in.read(b);
-        if (read != 0x8000) {
-            throw new IOException();
-        }
+        byte[] b = in.readAllBytes();
+        in.close();
         rom = new Rom(b);
         Preconditions.checkArgument(b[0x147] == 0);
         return new Cartridge(new MBC0(rom));
