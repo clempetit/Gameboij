@@ -1,6 +1,6 @@
-/*
- *	Author:      Clément Petit
- *	Date:        21 Feb 2018      
+/**
+ *  @author Clément Petit (282626)
+ *  @author Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj;

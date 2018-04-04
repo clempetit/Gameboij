@@ -1,16 +1,10 @@
-/*
- *	Author:      Clément Petit 
- *	Date:        20 Feb 2018      
+/**
+ *  @author Clément Petit (282626)
+ *  @author Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj;
 
-/**
- * 
- * @author Clément Petit (282626)
- * @author Yanis Berkani (271348)
- * 
- */
 public interface Preconditions {
     
     /**
