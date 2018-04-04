@@ -1,6 +1,6 @@
-/**
- *  @autor Clément Petit (282626)
- *  @autor Yanis Berkani (271348)
+/*
+ *	Author:      Clément Petit
+ *	Date:        21 Feb 2018      
  */
 
 package ch.epfl.gameboj;
@@ -14,21 +14,17 @@ public final class Bus {
     /** ArrayList containing components attached to the bus */
     private ArrayList<Component> attachedComp = new ArrayList<Component>();
     
-    /** attaches the given component to the bus
-     * @param component the component to be attached (must not be null)
-     * @throws NullPointerException if the component is null
-     */
+    /** attaches a new component to the bus
+	 * @param component the new component to be attached
+	 */
     public void attach(Component component) {
         attachedComp.add(Objects.requireNonNull(component));
     }
     
     /** return the value stored at the given address if at least one component has a value at this address
-     *  or return 0xFF if not
-     * @param address the address to look for (must be a 16 bits value)
-     * @throws IllegalArgumentException if the address is invalid
-     * @return the value stored at the given address if at least one component has a value at this address
-     * or return 0xFF if not
-     */
+	 *  return 0x100 if not
+	 * @param address the address to look for
+	 */
     public int read(int address) {
         Preconditions.checkBits16(address);
         for (Component c : attachedComp) {
@@ -40,10 +36,9 @@ public final class Bus {
     }
     
     /** writes the given value at the given address for each component attached to the bus
-     * @param address the address where to write (must be a 16 bits value)
-     * @param data the data to write at the given address (must be an 8 bits value)
-     * @throws IllegalArgumentException if the address or the data are invalid
-     */
+	 * @param address the address where to write
+	 * @param data the data to write at the given address
+	 */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);

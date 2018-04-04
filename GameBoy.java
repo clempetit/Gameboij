@@ -45,19 +45,31 @@ public class GameBoy {
         timer = new Timer(cpu);
         timer.attachTo(bus);
     }
-    
+    /**
+     * @return the bus of the gameboy
+     */
     public Bus bus() {
         return bus;
     }
     
+    /**
+     * @return the cpu of the gameboy
+     */
     public Cpu cpu() {
         return cpu;
     }
     
+    /**
+     * @return the timer of the gameboy
+     */
     public Timer timer() {
         return timer;
     }
     
+    /**
+     * runs the simulated gameboy until the given cycle minus 1 
+     * @param cycle the cycle
+     */
     public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle >= cycles());
         while (cycles() < cycle) {
@@ -66,6 +78,9 @@ public class GameBoy {
         }
     }
     
+    /**
+     * @return the number of cycles already simulated
+     */
     public long cycles() {
         return SimulatedCycles;
     }

@@ -65,6 +65,11 @@ public final class Cpu implements Component, Clocked {
         return table;
     }
     
+    /**
+     * Determines if the cpu needs to do something during the given cycle,
+     * and if so, calls the method reallyCycle.
+     * @param cycle the cycle
+     */
     @Override
     public void cycle(long cycle) {
         if ((nextNonIdleCycle == Long.MAX_VALUE) && (interruptionNumber() >= 0)) {
@@ -77,11 +82,11 @@ public final class Cpu implements Component, Clocked {
     
     /**
      * checks if the interruptions are activated and if an interruption
-     * is waiting, in which case it manages as described in 1.7.3 .
+     * is waiting, in which case it manages this interruption.
      * Otherwise it executes normally the next instruction.
      * @param cycle the cycle
      */
-    public void reallyCycle(long cycle) {
+    private void reallyCycle(long cycle) {
         int i = interruptionNumber();
         if (IME && i >= 0) {
             IME = false;

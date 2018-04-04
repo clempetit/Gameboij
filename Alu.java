@@ -48,18 +48,18 @@ public final class Alu {
     }
     
     /**
-     * return the value contained in the package value/flags given.
+     * return the value contained in the given package value/flags.
      * @param valueFlags the package value/flags
-     * @return the value contained in the package value/flags given
+     * @return the value contained in the given package value/flags
      */
     public static int unpackValue(int valueFlags) {
         return Bits.extract(valueFlags, 8, 24);
     }
     
     /**
-     * return the flags contained in the package value/flags given.
+     * return the flags contained in the given package value/flags.
      * @param valueFlags the package value/flags
-     * @return the flags contained in the package value/flags given
+     * @return the flags contained in the given package value/flags
      */
     public static int unpackFlags(int valueFlags) {
         return Bits.clip(8, valueFlags);
