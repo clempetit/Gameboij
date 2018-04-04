@@ -23,6 +23,13 @@ public final class Cartridge implements Component {
        this.mbc = mbc;
     }
     
+    /**
+     * return a cartridge whose ROM contains the bytes of the given file.
+     * @param romFile the file
+     * @throws IOException in case of input-output error
+     * @throws IllegalArgumentException if the file does not contain 0 at the position 0x147
+     * @return a cartridge whose ROM contains the bytes of the given file
+     */
     public static Cartridge ofFile(File romFile) throws IOException {
         
         try (InputStream in = new FileInputStream(romFile)) {
