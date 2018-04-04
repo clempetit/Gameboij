@@ -22,12 +22,20 @@ public final class Timer implements Component, Clocked {
     int TMA = 0;
     int TAC = 0;
     
+    /**
+     * builds a timer associated to the given processor.
+     * @param cpu the processor
+     * @throws NullPointerException if the processor is null
+     */
     public Timer(Cpu cpu) {
         Objects.requireNonNull(cpu);
         this.cpu = cpu;
     }
     
     @Override
+    /**
+     * updates the main timer, and the secondary if needed.
+     */
     public void cycle(long cycle) { 
         boolean s0 = state();              
         DIV = Bits.clip(16, DIV + 4);
@@ -35,6 +43,9 @@ public final class Timer implements Component, Clocked {
     }
 
     @Override
+    /**
+     * gives access to registers
+     */
     public int read(int address) {
         Preconditions.checkBits16(address);
         if (address == AddressMap.REG_DIV) {
@@ -52,6 +63,9 @@ public final class Timer implements Component, Clocked {
     }
 
     @Override
+    /**
+     * gives access to registers
+     */
     public void write(int address, int data) {
         Preconditions.checkBits8(data);
         Preconditions.checkBits16(address);
