@@ -41,13 +41,19 @@ public final class Cartridge implements Component {
         }
     }
     
-    @Override
+   @Override
+    /**
+     * check the argument and calls the mbc's corresponding method
+     */
     public int read(int address) {
         Preconditions.checkBits16(address);
         return mbc.read(address);
     }
 
     @Override
+    /**
+     * check the arguments and calls the mbc's corresponding method
+     */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
