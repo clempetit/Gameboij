@@ -41,7 +41,7 @@ public final class Cartridge implements Component {
     }
 
     @Override
-    public void write(int address, int data) { // CAS OU LA CARTOUCHE POSSEDE MEMOIRE VIVE A CERTAINES ADRESSES ?
+    public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
         mbc.write(address, data);
