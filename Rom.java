@@ -1,6 +1,8 @@
-/*
- *	Author:      Clément Petit
- *	Date:        20 Feb 2018      
+/**
+ * 
+ * @author Clément Petit (282626)
+ * @author Yanis Berkani (271348)
+ * 
  */
 
 package ch.epfl.gameboj.component.memory;
@@ -8,12 +10,7 @@ package ch.epfl.gameboj.component.memory;
 import java.util.Arrays;
 import java.util.Objects;
 
-/**
- * 
- * @author Clément Petit (282626)
- * @author Yanis Berkani (271348)
- * 
- */
+
 public final class Rom {
     private byte[] rom;
     
