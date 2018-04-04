@@ -1,18 +1,15 @@
-/*
- *	Author:      Clément Petit
- *	Date:        20 Feb 2018      
- */
-
-package ch.epfl.gameboj.component.memory;
-
-import ch.epfl.gameboj.Preconditions;
-
 /**
  * 
  * @author Clément Petit (282626)
  * @author Yanis Berkani (271348)
  * 
  */
+
+package ch.epfl.gameboj.component.memory;
+
+import ch.epfl.gameboj.Preconditions;
+
+
 public final class Ram {
     
     private byte[] ram;
