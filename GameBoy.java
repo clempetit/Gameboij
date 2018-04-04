@@ -25,6 +25,12 @@ public class GameBoy {
     private Timer timer;
     private long SimulatedCycles = 0;
     
+    /**
+     * builds a Game Boy creating the necessary components and
+     * attaching them to a common bus.
+     * @param cartridge the cartridge
+     * @throws NullPointerException if the cartridge is null
+     */
     public GameBoy(Cartridge cartridge){
         Objects.requireNonNull(cartridge);
         bus = new Bus();
@@ -67,7 +73,8 @@ public class GameBoy {
     }
     
     /**
-     * runs the simulated gameboy until the given cycle minus 1 
+     * runs the simulated gameboy until the given cycle minus 1,
+     * calling the method cycle of the timer and then of the processor. 
      * @param cycle the cycle
      */
     public void runUntil(long cycle) {
