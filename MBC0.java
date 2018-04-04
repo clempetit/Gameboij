@@ -14,7 +14,13 @@ import ch.epfl.gameboj.component.memory.Rom;
 public final class MBC0 implements Component {
     
     private Rom rom;
-
+    
+    /**
+     * builds a controller of type 0 for the given rom.
+     * @param rom the rom
+     * @throws NullPointerException if the rom is null
+     * @throws IllegalArgumentException if the rom does not contain exactly 32768 bytes
+     */
     public MBC0(Rom rom) {
         Objects.requireNonNull(rom);
         Preconditions.checkArgument(rom.size() == 32768);
