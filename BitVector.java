@@ -11,6 +11,8 @@ import ch.epfl.gameboj.Preconditions;
 
 public final class BitVector {
     private int[] vector;
+    
+    private enum extensionType{zero, wrapped};
 
     /**
      * 
@@ -96,9 +98,16 @@ public final class BitVector {
         return new BitVector(or);
     }
     
-    private int extensionElement(int index, boolean wrapped) { // ???
-        
-       return 0; 
+    private int extensionElement(int index, extensionType type)  { // ???
+       if (index < vector.length) {
+           return vector[index];
+       } else {
+           if (type == extensionType.zero) {
+               return 0;
+           } else {
+               return vector[Math.floorMod(index, vector.length)];
+           }
+       }
     }
     
     /**
@@ -108,11 +117,19 @@ public final class BitVector {
      * @param Wrapped
      * @return
      */
-    private BitVector extract(int start, int sizeInBits, boolean wrapped) { // ???
+    private BitVector extract(int start, int sizeInBits, extensionType type) { // ???
         int[] extracted = new int[sizeInBits / 32];
+        int startMod32 = Math.floorMod(start, 32);
+        int b = Math.floorDiv(start, 32);
         //TO IMPLEMENT
-        if (start % 32 == 0) {
-            
+        if (startMod32 == 0) { // floormod
+            for (int i = 0; i < extracted.length; i++) {
+                extracted[i] = extensionElement(start +i, type);
+            }
+        } else {
+            for (int i = 0; i < extracted.length; i++) {
+                extracted[i] = extensionElement(b + i, type) >>> start | extensionElement(b + i + 1, type) << 32 - start;
+            }
         }
         return new BitVector(extracted);
     }
@@ -124,7 +141,7 @@ public final class BitVector {
      * @return
      */
     public BitVector extractZeroExtended(int start, int sizeInBits) {
-        return extract(start, sizeInBits, false);
+        return extract(start, sizeInBits, extensionType.zero);
     }
     
     /**
@@ -134,7 +151,7 @@ public final class BitVector {
      * @return
      */
     public BitVector extractWrapped(int start, int sizeInBits) {
-        return extract(start, sizeInBits, true);
+        return extract(start, sizeInBits, extensionType.wrapped);
     }
     
     /**
@@ -147,11 +164,11 @@ public final class BitVector {
     }
     
     public int hashcode() {
-        return vector.hashCode();
+        return Arrays.hashCode(vector);
     }
     
-    public boolean equals(BitVector that) { // A VERIFIER
-        return vector.equals(that.vector);
+    public boolean equals(BitVector that) {
+        return Arrays.equals(vector, that.vector);
     }
     
     public final static class Builder {
@@ -163,7 +180,7 @@ public final class BitVector {
             vectorBuilder = new int[sizeInBits / 32];
         }
         
-         public Builder setByte(int index, int newValue) { 
+        public Builder setByte(int index, int newValue) { 
             if (vectorBuilder == null) {
                 throw new IllegalStateException();
             }
@@ -173,7 +190,6 @@ public final class BitVector {
             vectorBuilder[index/nbOfBytesInt] =  (vectorBuilder[index/nbOfBytesInt] & mask) | newValue << 8 *(index % nbOfBytesInt);
             return this;
         }
-        
         
         public BitVector Build() {
             if (vectorBuilder == null) {
