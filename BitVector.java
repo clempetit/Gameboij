@@ -163,14 +163,17 @@ public final class BitVector {
             vectorBuilder = new int[sizeInBits / 32];
         }
         
-        public Builder setByte(int index, int newValue) { // ???
+         public Builder setByte(int index, int newValue) { 
             if (vectorBuilder == null) {
                 throw new IllegalStateException();
             }
-            Preconditions.checkArgument(index >= 0 && index <= (32*vectorBuilder.length - Byte.SIZE) && index % 8 == 0);
-            vectorBuilder[index/32] =  vectorBuilder[index/32] | newValue << index % 4;
+            Preconditions.checkArgument(index >= 0 && index < (4*vectorBuilder.length));
+            int nbOfBytesInt = Integer.SIZE / Byte.SIZE;
+            int mask = ~(0b1111_1111 << 8*(index % nbOfBytesInt));
+            vectorBuilder[index/nbOfBytesInt] =  (vectorBuilder[index/nbOfBytesInt] & mask) | newValue << 8 *(index % nbOfBytesInt);
             return this;
         }
+        
         
         public BitVector Build() {
             if (vectorBuilder == null) {
