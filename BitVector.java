@@ -99,7 +99,7 @@ public final class BitVector {
     }
     
     private int extensionElement(int index, extensionType type)  { // ???
-       if (index < vector.length) {
+       if (index >= 0 && index < vector.length) {
            return vector[index];
        } else {
            if (type == extensionType.zero) {
