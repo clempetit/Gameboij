@@ -125,6 +125,7 @@ public final class BitVector {
      * @return
      */
     private BitVector extract(int start, int sizeInBits, extensionType type) {
+        Preconditions.checkArgument(sizeInBits % 32 == 0);
         int[] extracted = new int[sizeInBits / intSize];
         int startMod32 = Math.floorMod(start, intSize);
         int startDiv32 = Math.floorDiv(start, intSize);
