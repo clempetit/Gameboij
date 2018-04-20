@@ -185,7 +185,7 @@ public final class BitVector {
         for (int i = 0; i < size(); i++) {
             b.append(testBit(i) ? 1 : 0);
         }
-        return b.toString();
+        return b.reverse().toString();
     }
     
     public final static class Builder {
