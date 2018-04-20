@@ -168,13 +168,13 @@ public final class LcdImageLine {
             lsb = new BitVector.Builder(size);
         }
         
-        public Builder setByte(int index, int msbByte, int lsbByte) {
+        public Builder setBytes(int index, int msbByte, int lsbByte) {
             msb.setByte(index, msbByte);
             lsb.setByte(index, lsbByte);
             return this;
         }
         
-        public LcdImageLine Build() {
+        public LcdImageLine build() {
             BitVector m = msb.build();
             BitVector l = lsb.build();
             BitVector opacity = m.or(l);
