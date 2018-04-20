@@ -15,13 +15,13 @@ import ch.epfl.gameboj.Preconditions;
 public final class LcdImage {
     
     private final int width, height;
-    private final List<LcdImageLine> lineList; //list de java.util ?
+    private final List<LcdImageLine> lineList;
     
-    public LcdImage(int width, int height, List<LcdImageLine> lineList) { // Verifications ?
-        Preconditions.checkArgument(!(lineList.isEmpty()) && height == lineList.size());
+    public LcdImage(int width, int height, List<LcdImageLine> lineList) {
+        Preconditions.checkArgument(!(lineList.isEmpty()) && (height == lineList.size()));
         this.width = width;
         this.height = height;
-        this.lineList = Collections.unmodifiableList(new ArrayList<>(lineList)); // copie de la liste ? ArrayList ?
+        this.lineList = Collections.unmodifiableList(new ArrayList<>(lineList));
     }
     
     public int width() {
@@ -32,40 +32,41 @@ public final class LcdImage {
         return height;
     }
     
-    public int get(int x, int y) { // procéder comme ça ? definir color ou mettre des return directement ?
+    public int get(int x, int y) {
         boolean msbColor = lineList.get(y).msb().testBit(x);
         boolean lsbColor = lineList.get(y).lsb().testBit(x);
         int color;
         if (msbColor) {
             if (lsbColor) {
-                color = 0b11;
+                return 0b11;
             } else {
-                color = 0b10;
+                return 0b10;
             }
         } else {
             if (lsbColor) {
-                color = 0b01;
+                return 0b01;
             } else {
-                color = 0b00;
+                return 0b00;
             }
         }
-        return color;
     }
     
-    public boolean equals(LcdImage that) {
-        if (this.lineList.size() != that.lineList.size()) {
+    public boolean equals(Object that) { // Procéder avec itérateurs
+        if (!(that instanceof LcdImage)) {
             return false;
         }
-        boolean equals = true;
+        if (this.lineList.size() != ((LcdImage)that).lineList.size()) {
+            return false;
+        }
         for(int i = 0; i< this.lineList.size(); i++) {
-            if (!(this.lineList.get(i).equals(that.lineList.get(i)))) {
-                equals = false;
+            if (!(this.lineList.get(i).equals(((LcdImage)that).lineList.get(i)))) {
+                return false;
             }
         }
-        return equals;
+        return true;
     }
     
-    public int hashcode() { // mettre width et height ?
+    public int hashcode() {
         return Objects.hash(lineList);
     }
     
@@ -77,10 +78,11 @@ public final class LcdImage {
         public Builder(int width, int heigth) {
             this.width = width;
             this.height = height;
-            lineList = new ArrayList<>(height); // ArrayList ?
+            lineList = new ArrayList<>(height);
         }
         
         public Builder setLine(int index, LcdImageLine newValue) {
+            Preconditions.checkArgument(index >= 0 && index < lineList.size());
             lineList.set(index, newValue);
             return this;
         }

@@ -65,10 +65,8 @@ public final class LcdImageLine {
      * 
      * @param distance
      */
-    public void shift(int distance) {
-        msb.shift(distance);
-        lsb.shift(distance);
-        opacity.shift(distance);
+    public LcdImageLine shift(int distance) {
+        return new LcdImageLine(msb.shift(distance), lsb.shift(distance), opacity.shift(distance));
     }
     
     /**
@@ -128,7 +126,7 @@ public final class LcdImageLine {
      * @param index
      * @return
      */
-    public LcdImageLine join(LcdImageLine that, int index) { // Quelle ligne en premier ?
+    public LcdImageLine join(LcdImageLine that, int index) { // ???
         Preconditions.checkArgument(that.size()==this.size());
         BitVector newMsb = this.msb.extractWrapped(0, index).or(that.msb.extractWrapped(index, that.msb.size() - index).shift(index));
         BitVector newLsb = this.lsb.extractWrapped(0, index).or(that.lsb.extractWrapped(index, that.lsb.size() - index).shift(index));
@@ -161,7 +159,8 @@ public final class LcdImageLine {
         private final BitVector.Builder msb;
         private final BitVector.Builder lsb;
         
-        public Builder(int size) { // un seul attribut size ?
+        public Builder(int size) {
+            Preconditions.checkArgument(size > 0);
             msb = new BitVector.Builder(size);
             lsb = new BitVector.Builder(size);
         }
