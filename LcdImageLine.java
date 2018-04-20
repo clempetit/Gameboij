@@ -131,9 +131,9 @@ public final class LcdImageLine {
         BitVector maskLeft = new BitVector(size(), true).shift(index);
         BitVector maskRight = new BitVector(size(), true).shift(index).not();
         
-        BitVector newMsb = (this.msb.extractWrapped(0, index).and(maskRight)).or(that.msb.extractWrapped(index, that.msb.size() - index).and(maskLeft));
-        BitVector newLsb = (this.lsb.extractWrapped(0, index).and(maskRight)).or(that.lsb.extractWrapped(index, that.lsb.size() - index).and(maskLeft));
-        BitVector newOpacity = (this.opacity.extractWrapped(0, index).and(maskRight)).or(that.opacity.extractWrapped(index, that.opacity.size() - index).and(maskLeft));
+        BitVector newMsb = (this.msb.and(maskRight)).or(that.msb.and(maskLeft));
+        BitVector newLsb = (this.lsb.and(maskRight)).or(that.lsb.and(maskLeft));
+        BitVector newOpacity = (this.opacity.and(maskRight)).or(that.opacity.and(maskLeft));
         return new LcdImageLine(newMsb, newLsb, newOpacity);
     }
     
