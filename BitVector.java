@@ -59,6 +59,7 @@ public final class BitVector {
      * @return
      */
     public boolean testBit(int index) {
+        Preconditions.checkArgument(index >= 0 && index < size());
         return Bits.test(vector[index / intSize], index % intSize);
     }
     
@@ -193,7 +194,9 @@ public final class BitVector {
                 throw new IllegalStateException();
             }
             Preconditions.checkBits8(newValue);
-            Preconditions.checkArgument(index >= 0 && index < (nbOfBytesInInt*vector.length));
+            if (!(index >= 0 && index < (nbOfBytesInInt*vector.length))) {
+                throw new IndexOutOfBoundsException();
+            }
             int indexInInt = index % nbOfBytesInInt;
             int indexInTab = index / nbOfBytesInInt;
             
