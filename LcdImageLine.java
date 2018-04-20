@@ -126,11 +126,14 @@ public final class LcdImageLine {
      * @param index
      * @return
      */
-    public LcdImageLine join(LcdImageLine that, int index) { // ???
+    public LcdImageLine join(LcdImageLine that, int index) { 
         Preconditions.checkArgument(that.size()==this.size());
-        BitVector newMsb = this.msb.extractWrapped(0, index).or(that.msb.extractWrapped(index, that.msb.size() - index).shift(index));
-        BitVector newLsb = this.lsb.extractWrapped(0, index).or(that.lsb.extractWrapped(index, that.lsb.size() - index).shift(index));
-        BitVector newOpacity = this.opacity.extractWrapped(0, index).or(that.opacity.extractWrapped(index, that.opacity.size() - index).shift(index));
+        BitVector maskLeft = new BitVector(size(), true).shift(index);
+        BitVector maskRight = new BitVector(size(), true).shift(index).not();
+        
+        BitVector newMsb = (this.msb.extractWrapped(0, index).and(maskRight)).or(that.msb.extractWrapped(index, that.msb.size() - index).and(maskLeft));
+        BitVector newLsb = (this.lsb.extractWrapped(0, index).and(maskRight)).or(that.lsb.extractWrapped(index, that.lsb.size() - index).and(maskLeft));
+        BitVector newOpacity = (this.opacity.extractWrapped(0, index).and(maskRight)).or(that.opacity.extractWrapped(index, that.opacity.size() - index).and(maskLeft));
         return new LcdImageLine(newMsb, newLsb, newOpacity);
     }
     
