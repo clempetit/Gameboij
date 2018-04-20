@@ -11,7 +11,6 @@ import ch.epfl.gameboj.Preconditions;
 
 public final class BitVector {
     
-    private static final int intSize = Integer.SIZE;
     private static final int nbOfBytesInInt = Integer.SIZE / Byte.SIZE;
     
     private final int[] vector;
@@ -24,8 +23,8 @@ public final class BitVector {
      * @param initValue
      */
     public BitVector(int sizeInBits, boolean initValue) {
-     Preconditions.checkArgument(sizeInBits > 0 && (sizeInBits % intSize == 0));
-     vector = new int[sizeInBits / intSize];
+     Preconditions.checkArgument(sizeInBits > 0 && (sizeInBits % Integer.SIZE == 0));
+     vector = new int[sizeInBits / Integer.SIZE];
      if (initValue)
          Arrays.fill(vector, ~0);
     }
@@ -60,7 +59,7 @@ public final class BitVector {
      */
     public boolean testBit(int index) {
         Preconditions.checkArgument(index >= 0 && index < size());
-        return Bits.test(vector[index / intSize], index % intSize);
+        return Bits.test(vector[index / Integer.SIZE], index % Integer.SIZE);
     }
     
     /**
@@ -125,10 +124,10 @@ public final class BitVector {
      * @return
      */
     private BitVector extract(int start, int sizeInBits, extensionType type) {
-        Preconditions.checkArgument(sizeInBits % 32 == 0);
-        int[] extracted = new int[sizeInBits / intSize];
-        int startMod32 = Math.floorMod(start, intSize);
-        int startDiv32 = Math.floorDiv(start, intSize);
+        Preconditions.checkArgument(sizeInBits % Integer.SIZE == 0);
+        int[] extracted = new int[sizeInBits / Integer.SIZE];
+        int startMod32 = Math.floorMod(start, Integer.SIZE);
+        int startDiv32 = Math.floorDiv(start, Integer.SIZE);
         
         if (startMod32 == 0) {
             for (int i = 0; i < extracted.length; i++) {
@@ -137,7 +136,7 @@ public final class BitVector {
         } else {
             for (int i = 0; i < extracted.length; i++) {
                 extracted[i] = extensionElement(startDiv32 + i, type) >>> start
-                    | extensionElement(startDiv32 + i + 1, type) << intSize - start;
+                    | extensionElement(startDiv32 + i + 1, type) << Integer.SIZE - start;
             }
         }
         return new BitVector(extracted);
@@ -149,7 +148,7 @@ public final class BitVector {
      * @param sizeInBits
      * @return
      */
-    public BitVector extractZeroExtended(int start, int sizeInBits) { // refaire les verifs
+    public BitVector extractZeroExtended(int start, int sizeInBits) {
         return extract(start, sizeInBits, extensionType.zero);
     }
     
@@ -181,13 +180,21 @@ public final class BitVector {
                 && Arrays.equals(vector, ((BitVector)that).vector);
     }
     
+    public String toString() {
+        StringBuilder b = new StringBuilder(size());
+        for (int i = 0; i < size(); i++) {
+            b.append(testBit(i) ? 1 : 0);
+        }
+        return b.toString();
+    }
+    
     public final static class Builder {
         
         private int[] vector;
         
         public Builder(int sizeInBits) {
-            Preconditions.checkArgument(sizeInBits > 0 && sizeInBits % intSize == 0);
-            vector = new int[sizeInBits / intSize];
+            Preconditions.checkArgument(sizeInBits > 0 && sizeInBits % Integer.SIZE == 0);
+            vector = new int[sizeInBits / Integer.SIZE];
         }
         
         public Builder setByte(int index, int newValue) {
