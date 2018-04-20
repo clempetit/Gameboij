@@ -114,7 +114,7 @@ public final class LcdImageLine {
      * @param opacity
      * @return
      */
-    public LcdImageLine below(LcdImageLine that, BitVector opacity) { // pour le calcul de la nouvelle opacité, prendre that.opacity ?
+    public LcdImageLine below(LcdImageLine that, BitVector opacity) {
         Preconditions.checkArgument(that.size()==this.size());
         BitVector newMsb = (that.msb.and(opacity)).or(this.msb.and(opacity.not()));
         BitVector newLsb = (that.lsb.and(opacity)).or(this.lsb.and(opacity.not()));
@@ -141,8 +141,11 @@ public final class LcdImageLine {
      * @param that
      * @return
      */
-    public boolean equals(LcdImageLine that) { //verifier : instance de LcdImageLine ?
-        return msb.equals(that.msb) && lsb.equals(that.lsb) && opacity.equals(that.opacity);
+    public boolean equals(Object that) {
+        return that instanceof LcdImageLine
+                && msb.equals(((LcdImageLine)that).msb)
+                && lsb.equals(((LcdImageLine)that).lsb)
+                && opacity.equals(((LcdImageLine)that).opacity);
     }
     
     /**
@@ -150,28 +153,30 @@ public final class LcdImageLine {
      * @return
      */
     public int hashcode() {
-        return Objects.hash(msb, lsb, opacity); // correct ?
+        return Objects.hash(msb, lsb, opacity);
     }
     
-    public final class Builder { // attributs BitVector ou BitVector.Builder ?
+    public final class Builder {
         
-        private BitVector.Builder msb;
-        private BitVector.Builder lsb;
+        private final BitVector.Builder msb;
+        private final BitVector.Builder lsb;
         
-        public Builder(BitVector.Builder msb, BitVector.Builder lsb) { // ??? Verifier que leur taille sont égales
-            this.msb = msb;
-            this.lsb = lsb;
+        public Builder(int size) { // un seul attribut size ?
+            msb = new BitVector.Builder(size);
+            lsb = new BitVector.Builder(size);
         }
         
-        public Builder setByte(int index, int msbByte, int lsbByte) { // int ou byte ? checkBits8 ?
+        public Builder setByte(int index, int msbByte, int lsbByte) {
             msb.setByte(index, msbByte);
             lsb.setByte(index, lsbByte);
             return this;
         }
         
-        public LcdImageLine Build() { // comment calculer opacité ?
-            BitVector opacity = new BitVector(0000000, true);
-            return new LcdImageLine(msb.build(), lsb.build(), opacity);
+        public LcdImageLine Build() {
+            BitVector m = msb.build();
+            BitVector l = lsb.build();
+            BitVector opacity = m.or(l);
+            return new LcdImageLine(m, l, opacity);
         }
     }
 }
