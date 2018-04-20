@@ -26,7 +26,7 @@ public final class BitVector {
     public BitVector(int sizeInBits, boolean initValue) {
      Preconditions.checkArgument(sizeInBits > 0 && (sizeInBits % intSize == 0));
      vector = new int[sizeInBits / intSize];
-     if (!initValue)
+     if (initValue)
          Arrays.fill(vector, ~0);
     }
     
@@ -132,7 +132,7 @@ public final class BitVector {
         
         if (startMod32 == 0) {
             for (int i = 0; i < extracted.length; i++) {
-                extracted[i] = extensionElement(start +i, type);
+                extracted[i] = extensionElement(startDiv32 + i, type);
             }
         } else {
             for (int i = 0; i < extracted.length; i++) {
@@ -149,7 +149,7 @@ public final class BitVector {
      * @param sizeInBits
      * @return
      */
-    public BitVector extractZeroExtended(int start, int sizeInBits) {
+    public BitVector extractZeroExtended(int start, int sizeInBits) { // refaire les verifs
         return extract(start, sizeInBits, extensionType.zero);
     }
     
