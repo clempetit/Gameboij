@@ -75,7 +75,7 @@ public final class LcdImage {
         private int width, height;
         private List<LcdImageLine> lineList;
         
-        public Builder(int width, int heigth) {
+        public Builder(int width, int height) {
             this.width = width;
             this.height = height;
             lineList = new ArrayList<>(height);
