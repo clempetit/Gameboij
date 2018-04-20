@@ -10,7 +10,11 @@ import java.util.Arrays;
 import ch.epfl.gameboj.Preconditions;
 
 public final class BitVector {
-    private int[] vector;
+    
+    private static final int intSize = Integer.SIZE;
+    private static final int nbOfBytesInInt = Integer.SIZE / Byte.SIZE;
+    
+    private final int[] vector;
     
     private enum extensionType{zero, wrapped};
 
@@ -20,8 +24,8 @@ public final class BitVector {
      * @param initValue
      */
     public BitVector(int sizeInBits, boolean initValue) {
-     Preconditions.checkArgument(sizeInBits > 0 && (sizeInBits % 32 == 0));
-     vector = new int[sizeInBits / 32];
+     Preconditions.checkArgument(sizeInBits > 0 && (sizeInBits % intSize == 0));
+     vector = new int[sizeInBits / intSize];
      if (!initValue)
          Arrays.fill(vector, ~0);
     }
@@ -55,7 +59,7 @@ public final class BitVector {
      * @return
      */
     public boolean testBit(int index) {
-        return Bits.test(vector[index / 32], index % 32);
+        return Bits.test(vector[index / intSize], index % intSize);
     }
     
     /**
@@ -72,10 +76,11 @@ public final class BitVector {
     
     /**
      * 
-     * @param vector2
+     * @param that
      * @return
      */
-    public BitVector and(int[] vector2) {
+    public BitVector and(BitVector that) {
+        int[] vector2 = that.vector;
         Preconditions.checkArgument(vector2.length == vector.length);
         int[] and = new int[vector.length];
         for (int i = 0; i < and.length; i++) {
@@ -86,10 +91,11 @@ public final class BitVector {
     
     /**
      * 
-     * @param vector2
+     * @param that
      * @return
      */
-    public BitVector or(int[] vector2) {
+    public BitVector or(BitVector that) {
+        int[] vector2 = that.vector;
         Preconditions.checkArgument(vector2.length == vector.length);
         int[] or = new int[vector.length];
         for (int i = 0; i < or.length; i++) {
@@ -98,7 +104,7 @@ public final class BitVector {
         return new BitVector(or);
     }
     
-    private int extensionElement(int index, extensionType type)  { // ???
+    private int extensionElement(int index, extensionType type)  { // floorMod ou pas ?
        if (index >= 0 && index < vector.length) {
            return vector[index];
        } else {
@@ -117,18 +123,19 @@ public final class BitVector {
      * @param Wrapped
      * @return
      */
-    private BitVector extract(int start, int sizeInBits, extensionType type) { // ???
-        int[] extracted = new int[sizeInBits / 32];
-        int startMod32 = Math.floorMod(start, 32);
-        int b = Math.floorDiv(start, 32);
-        //TO IMPLEMENT
-        if (startMod32 == 0) { // floormod
+    private BitVector extract(int start, int sizeInBits, extensionType type) {
+        int[] extracted = new int[sizeInBits / intSize];
+        int startMod32 = Math.floorMod(start, intSize);
+        int startDiv32 = Math.floorDiv(start, intSize);
+        
+        if (startMod32 == 0) {
             for (int i = 0; i < extracted.length; i++) {
                 extracted[i] = extensionElement(start +i, type);
             }
         } else {
             for (int i = 0; i < extracted.length; i++) {
-                extracted[i] = extensionElement(b + i, type) >>> start | extensionElement(b + i + 1, type) << 32 - start;
+                extracted[i] = extensionElement(startDiv32 + i, type) >>> start
+                    | extensionElement(startDiv32 + i + 1, type) << intSize - start;
             }
         }
         return new BitVector(extracted);
@@ -173,30 +180,34 @@ public final class BitVector {
     
     public final static class Builder {
         
-        private int[] vectorBuilder;
+        private int[] vector;
         
         public Builder(int sizeInBits) {
-            Preconditions.checkArgument(sizeInBits > 0 && sizeInBits % 32 == 0);
-            vectorBuilder = new int[sizeInBits / 32];
+            Preconditions.checkArgument(sizeInBits > 0 && sizeInBits % intSize == 0);
+            vector = new int[sizeInBits / intSize];
         }
         
-        public Builder setByte(int index, int newValue) { 
-            if (vectorBuilder == null) {
+        public Builder setByte(int index, int newValue) { // Byte ou int en argument ?
+            if (vector == null) {
                 throw new IllegalStateException();
             }
-            Preconditions.checkArgument(index >= 0 && index < (4*vectorBuilder.length));
-            int nbOfBytesInt = Integer.SIZE / Byte.SIZE;
-            int mask = ~(0b1111_1111 << 8*(index % nbOfBytesInt));
-            vectorBuilder[index/nbOfBytesInt] =  (vectorBuilder[index/nbOfBytesInt] & mask) | newValue << 8 *(index % nbOfBytesInt);
+            Preconditions.checkBits8(newValue);
+            Preconditions.checkArgument(index >= 0 && index < (nbOfBytesInInt*vector.length));
+            int indexInInt = index % nbOfBytesInInt;
+            int indexInTab = index / nbOfBytesInInt;
+            
+            int mask = ~(0b1111_1111 << Byte.SIZE*(indexInInt));
+            vector[indexInTab] =  (vector[indexInTab] & mask)
+                    | newValue << Byte.SIZE*(indexInInt);
             return this;
         }
         
-        public BitVector Build() {
-            if (vectorBuilder == null) {
+        public BitVector build() {
+            if (vector == null) {
                 throw new IllegalStateException();
             }
-            BitVector bitVector = new BitVector(vectorBuilder);
-            vectorBuilder = null;
+            BitVector bitVector = new BitVector(vector);
+            vector = null;
             return bitVector;
         }
     }
