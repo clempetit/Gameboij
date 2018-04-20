@@ -7,6 +7,7 @@ package ch.epfl.gameboj.component.lcd;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +36,6 @@ public final class LcdImage {
     public int get(int x, int y) {
         boolean msbColor = lineList.get(y).msb().testBit(x);
         boolean lsbColor = lineList.get(y).lsb().testBit(x);
-        int color;
         if (msbColor) {
             if (lsbColor) {
                 return 0b11;
@@ -70,7 +70,7 @@ public final class LcdImage {
         return Objects.hash(lineList);
     }
     
-    public final class Builder {
+    public final static class Builder {
         
         private int width, height;
         private List<LcdImageLine> lineList;
@@ -78,7 +78,7 @@ public final class LcdImage {
         public Builder(int width, int height) {
             this.width = width;
             this.height = height;
-            lineList = new ArrayList<>(height);
+            lineList = new LinkedList(Collections.nCopies(height, null));
         }
         
         public Builder setLine(int index, LcdImageLine newValue) {

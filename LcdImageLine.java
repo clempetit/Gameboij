@@ -157,7 +157,7 @@ public final class LcdImageLine {
         return Objects.hash(msb, lsb, opacity);
     }
     
-    public final class Builder {
+    public final static class Builder {
         
         private final BitVector.Builder msb;
         private final BitVector.Builder lsb;
