@@ -104,7 +104,7 @@ public final class BitVector {
         return new BitVector(or);
     }
     
-    private int extensionElement(int index, extensionType type)  { // floorMod ou pas ?
+    private int extensionElement(int index, extensionType type)  {
        if (index >= 0 && index < vector.length) {
            return vector[index];
        } else {
@@ -174,8 +174,9 @@ public final class BitVector {
         return Arrays.hashCode(vector);
     }
     
-    public boolean equals(BitVector that) {
-        return Arrays.equals(vector, that.vector);
+    public boolean equals(Object that) {
+        return (that instanceof BitVector)
+                && Arrays.equals(vector, ((BitVector)that).vector);
     }
     
     public final static class Builder {
@@ -187,7 +188,7 @@ public final class BitVector {
             vector = new int[sizeInBits / intSize];
         }
         
-        public Builder setByte(int index, int newValue) { // Byte ou int en argument ?
+        public Builder setByte(int index, int newValue) {
             if (vector == null) {
                 throw new IllegalStateException();
             }
