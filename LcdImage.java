@@ -7,7 +7,6 @@ package ch.epfl.gameboj.component.lcd;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,19 +50,11 @@ public final class LcdImage {
         }
     }
     
-    public boolean equals(Object that) { // Procéder avec itérateurs
+    public boolean equals(Object that) {
         if (!(that instanceof LcdImage)) {
             return false;
         }
-        if (this.lineList.size() != ((LcdImage)that).lineList.size()) {
-            return false;
-        }
-        for(int i = 0; i< this.lineList.size(); i++) {
-            if (!(this.lineList.get(i).equals(((LcdImage)that).lineList.get(i)))) {
-                return false;
-            }
-        }
-        return true;
+        return this.lineList.equals(((LcdImage)that).lineList);
     }
     
     public int hashcode() {
@@ -78,7 +69,7 @@ public final class LcdImage {
         public Builder(int width, int height) {
             this.width = width;
             this.height = height;
-            lineList = new LinkedList(Collections.nCopies(height, null));
+            lineList = new ArrayList<>(Collections.nCopies(height, null));
         }
         
         public Builder setLine(int index, LcdImageLine newValue) {
