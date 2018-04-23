@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
+import ch.epfl.gameboj.bits.Bits;
 
 public final class LcdImageLine {
 
@@ -85,12 +86,26 @@ public final class LcdImageLine {
      * 
      * @param palette
      */
-    public void mapColors(byte palette) { // ???
-        for (int i = 0; i < msb.size(); i++) {
-            if(msb.testBit(i) && lsb.testBit(i)) {
-                
-            }
+    public LcdImageLine mapColors(int palette) { // opacité
+        Preconditions.checkBits8(palette);
+        int NO_CHANGES = 0b11100100;
+        if(palette == NO_CHANGES) {
+            return this;
         }
+        BitVector newLsb = new BitVector(size(), false);
+        BitVector newMsb = new BitVector(size(), false);
+        
+        BitVector notMsb = msb.not();
+        BitVector notLsb = lsb.not();
+        for (int i = 0; i < 4; i++) {
+            BitVector l = Bits.test(i, 0) ? lsb : notLsb;
+            BitVector m = Bits.test(i, 1) ? msb : notMsb;
+            BitVector mask = m.and(l);
+            newMsb = newMsb.or(mask.and(new BitVector(size(), Bits.test(palette, 2*i + 1))));
+            newLsb = newLsb.or(mask.and(new BitVector(size(), Bits.test(palette, 2*i))));
+        }
+        BitVector opacity = newMsb.and(newLsb);
+        return new LcdImageLine(newMsb, newLsb, opacity);
     }
     
     /**
