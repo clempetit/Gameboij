@@ -32,7 +32,8 @@ public final class LcdImage {
         return height;
     }
     
-    public int get(int x, int y) {
+    public int get(int x, int y) { // verification coordonnées ?
+        Preconditions.checkArgument(x >= 0 && y >= 0 && y < lineList.size());
         boolean msbColor = lineList.get(y).msb().testBit(x);
         boolean lsbColor = lineList.get(y).lsb().testBit(x);
         if (msbColor) {
@@ -66,7 +67,8 @@ public final class LcdImage {
         private int width, height;
         private List<LcdImageLine> lineList;
         
-        public Builder(int width, int height) {
+        public Builder(int width, int height) { //taille max ?
+            Preconditions.checkArgument(width >= 0 && height >= 0);
             this.width = width;
             this.height = height;
             lineList = new ArrayList<>(Collections.nCopies(height, null));

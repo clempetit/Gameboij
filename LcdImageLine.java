@@ -86,7 +86,7 @@ public final class LcdImageLine {
      * 
      * @param palette
      */
-    public LcdImageLine mapColors(int palette) { // opacité
+    public LcdImageLine mapColors(int palette) {
         Preconditions.checkBits8(palette);
         int NO_CHANGES = 0b11100100;
         if(palette == NO_CHANGES) {
@@ -104,7 +104,6 @@ public final class LcdImageLine {
             newMsb = newMsb.or(mask.and(new BitVector(size(), Bits.test(palette, 2*i + 1))));
             newLsb = newLsb.or(mask.and(new BitVector(size(), Bits.test(palette, 2*i))));
         }
-        BitVector opacity = newMsb.and(newLsb);
         return new LcdImageLine(newMsb, newLsb, opacity);
     }
     
@@ -177,7 +176,7 @@ public final class LcdImageLine {
         private final BitVector.Builder msb;
         private final BitVector.Builder lsb;
         
-        public Builder(int size) {
+        public Builder(int size) { // taille max ?
             Preconditions.checkArgument(size > 0);
             msb = new BitVector.Builder(size);
             lsb = new BitVector.Builder(size);
