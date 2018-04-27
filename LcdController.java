@@ -26,7 +26,7 @@ public final class LcdController implements Component, Clocked {
     
     private long nextNonIdleCycle = 0;
     
-    private long lcdOnCycle = 0; // valeur initiale ???
+    private long lcdOnCycle = 0;
     
     private enum Reg implements Register{
         LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX
@@ -44,12 +44,12 @@ public final class LcdController implements Component, Clocked {
     
     private static Ram videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
     
-    public LcdController(Cpu cpu) { // interruptions ?
+    public LcdController(Cpu cpu) {
         this.cpu = cpu;
     }
     
-    public LcdImage currentImage() { // Comment faire image noire non nulle ?
-        return new LcdImage(160, 144, null); // Builder
+    public LcdImage currentImage() {
+        return new LcdImage.Builder(160, 144).build();
     }
 
     @Override
@@ -59,7 +59,7 @@ public final class LcdController implements Component, Clocked {
             return videoRam.read(address - AddressMap.VIDEO_RAM_START);
         } else if (address > AddressMap.REGS_LCDC_START && address < AddressMap.REGS_LCDC_END){ // Comment obtenir la valeur d'un registre ?
             Reg r = Reg.values()[address - AddressMap.REGS_LCDC_START];
-            return lcrBench.get(r);
+            return lcrBench.get(r); // procéder comme ça ?
         } else {
         return NO_DATA;
         }
@@ -71,63 +71,56 @@ public final class LcdController implements Component, Clocked {
         Preconditions.checkBits8(data);
         if (address >= AddressMap.VIDEO_RAM_START && address < AddressMap.VIDEO_RAM_END) {
             videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
-        } else if (address > AddressMap.REGS_LCDC_START && address < AddressMap.REGS_LCDC_END) { // Comment obtenir la valeur d'un registre ?
-            
+        } else if (address > AddressMap.REGS_LCDC_START && address < AddressMap.REGS_LCDC_END) {
             Reg r = Reg.values()[address - AddressMap.REGS_LCDC_START];
             if (!(r == Reg.LY)) {
             lcrBench.set(r, data);
             }
             
             if (r == Reg.LCDC) {
-                if (!(lcrBench.testBit(Reg.LCDC, LcdcBits.LCD_STATUS))) { // voir si la demarche est bonne
+                if (!(lcrBench.testBit(Reg.LCDC, LcdcBits.LCD_STATUS))) {
                     lcrBench.setBit(Reg.STAT, StatBits.MODE0, false);
                     lcrBench.setBit(Reg.STAT, StatBits.MODE1, false);
                     lcrBench.set(Reg.LY, 0);
                     LycEqLy();                             // utiliser ici ?
                     nextNonIdleCycle = Long.MAX_VALUE;
                 }
-            }
-            
-            if (r == Reg.STAT) {
+            } else if (r == Reg.STAT) {
                 int mask = (data >>> 3) << 3; // Améliorer code ?
                 lcrBench.set(Reg.STAT, mask | Bits.clip(3, (lcrBench.get(Reg.STAT))));   
-            }
-            
-            //if (!(lcrBench.testBit(Reg.STAT, StatBits.MODE0) && lcrBench.testBit(Reg.STAT, StatBits.MODE1))) { // 1.2.8 interruption LCD_STAT, mode 0, 1 ou 2 conditions ?
-                
-            //}
-            //if (!(lcrBench.testBit(Reg.STAT, StatBits.MODE0)) && lcrBench.testBit(Reg.STAT, StatBits.MODE1)) { // ??? lorsqu'il entre en mode 1, il lève de manière inconditionnelle l'interruption VBLANK
-           //     cpu.requestInterrupt(Interrupt.VBLANK);
-            //}
-        } // QUAND traiter ces cas ??
-    }
-    
-    private void modifLYOrLYC(Reg r, int data) {
-        Preconditions.checkArgument(r == Reg.LY || r == Reg.LYC);
-        if ( r == Reg.LY) {
-            lcrBench.set(Reg.LY, data);
-            
-        } else { // valable aussi pour LYC ?
-            lcrBench.set(Reg.LYC, data);
-            LycEqLy();
+            } else if (r == Reg.LYC) {
+                LycEqLy();
+            } 
         }
     }
     
-    private void LycEqLy() { // utiliser cette méthode ?
-        if (lcrBench.get(Reg.LY) == lcrBench.get(Reg.LYC)) {
-            lcrBench.setBit(Reg.STAT, StatBits.LYC_EQ_LY, true); // mettre à 1 le bit LYC_EQ_LY de STAT ???
-            if (lcrBench.testBit(Reg.STAT, StatBits.INT_LYC)) {  // placer ici ?
+    private void LycEqLy() {
+        boolean prevState = lcrBench.testBit(Reg.STAT, StatBits.LYC_EQ_LY); // égaux initialement ?
+        if (!prevState && lcrBench.get(Reg.LY) == lcrBench.get(Reg.LYC)) {
+            lcrBench.setBit(Reg.STAT, StatBits.LYC_EQ_LY, true);
+            if (lcrBench.testBit(Reg.STAT, StatBits.INT_LYC)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
             }
         } else {
-            lcrBench.setBit(Reg.STAT, StatBits.LYC_EQ_LY, false); // mettre à 0 le bit LYC_EQ_LY de STAT ???
+            lcrBench.setBit(Reg.STAT, StatBits.LYC_EQ_LY, false);
         }
+    }
+    
+    private int getMode() {
+        return Bits.clip(2, lcrBench.get(Reg.STAT));
+    }
+    
+    private void setMode(int mode) {
+        Preconditions.checkArgument(mode >= 0 && mode <= 3);
+        int mask = (~0 << 2) | mode;
+        lcrBench.set(Reg.STAT, lcrBench.get(Reg.STAT) & mask);
     }
     
     @Override
     public void cycle(long cycle) {
         if(nextNonIdleCycle == Long.MAX_VALUE && lcrBench.testBit(Reg.LCDC, LcdcBits.LCD_STATUS)) {
             lcdOnCycle = cycle;
+            nextNonIdleCycle = cycle;
         }
         if (cycle == nextNonIdleCycle) {
             reallyCycle(cycle);
@@ -136,6 +129,52 @@ public final class LcdController implements Component, Clocked {
     }
     
     private void reallyCycle(long cycle) {
+        switch(getMode()) {
+        case 2: {
+            setMode(3);
+            lcrBench.set(Reg.LY, lcrBench.get(Reg.LY) + 1);
+            LycEqLy();
+            nextNonIdleCycle += 43;
+        }
+            break;
+        case 3: {
+            setMode(0);
+            if (lcrBench.testBit(Reg.STAT, StatBits.INT_MODE0)) {
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+            }
+            nextNonIdleCycle += 51;
+        }
+            break;
+        case 0: {
+            if (lcrBench.get(Reg.LY) == 144) {
+                System.out.println(lcrBench.get(Reg.LY) + "         144"); ///////
+                setMode(1);
+                lcrBench.set(Reg.LY, 0);
+                LycEqLy();
+                if (lcrBench.testBit(Reg.STAT, StatBits.INT_MODE1)) {
+                    cpu.requestInterrupt(Interrupt.LCD_STAT);
+                }
+                nextNonIdleCycle += 1140;
+            } else {
+                //System.out.println(lcrBench.get(Reg.LY) + "         autre");///////
+                setMode(2);
+                if (lcrBench.testBit(Reg.STAT, StatBits.INT_MODE2)) {
+                    cpu.requestInterrupt(Interrupt.LCD_STAT);
+                }
+                nextNonIdleCycle += 20;
+            }
+        }
+            break;
+        case 1: {
+            cpu.requestInterrupt(Interrupt.VBLANK); // ici ?
+            System.out.println("VBLANK at " + cycle);
+            setMode(2);
+            if (lcrBench.testBit(Reg.STAT, StatBits.INT_MODE2)) {
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+            }
+            nextNonIdleCycle += 20;
+        }
+        }
         
     }
 

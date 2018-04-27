@@ -71,7 +71,7 @@ public final class LcdImage {
             Preconditions.checkArgument(width >= 0 && height >= 0);
             this.width = width;
             this.height = height;
-            lineList = new ArrayList<>(Collections.nCopies(height, null));
+            lineList = new ArrayList<>(Collections.nCopies(height, new LcdImageLine.Builder(width).build()));
         }
         
         public Builder setLine(int index, LcdImageLine newValue) {
