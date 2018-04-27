@@ -58,34 +58,8 @@ public final class LcdController implements Component, Clocked {
         if (address >= AddressMap.VIDEO_RAM_START && address < AddressMap.VIDEO_RAM_END) {
             return videoRam.read(address - AddressMap.VIDEO_RAM_START);
         } else if (address > AddressMap.REGS_LCDC_START && address < AddressMap.REGS_LCDC_END){ // Comment obtenir la valeur d'un registre ?
-            switch(address - AddressMap.REGS_LCDC_START) {
-            case ((Reg.LCDC).values[0]): // ne marche pas
-                return lcrBench.get(Reg.LCDC); // magic numbers
-            case 0xFF41:
-                return lcrBench.get(Reg.STAT);
-            case 0xFF42:
-                return lcrBench.get(Reg.SCY);
-            case 0xFF43:
-                return lcrBench.get(Reg.SCX);
-            case 0xFF44:
-                return lcrBench.get(Reg.LY);
-            case 0xFF45:
-                return lcrBench.get(Reg.LYC);
-            case 0xFF46:
-                return lcrBench.get(Reg.DMA);
-            case 0xFF47:
-                return lcrBench.get(Reg.BGP);
-            case 0xFF48:
-                return lcrBench.get(Reg.OBP0);
-            case 0xFF49:
-                return lcrBench.get(Reg.OBP1);
-            case 0xFF4A:
-                return lcrBench.get(Reg.WY);
-            case 0xFF4B:
-                return lcrBench.get(Reg.WX);
-            default:
-                return NO_DATA;
-            }
+            Reg r = Reg.values()[address - AddressMap.REGS_LCDC_START];
+            return lcrBench.get(r);
         } else {
         return NO_DATA;
         }
