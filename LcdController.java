@@ -56,8 +56,7 @@ public final class LcdController implements Component, Clocked {
 
     public LcdImage currentImage() {
         if (currentImage == null) {
-            return new LcdImage.Builder(160, 144).build(); // Procéder comme ça
-                                                           // ?
+            return new LcdImage.Builder(160, 144).build();
         } else {
             return currentImage;
         }
@@ -82,28 +81,28 @@ public final class LcdController implements Component, Clocked {
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
         Preconditions.checkBits8(data);
+        boolean prevLcdStatus = (lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS));
         if (address >= AddressMap.VIDEO_RAM_START
                 && address < AddressMap.VIDEO_RAM_END) {
-            videoRam.write(address - AddressMap.VIDEO_RAM_START, data);
+            videoRamCtrlr.write(address, data);
         } else if (address > AddressMap.REGS_LCDC_START
                 && address < AddressMap.REGS_LCDC_END) {
             Reg r = Reg.values()[address - AddressMap.REGS_LCDC_START];
-            if (!(r == Reg.LY)) {
+            
+            if (!((r == Reg.LY) | (r == Reg.STAT))) {
                 lcdBank.set(r, data);
             }
 
             if (r == Reg.LCDC) {
-                if (!(lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS))) {
-                    lcdBank.setBit(Reg.STAT, StatBits.MODE0, false);
-                    lcdBank.setBit(Reg.STAT, StatBits.MODE1, false);
+                if (prevLcdStatus && !(lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS))) {
+                    lcdBank.set(Reg.STAT, lcdBank.get(Reg.STAT) & (~0 << 2));
                     lcdBank.set(Reg.LY, 0);
-                    LycEqLy(); // utiliser ici ?
+                    LycEqLy();
                     nextNonIdleCycle = Long.MAX_VALUE;
                 }
             } else if (r == Reg.STAT) {
-                int mask = (data >>> 3) << 3; // Améliorer code ?
-                lcdBank.set(Reg.STAT,
-                        mask | Bits.clip(3, (lcdBank.get(Reg.STAT))));
+                int mask = data & (~0 << 3);
+                lcdBank.set(Reg.STAT, mask | Bits.clip(3, (lcdBank.get(Reg.STAT))));
             } else if (r == Reg.LYC) {
                 LycEqLy();
             }
@@ -111,15 +110,13 @@ public final class LcdController implements Component, Clocked {
     }
 
     private void LycEqLy() {
-        boolean prevState = lcdBank.testBit(Reg.STAT, StatBits.LYC_EQ_LY); // égaux
-                                                                           // initialement
-                                                                           // ?
+        boolean prevState = lcdBank.testBit(Reg.STAT, StatBits.LYC_EQ_LY); // égaux initialement ?
         if (!prevState && lcdBank.get(Reg.LY) == lcdBank.get(Reg.LYC)) {
             lcdBank.setBit(Reg.STAT, StatBits.LYC_EQ_LY, true);
             if (lcdBank.testBit(Reg.STAT, StatBits.INT_LYC)) {
                 cpu.requestInterrupt(Interrupt.LCD_STAT);
             }
-        } else {
+        } else if (prevState && lcdBank.get(Reg.LY) != lcdBank.get(Reg.LYC)){
             lcdBank.setBit(Reg.STAT, StatBits.LYC_EQ_LY, false);
         }
     }
@@ -128,23 +125,38 @@ public final class LcdController implements Component, Clocked {
         return Bits.clip(2, lcdBank.get(Reg.STAT));
     }
 
-    private void setMode(int mode) {
+    private void setMode(int mode) { // magic numbers ?
         Preconditions.checkArgument(mode >= 0 && mode <= 3);
         int mask = (~0 << 2) | mode;
-        lcdBank.set(Reg.STAT, (lcdBank.get(Reg.STAT) | 3) & mask);
+        lcdBank.set(Reg.STAT, (lcdBank.get(Reg.STAT) | 0b11) & mask);
+        switch (mode) {
+        case 0: {
+            if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE0))
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+        }
+            break;
+        case 1: {
+            if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE1))
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+        }
+            break;
+        case 2: {
+            if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE2))
+                cpu.requestInterrupt(Interrupt.LCD_STAT);
+        }
+        }
     }
 
     @Override
     public void cycle(long cycle) {
         if (nextNonIdleCycle == Long.MAX_VALUE
                 && lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS)) {
-            lcdOnCycle = cycle;
+            lcdOnCycle = cycle;                                    // remplacer par autre chose ?
             nextNonIdleCycle = cycle;
         }
         if (cycle == nextNonIdleCycle) {
             reallyCycle(cycle);
         }
-
     }
 
     private void reallyCycle(long cycle) {
@@ -159,51 +171,37 @@ public final class LcdController implements Component, Clocked {
             break;
         case 3: {
             setMode(0);
-            if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE0)) {
-                cpu.requestInterrupt(Interrupt.LCD_STAT);
-            }
             nextNonIdleCycle += 51;
         }
             break;
         case 0: {
-            if (lcdBank.get(Reg.LY) == 144) { // LY peut aller jusqu'à 153 !!!
+            if (lcdBank.get(Reg.LY) == 144) {
                 setMode(1);
-                if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE1)) {
-                    cpu.requestInterrupt(Interrupt.LCD_STAT);
-                }
-
-                lcdBank.set(Reg.LY, (lcdBank.get(Reg.LY) + 1));
+                lcdBank.set(Reg.LY, (lcdBank.get(Reg.LY) + 1)); // nécessaire ici ?
                 LycEqLy();
-
                 currentImage = nextImageBuilder.build();
                 nextNonIdleCycle += 114;
             } else {
                 setMode(2);
-                if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE2)) {
-                    cpu.requestInterrupt(Interrupt.LCD_STAT);
-                }
-                if (lcdBank.get(Reg.LY) == 0) { // Placer ici ?
+                if (lcdBank.get(Reg.LY) == 0) // à l'allumage
                     nextImageBuilder = new LcdImage.Builder(160, 144);
-                }
                 nextNonIdleCycle += 20;
             }
         }
             break;
         case 1: {
-            if (lcdBank.get(Reg.LY) <= 153) {
-                cpu.requestInterrupt(Interrupt.VBLANK); // ici ?
-                lcdBank.set(Reg.LY, (lcdBank.get(Reg.LY) + 1));
+            if (lcdBank.get(Reg.LY) > 0 && lcdBank.get(Reg.LY) <= 153) {
+                if (lcdBank.get(Reg.LY) == 145) {
+                    cpu.requestInterrupt(Interrupt.VBLANK); // ici ?
+                }
+                lcdBank.set(Reg.LY, ((lcdBank.get(Reg.LY) + 1)) % 154);
                 LycEqLy();
                 nextNonIdleCycle += 114;
-            } else {
-                // puis quand on arrive à 153
+            } else { // puis quand on arrive à 154
                 setMode(2);
                 lcdBank.set(Reg.LY, 0);
-                if (lcdBank.testBit(Reg.STAT, StatBits.INT_MODE2)) {
-                    cpu.requestInterrupt(Interrupt.LCD_STAT);
-                }
-                nextImageBuilder = new LcdImage.Builder(160, 144); // magic
-                                                                   // numbers
+                LycEqLy();
+                nextImageBuilder = new LcdImage.Builder(160, 144); // magic numbers
                 nextNonIdleCycle += 20;
             }
         }
@@ -215,7 +213,7 @@ public final class LcdController implements Component, Clocked {
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(256); // magic
                                                                           // numbers
 
-        int paletteBgWin = lcdBank.get(Reg.BGP);
+        int bgp = lcdBank.get(Reg.BGP);
 
         int bgArea = lcdBank.testBit(Reg.LCDC, LcdcBits.BG_AREA) ? 1 : 0;
         int bgDataStart = AddressMap.BG_DISPLAY_DATA[bgArea];
@@ -223,26 +221,24 @@ public final class LcdController implements Component, Clocked {
         // int winArea = lcdBank.testBit(Reg.LCDC, LcdcBits.WIN_AREA) ? 1 : 0;
         // int winDataStart = AddressMap.BG_DISPLAY_DATA[winArea];
 
-        int tileSource = lcdBank.testBit(Reg.LCDC, LcdcBits.TILE_SOURCE) ? 1
-                : 0;
+        int tileSource = lcdBank.testBit(Reg.LCDC, LcdcBits.TILE_SOURCE) ? 1 : 0;
         int tileSourceStart = AddressMap.TILE_SOURCE[tileSource];
-        LcdImageLine line = lineBuilder.build().extractWrapped(lcdBank.get(Reg.SCX), 160);
         
-        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) { // activation image de fond
+        LcdImageLine line = new LcdImageLine.Builder(256).build();
+        
+        //if (lcdBank.testBit(Reg.LCDC, LcdcBits.BG))
+        //    System.out.println(lcdBank.testBit(Reg.LCDC, LcdcBits.BG));
+        //if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) { // activation image de fond
             for (int i = 0; i < 32; i++) { // nouvelle tuile tous les 8 lignes
                 int tileIndex = videoRamCtrlr
                         .read(32 * (y / 8) + bgDataStart + i); // magic numbers
                 lineBuilder.setBytes(i,
-                        Bits.reverse8(videoRamCtrlr.read(tileSourceStart
-                                + 16 * tileIndex
-                                + 2 * ((lcdBank.get(Reg.SCY) + y) % 8) + 1)),
-                        Bits.reverse8(videoRamCtrlr.read(tileSourceStart
-                                + 16 * tileIndex
-                                + 2 * ((lcdBank.get(Reg.SCY) + y) % 8)))); // inverser les bits ici ? 1.2.4
+                        Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * ((lcdBank.get(Reg.SCY) + y) % 8) + 1)),
+                        Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * ((lcdBank.get(Reg.SCY) + y) % 8)))); // inverser les bits ici ? 1.2.4
             }
-            line = lineBuilder.build().mapColors(paletteBgWin)
+            line = lineBuilder.build().mapColors(bgp)
                     .extractWrapped(lcdBank.get(Reg.SCX), 160);
-        }
+        //}
 
         nextImageBuilder.setLine(y, line); // mapColors ici ?
     }

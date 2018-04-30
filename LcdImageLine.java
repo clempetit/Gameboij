@@ -116,8 +116,7 @@ public final class LcdImageLine {
         Preconditions.checkArgument(that.size()==this.size());
         BitVector newMsb = (that.msb.and(that.opacity)).or(this.msb.and(that.opacity.not()));
         BitVector newLsb = (that.lsb.and(that.opacity)).or(this.lsb.and(that.opacity.not()));
-        BitVector newOpacity = that.opacity.or(this.opacity);
-        return new LcdImageLine(newMsb, newLsb, newOpacity);
+        return new LcdImageLine(newMsb, newLsb, that.opacity);
     }
     
     /**
@@ -130,8 +129,7 @@ public final class LcdImageLine {
         Preconditions.checkArgument(that.size()==this.size());
         BitVector newMsb = (that.msb.and(opacity)).or(this.msb.and(opacity.not()));
         BitVector newLsb = (that.lsb.and(opacity)).or(this.lsb.and(opacity.not()));
-        BitVector newOpacity = opacity.or(this.opacity);
-        return new LcdImageLine(newMsb, newLsb, newOpacity);
+        return new LcdImageLine(newMsb, newLsb, that.opacity);
     }
     
     /**
