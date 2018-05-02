@@ -220,17 +220,7 @@ public final class LcdController implements Component, Clocked {
         
         int lineIndex = (lcdBank.get(Reg.SCY) + y) % 256;
         
-        LcdImageLine line = new LcdImageLine.Builder(256).build();
-        
-        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) {
-            for (int i = 0; i < 32; i++) { 
-                int tileIndex = videoRamCtrlr.read(32 * (lineIndex/ 8) + memoryStart(LcdcBits.BG_AREA) + i); // magic numbers
-                lineBuilder.setBytes(i,
-                        Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8) + 1)),
-                        Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8))));
-            }
-            line = lineBuilder.build().mapColors(bgp).extractWrapped(lcdBank.get(Reg.SCX), 160);
-        }
+        LcdImageLine line = bgLine(lineIndex);
         
         nextImageBuilder.setLine(y, line); // mapColors ici ?
     }
@@ -238,6 +228,43 @@ public final class LcdController implements Component, Clocked {
     private int memoryStart(Bit area) {
         int start = lcdBank.testBit(Reg.LCDC, area) ? 1 : 0;
         return AddressMap.BG_DISPLAY_DATA[start];
+    }
+    
+    private LcdImageLine bgLine(int lineIndex) {
+        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) {
+            return extractLine(lineIndex, LcdcBits.BG_AREA);
+        } else {
+            return emptyLine();
+        }
+    }
+    
+    private LcdImageLine winLine(int lineIndex) {
+        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN))) {
+            return extractLine(lineIndex, LcdcBits.WIN_AREA);
+        } else {
+            return emptyLine();
+        }
+    }
+    
+    private LcdImageLine extractLine(int lineIndex, Bit area) {
+        
+        int tileSource = lcdBank.testBit(Reg.LCDC, LcdcBits.TILE_SOURCE) ? 1 : 0;
+        int tileSourceStart = AddressMap.TILE_SOURCE[tileSource];
+        
+        int bgp = lcdBank.get(Reg.BGP);
+        
+        LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(256); // magic numbers
+        for (int i = 0; i < 32; i++) { 
+            int tileIndex = videoRamCtrlr.read(32 * (lineIndex/ 8) + memoryStart(area) + i); // magic numbers
+            lineBuilder.setBytes(i,
+                    Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8) + 1)),
+                    Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8))));
+        }
+        return lineBuilder.build().mapColors(bgp).extractWrapped(lcdBank.get(Reg.SCX), 160);
+    }
+    
+    private LcdImageLine emptyLine() {
+        return new LcdImageLine.Builder(256).build().extractWrapped(lcdBank.get(Reg.SCX), 160);
     }
 
 }
