@@ -226,16 +226,16 @@ public final class LcdController implements Component, Clocked {
     
     private LcdImageLine bgLine(int lineIndex) {
         if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) {
-            return extractLine(lineIndex, LcdcBits.BG_AREA).extractWrapped(lcdBank.get(Reg.SCX), 160);
+            return extractLine(lineIndex, LcdcBits.BG_AREA).extractWrapped(160, lcdBank.get(Reg.SCX));
         } else {
             return emptyLine();
         }
     }
     
-    private LcdImageLine winLine(int lineIndex) {
+    private LcdImageLine winLine(int winLineIndex) {
         int WX = lcdBank.get(Reg.WX) - 7; 
         if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN)) && WX >= 0 && WX < 160) {
-            return extractLine(lineIndex, LcdcBits.WIN_AREA);
+            return extractLine(winLineIndex, LcdcBits.WIN_AREA);
         } else {
             return emptyLine();
         }
@@ -259,7 +259,7 @@ public final class LcdController implements Component, Clocked {
     }
     
     private LcdImageLine emptyLine() {
-        return new LcdImageLine.Builder(256).build().extractWrapped(lcdBank.get(Reg.SCX), 160);
+        return new LcdImageLine.Builder(256).build().extractWrapped(160, lcdBank.get(Reg.SCX));
     }
 
 }
