@@ -76,10 +76,10 @@ public final class LcdImageLine {
      * @param size
      * @return
      */
-    public LcdImageLine extractWrapped(int start, int size) {
-        return new LcdImageLine(msb.extractWrapped(start, size),
-                lsb.extractWrapped(start, size),
-                opacity.extractWrapped(start, size));
+    public LcdImageLine extractWrapped(int size, int start) {
+        return new LcdImageLine(msb.extractWrapped(size, start),
+                lsb.extractWrapped(size, start),
+                opacity.extractWrapped(size, start));
     }
     
     /**
@@ -129,7 +129,7 @@ public final class LcdImageLine {
         Preconditions.checkArgument(that.size()==this.size());
         BitVector newMsb = (that.msb.and(opacity)).or(this.msb.and(opacity.not()));
         BitVector newLsb = (that.lsb.and(opacity)).or(this.lsb.and(opacity.not()));
-        return new LcdImageLine(newMsb, newLsb, that.opacity);
+        return new LcdImageLine(newMsb, newLsb, opacity);
     }
     
     /**

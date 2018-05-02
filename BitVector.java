@@ -123,7 +123,7 @@ public final class BitVector {
      * @param Wrapped
      * @return
      */
-    private BitVector extract(int start, int sizeInBits, extensionType type) {
+    private BitVector extract(int sizeInBits, int start, extensionType type) {
         Preconditions.checkArgument(sizeInBits % Integer.SIZE == 0);
         int[] extracted = new int[sizeInBits / Integer.SIZE];
         int startMod32 = Math.floorMod(start, Integer.SIZE);
@@ -148,8 +148,8 @@ public final class BitVector {
      * @param sizeInBits
      * @return
      */
-    public BitVector extractZeroExtended(int start, int sizeInBits) {
-        return extract(start, sizeInBits, extensionType.zero);
+    public BitVector extractZeroExtended(int sizeInBits, int start) {
+        return extract(sizeInBits, start, extensionType.zero);
     }
     
     /**
@@ -158,8 +158,8 @@ public final class BitVector {
      * @param sizeInBits
      * @return
      */
-    public BitVector extractWrapped(int start, int sizeInBits) {
-        return extract(start, sizeInBits, extensionType.wrapped);
+    public BitVector extractWrapped(int sizeInBits, int start) {
+        return extract(sizeInBits, start, extensionType.wrapped);
     }
     
     /**
@@ -168,7 +168,7 @@ public final class BitVector {
      * @return
      */
     public BitVector shift(int distance) {
-        return extractZeroExtended(-distance, size());
+        return extractZeroExtended(size(), -distance);
     }
     
     public int hashcode() {
