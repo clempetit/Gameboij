@@ -25,9 +25,9 @@ public final class LcdController implements Component, Clocked {
 
     private Cpu cpu;
 
-    private long nextNonIdleCycle = 0;
-
-    private long lcdOnCycle = 0;
+    private long nextNonIdleCycle = Long.MAX_VALUE;
+    
+    private int winY;
 
     private LcdImage.Builder nextImageBuilder;
     private LcdImage currentImage;
@@ -110,12 +110,8 @@ public final class LcdController implements Component, Clocked {
     
     @Override
     public void cycle(long cycle) {
-        if (cycle == 0) {
-            nextNonIdleCycle = Long.MAX_VALUE;
-        }
         if (nextNonIdleCycle == Long.MAX_VALUE
                 && lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS)) {
-            lcdOnCycle = cycle;                                    // remplacer par autre chose ?
             nextNonIdleCycle = cycle;
         }
         if (cycle == nextNonIdleCycle) {
@@ -130,6 +126,7 @@ public final class LcdController implements Component, Clocked {
             computeLine(lcdBank.get(Reg.LY));
             lcdBank.set(Reg.LY, lcdBank.get(Reg.LY) + 1);
             LycEqLy();
+            winY++;
             nextNonIdleCycle += 43;
         }
             break;
@@ -151,6 +148,7 @@ public final class LcdController implements Component, Clocked {
                 setMode(2);
                 if (lcdBank.get(Reg.LY) == 0) {// à l'allumage
                     nextImageBuilder = new LcdImage.Builder(160, 144);
+                    winY = 0;
                 }
                 nextNonIdleCycle += 20;
             }
@@ -164,6 +162,7 @@ public final class LcdController implements Component, Clocked {
             } else { // puis quand on arrive à 154
                 setMode(2);
                 nextImageBuilder = new LcdImage.Builder(160, 144); // magic numbers
+                winY = 0;
                 nextNonIdleCycle += 20;
             }
         }
@@ -211,18 +210,13 @@ public final class LcdController implements Component, Clocked {
     }
 
     private void computeLine(int y) {
-        LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(256); // magic numbers
-
-        int bgp = lcdBank.get(Reg.BGP);
-
-        int tileSource = lcdBank.testBit(Reg.LCDC, LcdcBits.TILE_SOURCE) ? 1 : 0;
-        int tileSourceStart = AddressMap.TILE_SOURCE[tileSource];
         
-        int lineIndex = (lcdBank.get(Reg.SCY) + y) % 256;
+        int bgLineIndex = (lcdBank.get(Reg.SCY) + y) % 256;
+        LcdImageLine line = bgLine(bgLineIndex);
         
-        LcdImageLine line = bgLine(lineIndex);
+        int winLineIndex = winY % 256;                      //???
         
-        nextImageBuilder.setLine(y, line); // mapColors ici ?
+        nextImageBuilder.setLine(y, line);
     }
     
     private int memoryStart(Bit area) {
@@ -232,14 +226,15 @@ public final class LcdController implements Component, Clocked {
     
     private LcdImageLine bgLine(int lineIndex) {
         if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) {
-            return extractLine(lineIndex, LcdcBits.BG_AREA);
+            return extractLine(lineIndex, LcdcBits.BG_AREA).extractWrapped(lcdBank.get(Reg.SCX), 160);
         } else {
             return emptyLine();
         }
     }
     
     private LcdImageLine winLine(int lineIndex) {
-        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN))) {
+        int WX = lcdBank.get(Reg.WX) - 7; 
+        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN)) && WX >= 0 && WX < 160) {
             return extractLine(lineIndex, LcdcBits.WIN_AREA);
         } else {
             return emptyLine();
@@ -260,7 +255,7 @@ public final class LcdController implements Component, Clocked {
                     Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8) + 1)),
                     Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8))));
         }
-        return lineBuilder.build().mapColors(bgp).extractWrapped(lcdBank.get(Reg.SCX), 160);
+        return lineBuilder.build().mapColors(bgp);
     }
     
     private LcdImageLine emptyLine() {
