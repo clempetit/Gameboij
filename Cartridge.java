@@ -15,35 +15,40 @@ import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.memory.Rom;
 
 public final class Cartridge implements Component {
-    
+
     private final Component mbc;
-    private static Rom rom;
-    
+
+    private static final int CARTRIDGE_TYPE = 0x147;
+
     private Cartridge(Component mbc) {
-       this.mbc = mbc;
+        this.mbc = mbc;
     }
-    
+
     /**
      * return a cartridge whose ROM contains the bytes of the given file.
-     * @param romFile the file
-     * @throws IOException in case of input-output error
-     * @throws IllegalArgumentException if the file does not contain 0 at the position 0x147
+     * 
+     * @param romFile
+     *            the file
+     * @throws IOException
+     *             in case of input-output error
+     * @throws IllegalArgumentException
+     *             if the file does not contain 0 at the position 0x147
      * @return a cartridge whose ROM contains the bytes of the given file
      */
     public static Cartridge ofFile(File romFile) throws IOException {
-        
+
         try (InputStream in = new FileInputStream(romFile)) {
-        byte[] b = in.readAllBytes();
-        in.close();
-        rom = new Rom(b);
-        Preconditions.checkArgument(b[0x147] == 0);
-        return new Cartridge(new MBC0(rom));
+            byte[] b = in.readAllBytes();
+            in.close();
+            Rom rom = new Rom(b);
+            Preconditions.checkArgument(b[CARTRIDGE_TYPE] == 0);
+            return new Cartridge(new MBC0(rom));
         }
     }
-    
-   @Override
+
+    @Override
     /**
-     * check the argument and calls the mbc's corresponding method
+     * check the argument and calls the mbc's corresponding method.
      */
     public int read(int address) {
         Preconditions.checkBits16(address);
@@ -52,7 +57,7 @@ public final class Cartridge implements Component {
 
     @Override
     /**
-     * check the arguments and calls the mbc's corresponding method
+     * check the arguments and calls the mbc's corresponding method.
      */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);

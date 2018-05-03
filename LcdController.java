@@ -23,7 +23,7 @@ public final class LcdController implements Component, Clocked {
     public static final int LCD_WIDTH = 160;
     public static final int LCD_HEIGHT = 144;
 
-    private Cpu cpu;
+    private final Cpu cpu;
 
     private long nextNonIdleCycle = Long.MAX_VALUE;
     
@@ -188,8 +188,8 @@ public final class LcdController implements Component, Clocked {
 
     private void setMode(int mode) { // magic numbers ?
         Preconditions.checkArgument(mode >= 0 && mode <= 3);
-        int mask = (~0 << 2) | mode;
-        lcdBank.set(Reg.STAT, (lcdBank.get(Reg.STAT) | 0b11) & mask);
+        int mask = 0b11;
+        lcdBank.set(Reg.STAT, (lcdBank.get(Reg.STAT) | mask) & (mode | ~mask));
         
         switch (mode) {
         case 0: {
@@ -250,7 +250,7 @@ public final class LcdController implements Component, Clocked {
         
         LcdImageLine.Builder lineBuilder = new LcdImageLine.Builder(256); // magic numbers
         for (int i = 0; i < 32; i++) { 
-            int tileIndex = videoRamCtrlr.read(32 * (lineIndex/ 8) + memoryStart(area) + i); // magic numbers
+            int tileIndex = videoRamCtrlr.read(32 * (lineIndex / 8) + memoryStart(area) + i); // magic numbers
             lineBuilder.setBytes(i,
                     Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8) + 1)),
                     Bits.reverse8(videoRamCtrlr.read(tileSourceStart + 16 * tileIndex + 2 * (lineIndex % 8))));
