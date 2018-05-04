@@ -12,11 +12,16 @@ import ch.epfl.gameboj.bits.Bit;
 import ch.epfl.gameboj.bits.Bits;
 
 public final class Alu {
-
+    /**
+     * Enumeration that represents a flag.
+     */
     public enum Flag implements Bit {
         UNUSED_0, UNUSED_1, UNUSED_2, UNUSED_3, C, H, N, Z
     };
-
+    
+    /**
+     * Enumeration that represents a direction.
+     */
     public enum RotDir {
         LEFT, RIGHT
     };
