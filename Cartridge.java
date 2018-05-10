@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.component.Component;
@@ -19,6 +20,14 @@ public final class Cartridge implements Component {
     private final Component mbc;
 
     private static final int CARTRIDGE_TYPE = 0x147;
+    
+    private static final int RAM_SIZE = 0x149;
+    private static final int[] SIZES_TAB = {0, 2048, 8192, 32768};
+    private static final int RAM_SIZE0 = 0;
+    private static final int RAM_SIZE1 = 2048;
+    private static final int RAM_SIZE2 = 8192;
+    private static final int RAM_SIZE3 = 32768;
+    
 
     private Cartridge(Component mbc) {
         this.mbc = mbc;
@@ -31,8 +40,10 @@ public final class Cartridge implements Component {
      *            the file
      * @throws IOException
      *             in case of input-output error
-     * @throws IllegalArgumentException
-     *             if the file does not contain 0 at the position 0x147
+     * @throws IndexOutOfBoundException()
+     *             if the file does not contain a value between 0 and 3 at the position 0x147
+     * @throws IndexOutOfBoundException()
+     *             if the msb is type 1, 2 or 3, and the file does not contain a value between 0 and 3 at the position 0x149 
      * @return a cartridge whose ROM contains the bytes of the given file
      */
     public static Cartridge ofFile(File romFile) throws IOException {
@@ -40,9 +51,15 @@ public final class Cartridge implements Component {
         try (InputStream in = new FileInputStream(romFile)) {
             byte[] b = in.readAllBytes();
             in.close();
+            Objects.checkIndex(b[CARTRIDGE_TYPE], 4);
             Rom rom = new Rom(b);
-            Preconditions.checkArgument(b[CARTRIDGE_TYPE] == 0);
-            return new Cartridge(new MBC0(rom));
+            
+            if (b[CARTRIDGE_TYPE] == 0)
+                return new Cartridge(new MBC0(rom));
+            else {
+                int size = Objects.checkIndex(b[RAM_SIZE], 4);
+                return new Cartridge(new MBC1(rom, SIZES_TAB[size]));
+            }
         }
     }
 

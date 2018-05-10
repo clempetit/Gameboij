@@ -5,7 +5,6 @@
 
 package ch.epfl.gameboj.component.cpu;
 
-import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.Bus;
 import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.Register;
@@ -16,6 +15,9 @@ import ch.epfl.gameboj.component.Clocked;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.cpu.Alu.RotDir;
 import ch.epfl.gameboj.component.memory.Ram;
+import ch.epfl.gameboj.AddressMap;
+import static ch.epfl.gameboj.AddressMap.HIGH_RAM_START;
+import static ch.epfl.gameboj.AddressMap.HIGH_RAM_END;
 
 public final class Cpu implements Component, Clocked {
 
@@ -25,8 +27,6 @@ public final class Cpu implements Component, Clocked {
     private static int prefix = 0xCB;
 
     private final Ram highRam = new Ram(AddressMap.HIGH_RAM_SIZE);
-    private static final int hRamStart = AddressMap.HIGH_RAM_START;
-    private static final int hRamEnd = AddressMap.HIGH_RAM_END;
 
     private int PC = 0;
     private int SP = 0;
@@ -267,7 +267,7 @@ public final class Cpu implements Component, Clocked {
         }
             break;
         case LD_HLSP_S8: {
-            int e = Bits.clip(16, Bits.signExtend8(read8AfterOpcode()));
+            int e = Bits.clip(16, readExtend8(read8AfterOpcode()));
             int vf = Alu.add16L(SP, e);
             combineAluFlags(vf, FlagSrc.V0, FlagSrc.V0, FlagSrc.ALU,
                     FlagSrc.ALU);
@@ -531,13 +531,13 @@ public final class Cpu implements Component, Clocked {
         }
             break;
         case JR_E8: {
-            PC2 = Bits.clip(16, PC2 + Bits.signExtend8(read8AfterOpcode()));
+            PC2 = Bits.clip(16, PC2 + readExtend8(read8AfterOpcode()));
         }
             break;
         case JR_CC_E8: {
             if (extractCondition(op)) {
                 condition = true;
-                PC2 = Bits.clip(16, PC2 + Bits.signExtend8(read8AfterOpcode()));
+                PC2 = Bits.clip(16, PC2 + readExtend8(read8AfterOpcode()));
             }
         }
             break;
@@ -617,13 +617,12 @@ public final class Cpu implements Component, Clocked {
      */
     @Override
     public int read(int address) {
-        Preconditions.checkBits16(address);
         if (address == AddressMap.REG_IE) {
             return IE;
         } else if (address == AddressMap.REG_IF) {
             return IF;
-        } else if (address >= hRamStart && address < hRamEnd) {
-            return highRam.read(address - hRamStart);
+        } else if (address >= HIGH_RAM_START && address < HIGH_RAM_END) {
+            return highRam.read(address - HIGH_RAM_START);
         } else {
             return NO_DATA;
         }
@@ -634,14 +633,12 @@ public final class Cpu implements Component, Clocked {
      */
     @Override
     public void write(int address, int data) {
-        Preconditions.checkBits16(address);
-        Preconditions.checkBits8(data);
         if (address == AddressMap.REG_IE) {
             IE = data;
         } else if (address == AddressMap.REG_IF) {
             IF = data;
-        } else if (address >= hRamStart && address < hRamEnd) {
-            highRam.write(address - hRamStart, data);
+        } else if (address >= HIGH_RAM_START && address < HIGH_RAM_END) {
+            highRam.write(address - HIGH_RAM_START, data);
         }
     }
 
@@ -678,8 +675,7 @@ public final class Cpu implements Component, Clocked {
      * @return the 8 bits value at the given address
      */
     private int read8(int address) {
-        Preconditions.checkBits16(address);
-        return Preconditions.checkBits8(bus.read(address));
+        return bus.read(address);
     }
 
     /**
@@ -701,6 +697,10 @@ public final class Cpu implements Component, Clocked {
     private int read8AfterOpcode() {
         assert PC < 0xFFFF;
         return read8(PC + 1);
+    }
+    
+    private int readExtend8(int a) {
+        return Bits.signExtend8(a);
     }
 
     /**
@@ -741,8 +741,6 @@ public final class Cpu implements Component, Clocked {
      *             if v is invalid
      */
     private void write8(int address, int v) {
-        Preconditions.checkBits16(address);
-        Preconditions.checkBits8(v);
         bus.write(address, v);
     }
 

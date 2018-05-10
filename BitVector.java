@@ -6,12 +6,14 @@
 package ch.epfl.gameboj.bits;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import ch.epfl.gameboj.Preconditions;
 
 public final class BitVector {
     
     private static final int nbOfBytesInInt = Integer.SIZE / Byte.SIZE;
+    private static final int BYTE_MASK = 0b1111_1111;
     
     private final int[] vector;
     
@@ -58,7 +60,7 @@ public final class BitVector {
      * @return
      */
     public boolean testBit(int index) {
-        Preconditions.checkArgument(index >= 0 && index < size());
+        Objects.checkIndex(index, size());
         return Bits.test(vector[index / Integer.SIZE], index % Integer.SIZE);
     }
     
@@ -124,7 +126,7 @@ public final class BitVector {
      * @return
      */
     private BitVector extract(int sizeInBits, int start, extensionType type) {
-        Preconditions.checkArgument(sizeInBits % Integer.SIZE == 0);
+        Preconditions.checkArgument(sizeInBits % Integer.SIZE == 0 && sizeInBits >= 0); // Verifier conditions
         int[] extracted = new int[sizeInBits / Integer.SIZE];
         int startMod32 = Math.floorMod(start, Integer.SIZE);
         int startDiv32 = Math.floorDiv(start, Integer.SIZE);
@@ -202,15 +204,15 @@ public final class BitVector {
                 throw new IllegalStateException();
             }
             Preconditions.checkBits8(newValue);
-            if (!(index >= 0 && index < (nbOfBytesInInt*vector.length))) {
+            if (!(index >= 0 && index < (nbOfBytesInInt * vector.length))) {
                 throw new IndexOutOfBoundsException();
             }
             int indexInInt = index % nbOfBytesInInt;
             int indexInTab = index / nbOfBytesInInt;
             
-            int mask = ~(0b1111_1111 << Byte.SIZE*(indexInInt));
+            int mask = ~(BYTE_MASK << Byte.SIZE * (indexInInt));
             vector[indexInTab] =  (vector[indexInTab] & mask)
-                    | newValue << Byte.SIZE*(indexInInt);
+                    | newValue << Byte.SIZE * (indexInInt);
             return this;
         }
         

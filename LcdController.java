@@ -135,7 +135,7 @@ public final class LcdController implements Component, Clocked {
                         nextNonIdleCycle = Long.MAX_VALUE;
                 } else if (r == Reg.LYC) {
                     LycEqLy();
-                } else if (r == Reg.DMA) { // 8 ou 16 chiffres écrits dans DMA ?
+                } else if (r == Reg.DMA) {
                      copyDestination = OAM_START;
                      copySource = lcdBank.get(Reg.DMA) << Byte.SIZE;
                 }
@@ -207,7 +207,7 @@ public final class LcdController implements Component, Clocked {
 
     }
 
-    private void LycEqLy() { // VERIFIER
+    private void LycEqLy() {                                        // VERIFIER
         boolean prevState = lcdBank.testBit(Reg.STAT, StatBits.LYC_EQ_LY);
         if (!prevState && lcdBank.get(Reg.LY) == lcdBank.get(Reg.LYC)) {
             lcdBank.setBit(Reg.STAT, StatBits.LYC_EQ_LY, true);

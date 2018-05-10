@@ -32,21 +32,21 @@ public final class LcdImage {
         return height;
     }
     
-    public int get(int x, int y) { // verification coordonnées ?
+    public int get(int x, int y) {                                  // verification coordonnées ?
         Preconditions.checkArgument(x >= 0 && y >= 0 && y < lineList.size());
         boolean msbColor = lineList.get(y).msb().testBit(x);
         boolean lsbColor = lineList.get(y).lsb().testBit(x);
         if (msbColor) {
             if (lsbColor) {
-                return 0b11;
+                return 3;
             } else {
-                return 0b10;
+                return 2;
             }
         } else {
             if (lsbColor) {
-                return 0b01;
+                return 1;
             } else {
-                return 0b00;
+                return 0;
             }
         }
     }
@@ -75,7 +75,7 @@ public final class LcdImage {
         }
         
         public Builder setLine(int index, LcdImageLine newValue) {
-            Preconditions.checkArgument(index >= 0 && index < lineList.size());
+            Objects.checkIndex(index, lineList.size());
             lineList.set(index, newValue);
             return this;
         }

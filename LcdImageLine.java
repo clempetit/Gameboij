@@ -13,6 +13,8 @@ import ch.epfl.gameboj.bits.Bits;
 
 public final class LcdImageLine {
 
+    private static final int STANDARD_PALETTE = 0b11100100;
+    
     private final BitVector msb;
     private final BitVector lsb;
     private final BitVector opacity;
@@ -88,8 +90,7 @@ public final class LcdImageLine {
      */
     public LcdImageLine mapColors(int palette) {
         Preconditions.checkBits8(palette);
-        int NO_CHANGES = 0b11100100;
-        if(palette == NO_CHANGES) {
+        if(palette == STANDARD_PALETTE) {
             return this;
         }
         BitVector newLsb = new BitVector(size(), false);
@@ -110,18 +111,6 @@ public final class LcdImageLine {
     /**
      * 
      * @param that
-     * @return
-     */
-    public LcdImageLine below(LcdImageLine that) { // (op & sup) | (!op & inf)
-        Preconditions.checkArgument(that.size()==this.size());
-        BitVector newMsb = (that.msb.and(that.opacity)).or(this.msb.and(that.opacity.not()));
-        BitVector newLsb = (that.lsb.and(that.opacity)).or(this.lsb.and(that.opacity.not()));
-        return new LcdImageLine(newMsb, newLsb, that.opacity);
-    }
-    
-    /**
-     * 
-     * @param that
      * @param opacity
      * @return
      */
@@ -129,7 +118,17 @@ public final class LcdImageLine {
         Preconditions.checkArgument(that.size()==this.size());
         BitVector newMsb = (that.msb.and(opacity)).or(this.msb.and(opacity.not()));
         BitVector newLsb = (that.lsb.and(opacity)).or(this.lsb.and(opacity.not()));
-        return new LcdImageLine(newMsb, newLsb, opacity);
+        BitVector newOpacity = this.opacity.or(opacity);
+        return new LcdImageLine(newMsb, newLsb, newOpacity);
+    }
+    
+    /**
+     * 
+     * @param that
+     * @return
+     */
+    public LcdImageLine below(LcdImageLine that) { // (op & sup) | (!op & inf)
+        return below(that, that.opacity);
     }
     
     /**
@@ -138,10 +137,11 @@ public final class LcdImageLine {
      * @param index
      * @return
      */
-    public LcdImageLine join(LcdImageLine that, int index) { 
-        Preconditions.checkArgument(that.size()==this.size());
+    public LcdImageLine join(LcdImageLine that, int index) {
+        Objects.checkIndex(index, this.size());
+        Preconditions.checkArgument(that.size() == this.size());
         BitVector maskLeft = new BitVector(size(), true).shift(index);
-        BitVector maskRight = new BitVector(size(), true).shift(index).not();
+        BitVector maskRight = maskLeft.not();
         
         BitVector newMsb = (this.msb.and(maskRight)).or(that.msb.and(maskLeft));
         BitVector newLsb = (this.lsb.and(maskRight)).or(that.lsb.and(maskLeft));
@@ -174,7 +174,7 @@ public final class LcdImageLine {
         private final BitVector.Builder msb;
         private final BitVector.Builder lsb;
         
-        public Builder(int size) { // taille max ?
+        public Builder(int size) {              // taille max ?
             Preconditions.checkArgument(size > 0);
             msb = new BitVector.Builder(size);
             lsb = new BitVector.Builder(size);
