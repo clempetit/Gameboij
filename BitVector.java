@@ -170,7 +170,7 @@ public final class BitVector {
     }
 
     /**
-     * extracts a vector of given size from the 0's extension of this vector.
+     * extracts a vector of given size from the extension by 0 of this vector.
      * 
      * @param start
      *            the start bit
@@ -179,14 +179,14 @@ public final class BitVector {
      * @throws IllegalArgumentException
      *             if sizeInBits is invalid
      * @return a new bit vector which is the extracted vector of given size from
-     *         the 0's extension of this vector
+     *         the extension by 0 of this vector
      */
     public BitVector extractZeroExtended(int sizeInBits, int start) {
         return extract(sizeInBits, start, extensionType.zero);
     }
 
     /**
-     * extracts a vector of given size from the wrapped extension of this
+     * extracts a vector of given size from the extension by wrapping of this
      * vector.
      * 
      * @param start
@@ -196,7 +196,7 @@ public final class BitVector {
      * @throws IllegalArgumentException
      *             if sizeInBits is invalid
      * @return a new bit vector which is the extracted vector of given size from
-     *         the wrapped extension of this vector
+     *         the extension by wrapping of this vector
      */
     public BitVector extractWrapped(int sizeInBits, int start) {
         return extract(sizeInBits, start, extensionType.wrapped);
@@ -328,5 +328,3 @@ public final class BitVector {
         }
     }
 }
-
-
