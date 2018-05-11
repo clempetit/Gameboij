@@ -275,7 +275,6 @@ public final class LcdController implements Component, Clocked {
 
     private LcdImageLine extractBgLine(int lineIndex) {
         if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) {
-            // System.out.println(lcdBank.get(Reg.SCX));
             return extractLine(lineIndex, BG_LINE_SIZE, LcdcBits.BG_AREA)
                     .extractWrapped(LCD_WIDTH, lcdBank.get(Reg.SCX));
         } else
