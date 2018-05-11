@@ -151,20 +151,22 @@ public final class LcdController implements Component, Clocked {
         if (copyDestination != OAM_END)
             write(copyDestination++, bus.read(copySource++));
         
-        if (nextNonIdleCycle == Long.MAX_VALUE && lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS))
+        if (nextNonIdleCycle == Long.MAX_VALUE && lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS)) {
             nextNonIdleCycle = cycle;
+            lcdBank.set(Reg.LY, 153);
+        }
         
         if (cycle == nextNonIdleCycle)
             reallyCycle(cycle);
     }
-
+    
     private void reallyCycle(long cycle) {
+        
         switch (getMode()) {
         case 2: {
             setMode(3);
             computeLine(lcdBank.get(Reg.LY));
-            lcdBank.set(Reg.LY, lcdBank.get(Reg.LY) + 1);
-            LycEqLy();
+            
             nextNonIdleCycle += 43;
         }
             break;
@@ -174,7 +176,8 @@ public final class LcdController implements Component, Clocked {
         }
             break;
         case 0: {
-            if (lcdBank.get(Reg.LY) == 144) {
+            
+            if (lcdBank.get(Reg.LY) == 143) {
                 setMode(1);
                 cpu.requestInterrupt(Interrupt.VBLANK);
                 currentImage = nextImageBuilder.build();
@@ -182,6 +185,8 @@ public final class LcdController implements Component, Clocked {
                 LycEqLy();
                 nextNonIdleCycle += 114;
             } else {
+                lcdBank.set(Reg.LY, (lcdBank.get(Reg.LY) + 1) % 154);
+                LycEqLy();
                 setMode(2);
                 if (lcdBank.get(Reg.LY) == 0) { // à l'allumage
                     nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
@@ -192,11 +197,12 @@ public final class LcdController implements Component, Clocked {
         }
             break;
         case 1: {
-            if (lcdBank.get(Reg.LY) > 144 && lcdBank.get(Reg.LY) <= 153) {
+            if (lcdBank.get(Reg.LY) >= 144 && lcdBank.get(Reg.LY) < 153) {
                 lcdBank.set(Reg.LY, ((lcdBank.get(Reg.LY) + 1)) % 154);
                 LycEqLy();
                 nextNonIdleCycle += 114;
             } else { // puis quand on arrive à 154
+                lcdBank.set(Reg.LY, ((lcdBank.get(Reg.LY) + 1)) % 154);
                 setMode(2);
                 nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
                 winY = 0;
@@ -249,7 +255,7 @@ public final class LcdController implements Component, Clocked {
         int bgLineIndex = Bits.clip(8, lcdBank.get(Reg.SCY) + y);
         LcdImageLine bgLine = extractBgLine(bgLineIndex);
         
-        int WX = lcdBank.get(Reg.WX) - 7;
+        int WX = Math.max(0, lcdBank.get(Reg.WX) - 7);
         if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN)) && WX >= 0 && WX < LCD_WIDTH && y >= lcdBank.get(Reg.WY)) {
             LcdImageLine winLine = extractLine(winY, WIN_LINE_SIZE, LcdcBits.WIN_AREA);
             winY++;
