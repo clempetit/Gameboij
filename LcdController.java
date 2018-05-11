@@ -161,12 +161,10 @@ public final class LcdController implements Component, Clocked {
     }
     
     private void reallyCycle(long cycle) {
-        
         switch (getMode()) {
         case 2: {
             setMode(3);
             computeLine(lcdBank.get(Reg.LY));
-            
             nextNonIdleCycle += 43;
         }
             break;
@@ -176,7 +174,6 @@ public final class LcdController implements Component, Clocked {
         }
             break;
         case 0: {
-            
             if (lcdBank.get(Reg.LY) == 143) {
                 setMode(1);
                 cpu.requestInterrupt(Interrupt.VBLANK);
@@ -198,12 +195,12 @@ public final class LcdController implements Component, Clocked {
             break;
         case 1: {
             if (lcdBank.get(Reg.LY) >= 144 && lcdBank.get(Reg.LY) < 153) {
-                lcdBank.set(Reg.LY, ((lcdBank.get(Reg.LY) + 1)) % 154);
+                lcdBank.set(Reg.LY, ((lcdBank.get(Reg.LY) + 1)) % 153);
                 LycEqLy();
                 nextNonIdleCycle += 114;
-            } else { // puis quand on arrive à 154
-                lcdBank.set(Reg.LY, ((lcdBank.get(Reg.LY) + 1)) % 154);
+            } else { // puis quand on arrive à 153
                 setMode(2);
+                LycEqLy();
                 nextImageBuilder = new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT);
                 winY = 0;
                 nextNonIdleCycle += 20;
@@ -274,8 +271,10 @@ public final class LcdController implements Component, Clocked {
     }
     
     private LcdImageLine extractBgLine(int lineIndex) {
-        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG)))
+        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.BG))) {
+            //System.out.println(lcdBank.get(Reg.SCX));
             return extractLine(lineIndex, BG_LINE_SIZE, LcdcBits.BG_AREA).extractWrapped(LCD_WIDTH, lcdBank.get(Reg.SCX));
+        }
         else
             return emptyLine();
     }
