@@ -103,7 +103,8 @@ public final class BitVector {
      *            the other vector (must have the same length as this vector)
      * @throws IllegalArgumentException
      *             if the other vector is invalid
-     * @return a new bit vector which is the bitwise conjunction between this vector and the other vector
+     * @return a new bit vector which is the bitwise conjunction between this
+     *         vector and the other vector
      */
     public BitVector and(BitVector that) {
         int[] vector2 = that.vector;
@@ -122,7 +123,8 @@ public final class BitVector {
      *            the other vector (must have the same length as this vector)
      * @throws IllegalArgumentException
      *             if the other vector is invalid
-     * @return a new bit vector which is the bitwise disjunction between this vector and another vector
+     * @return a new bit vector which is the bitwise disjunction between this
+     *         vector and another vector
      */
     public BitVector or(BitVector that) {
         int[] vector2 = that.vector;
@@ -147,7 +149,8 @@ public final class BitVector {
     }
 
     private BitVector extract(int sizeInBits, int start, extensionType type) {
-        Preconditions.checkArgument(sizeInBits % Integer.SIZE == 0 && sizeInBits > 0);
+        Preconditions.checkArgument(
+                sizeInBits % Integer.SIZE == 0 && sizeInBits > 0);
         int[] extracted = new int[sizeInBits / Integer.SIZE];
         int startMod32 = Math.floorMod(start, Integer.SIZE);
         int startDiv32 = Math.floorDiv(start, Integer.SIZE);
@@ -169,24 +172,31 @@ public final class BitVector {
     /**
      * extracts a vector of given size from the 0's extension of this vector.
      * 
-     * @param start the start bit
-     * @param sizeInBits the size in bits (must be a strictly positive multiple of 32) 
+     * @param start
+     *            the start bit
+     * @param sizeInBits
+     *            the size in bits (must be a strictly positive multiple of 32)
      * @throws IllegalArgumentException
      *             if sizeInBits is invalid
-     * @return a new bit vector which is the extracted vector of given size from the 0's extension of this vector
+     * @return a new bit vector which is the extracted vector of given size from
+     *         the 0's extension of this vector
      */
     public BitVector extractZeroExtended(int sizeInBits, int start) {
         return extract(sizeInBits, start, extensionType.zero);
     }
 
     /**
-     * extracts a vector of given size from the wrapped extension of this vector.
+     * extracts a vector of given size from the wrapped extension of this
+     * vector.
      * 
-     * @param start the start bit
-     * @param sizeInBits the size in bits (must be a strictly positive multiple of 32)
+     * @param start
+     *            the start bit
+     * @param sizeInBits
+     *            the size in bits (must be a strictly positive multiple of 32)
      * @throws IllegalArgumentException
      *             if sizeInBits is invalid
-     * @return a new bit vector which is the extracted vector of given size from the wrapped extension of this vector
+     * @return a new bit vector which is the extracted vector of given size from
+     *         the wrapped extension of this vector
      */
     public BitVector extractWrapped(int sizeInBits, int start) {
         return extract(sizeInBits, start, extensionType.wrapped);
@@ -199,8 +209,8 @@ public final class BitVector {
      * 
      * @param distance
      *            the distance
-     * @return a new bit vector which is this vector shifted by the given distance using the usual
-     *         convention
+     * @return a new bit vector which is this vector shifted by the given
+     *         distance using the usual convention
      */
     public BitVector shift(int distance) {
         return extractZeroExtended(size(), -distance);
@@ -219,7 +229,8 @@ public final class BitVector {
      * checks if the given vector is a BitVector and if it is the same size and
      * has the same bits as this vector.
      * 
-     * @param that the other vector
+     * @param that
+     *            the other vector
      * @return true if the given vector is a BitVector and is equal to this
      *         vector and false otherwise
      */
@@ -277,7 +288,8 @@ public final class BitVector {
          *            the new value (must be an 8 bits value)
          * @throws IllegalStateException
          *             if the vector is null
-         * @throws IllegalArgumentException if newValue is invalid
+         * @throws IllegalArgumentException
+         *             if newValue is invalid
          * @throws IndexOutOfBoundsException
          *             if the index is invalid
          * @return the bit vector whose given index byte has the given new value
@@ -316,4 +328,5 @@ public final class BitVector {
         }
     }
 }
+
 
