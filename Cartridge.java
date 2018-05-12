@@ -46,7 +46,6 @@ public final class Cartridge implements Component {
 
         try (InputStream in = new FileInputStream(romFile)) {
             byte[] b = in.readAllBytes();
-            in.close();
             Objects.checkIndex(b[CARTRIDGE_TYPE], 4);
             Rom rom = new Rom(b);
             
