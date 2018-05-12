@@ -255,7 +255,7 @@ public final class BitVector {
     }
 
     /**
-     * represents a builder of bit vectors.
+     * represents a bit vector builder.
      */
     public final static class Builder {
 
@@ -316,7 +316,7 @@ public final class BitVector {
          * 
          * @throws IllegalStateException
          *             if the vector is null
-         * @return the bit vector
+         * @return the built bit vector
          */
         public BitVector build() {
             if (vector == null) {
@@ -328,4 +328,3 @@ public final class BitVector {
         }
     }
 }
-
