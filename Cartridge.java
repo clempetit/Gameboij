@@ -23,10 +23,6 @@ public final class Cartridge implements Component {
     
     private static final int RAM_SIZE = 0x149;
     private static final int[] SIZES_TAB = {0, 2048, 8192, 32768};
-    private static final int RAM_SIZE0 = 0;
-    private static final int RAM_SIZE1 = 2048;
-    private static final int RAM_SIZE2 = 8192;
-    private static final int RAM_SIZE3 = 32768;
     
 
     private Cartridge(Component mbc) {
