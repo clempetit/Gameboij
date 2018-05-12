@@ -278,7 +278,7 @@ public final class BitVector {
         }
 
         /**
-         * defines the value of a byte designated by its index.
+         * sets the value of a byte designated by its index.
          * 
          * @param index
          *            the index (must be positive and strictly inferior to the
