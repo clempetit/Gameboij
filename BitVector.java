@@ -292,7 +292,7 @@ public final class BitVector {
          *             if newValue is invalid
          * @throws IndexOutOfBoundsException
          *             if the index is invalid
-         * @return the bit vector whose given index byte has the given new value
+         * @return the builder
          */
         public Builder setByte(int index, int newValue) {
             if (vector == null) {
