@@ -255,7 +255,7 @@ public final class BitVector {
     }
 
     /**
-     * represents a builder of bits vector.
+     * represents a builder of bit vectors.
      */
     public final static class Builder {
 
@@ -328,3 +328,4 @@ public final class BitVector {
         }
     }
 }
+
