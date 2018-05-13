@@ -226,12 +226,12 @@ public final class BitVector {
     }
 
     /**
-     * checks if the given vector is a BitVector and if it is the same size and
+     * checks if the given object is a BitVector and if it is the same size and
      * has the same bits as this vector.
      * 
      * @param that
-     *            the other vector
-     * @return true if the given vector is a BitVector and is equal to this
+     *            the object
+     * @return true if the given object is a BitVector and is equal to this
      *         vector and false otherwise
      */
     public boolean equals(Object that) {
