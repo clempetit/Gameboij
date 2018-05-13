@@ -205,12 +205,12 @@ public final class LcdImageLine {
     }
 
     /**
-     * checks if the other line is a LcdImageLine and if its three bit vectors
+     * checks if the given object is an LcdImageLine and if its three bit vectors
      * are equals to those of this line.
      * 
      * @param that
-     *            the other line
-     * @return true if the other line is a LcdImageLine and if its three bit
+     *            the object
+     * @return true if that is an LcdImageLine and if its three bit
      *         vectors are equals to those of this line and false otherwise
      */
     public boolean equals(Object that) {
@@ -230,7 +230,7 @@ public final class LcdImageLine {
     }
 
     /**
-     * represents a builder of image lines.
+     * represents an image line builder.
      */
     public final static class Builder {
 
