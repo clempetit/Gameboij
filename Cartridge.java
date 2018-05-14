@@ -15,6 +15,9 @@ import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.component.Component;
 import ch.epfl.gameboj.component.memory.Rom;
 
+/**
+ * represents a cartridge.
+ */
 public final class Cartridge implements Component {
 
     private final Component mbc;
@@ -39,7 +42,7 @@ public final class Cartridge implements Component {
      * @throws IndexOutOfBoundException()
      *             if the file does not contain a value between 0 and 3 at the position 0x147
      * @throws IndexOutOfBoundException()
-     *             if the msb is type 1, 2 or 3, and the file does not contain a value between 0 and 3 at the position 0x149 
+     *             if the mbc is type 1, 2 or 3, and the file does not contain a value between 0 and 3 at the position 0x149 
      * @return a cartridge whose ROM contains the bytes of the given file
      */
     public static Cartridge ofFile(File romFile) throws IOException {
@@ -60,7 +63,9 @@ public final class Cartridge implements Component {
 
     @Override
     /**
-     * check the argument and calls the mbc's corresponding method.
+     * checks the argument and calls the mbc's corresponding method.
+     * 
+     * @param address the address (must be a 16 bits value)
      */
     public int read(int address) {
         Preconditions.checkBits16(address);
@@ -69,7 +74,10 @@ public final class Cartridge implements Component {
 
     @Override
     /**
-     * check the arguments and calls the mbc's corresponding method.
+     * checks the arguments and calls the mbc's corresponding method.
+     * 
+     * @param address the address (must be a 16 bits value)
+     * @param data the data (must be an 8 bits value)
      */
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
