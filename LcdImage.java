@@ -13,13 +13,13 @@ import java.util.Objects;
 import ch.epfl.gameboj.Preconditions;
 
 /**
- * represents an image of the Game Boy.
+ * represents a GameBoy image.
  */
 public final class LcdImage {
-
+    
     private final int width, height;
     private final List<LcdImageLine> lineList;
-
+    
     /**
      * initializes the width and the height of the image and the list of its
      * lines.
@@ -35,13 +35,12 @@ public final class LcdImage {
      *             if lineList is empty or the height is invalid
      */
     public LcdImage(int width, int height, List<LcdImageLine> lineList) {
-        Preconditions.checkArgument(
-                !(lineList.isEmpty()) && (height == lineList.size()));
+        Preconditions.checkArgument(!(lineList.isEmpty()) && (height == lineList.size()));
         this.width = width;
         this.height = height;
         this.lineList = Collections.unmodifiableList(new ArrayList<>(lineList));
     }
-
+    
     /**
      * returns the width of the image.
      * 
@@ -50,7 +49,7 @@ public final class LcdImage {
     public int width() {
         return width;
     }
-
+    
     /**
      * returns the height of the image.
      * 
@@ -59,7 +58,7 @@ public final class LcdImage {
     public int height() {
         return height;
     }
-
+    
     /**
      * gets, in the form of an integer included between 0 and 3, the color of
      * the pixel of given index (x,y).
@@ -92,7 +91,7 @@ public final class LcdImage {
             }
         }
     }
-
+    
     /**
      * checks if the given object is an LcdImage and if its image line list is
      * equal to this image line list.
@@ -106,9 +105,9 @@ public final class LcdImage {
         if (!(that instanceof LcdImage)) {
             return false;
         }
-        return this.lineList.equals(((LcdImage) that).lineList);
+        return this.lineList.equals(((LcdImage)that).lineList);
     }
-
+    
     /**
      * returns the hashcode of the list of the image lines .
      * 
@@ -117,15 +116,15 @@ public final class LcdImage {
     public int hashcode() {
         return Objects.hash(lineList);
     }
-
+    
     /**
-     * represents an image builder.
+     * represents an LcdImage builder.
      */
     public final static class Builder {
-
+        
         private int width, height;
         private List<LcdImageLine> lineList;
-
+        
         /**
          * initializes the width and the height of the image to build that is
          * initially empty, that is that all its pixels have the color 0.
@@ -137,14 +136,13 @@ public final class LcdImage {
          * @throws IllegalArgumentException
          *             if the width or the height is invalid
          */
-        public Builder(int width, int height) { // taille max ?
+        public Builder(int width, int height) {
             Preconditions.checkArgument(width >= 0 && height >= 0);
             this.width = width;
             this.height = height;
-            lineList = new ArrayList<>(Collections.nCopies(height,
-                    new LcdImageLine.Builder(width).build()));
+            lineList = new ArrayList<>(Collections.nCopies(height, new LcdImageLine.Builder(width).build()));
         }
-
+        
         /**
          * sets the line of given index to the given value.
          * 
@@ -159,18 +157,18 @@ public final class LcdImage {
          */
         public Builder setLine(int index, LcdImageLine newValue) {
             Objects.checkIndex(index, lineList.size());
+            Preconditions.checkArgument(newValue.size() == width);
             lineList.set(index, newValue);
             return this;
         }
-
+        
         /**
-         * returns the image that is being built.
+         * returns the image built from that builder.
          * 
-         * @return the image
+         * @return the built image
          */
         public LcdImage build() {
             return new LcdImage(width, height, lineList);
         }
     }
 }
-
