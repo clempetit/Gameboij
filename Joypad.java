@@ -9,19 +9,21 @@ import ch.epfl.gameboj.AddressMap;
 import ch.epfl.gameboj.bits.Bits;
 import ch.epfl.gameboj.component.cpu.Cpu;
 import ch.epfl.gameboj.component.cpu.Cpu.Interrupt;
-
+/**
+ * represents the Game Boy's joypad.
+ */
 public final class Joypad implements Component {
-
+    
     private final Cpu cpu;
-
+    
     private int line0 = 0;
     private int line1 = 0;
     private int lineSelection = 0;
-
-    public static enum Key {
-        RIGHT, LEFT, UP, DOWN, A, B, SELECT, START
-    }
-
+    
+    /**
+     * enumeration representing the joypad keys.
+     */
+    public static enum Key {RIGHT, LEFT, UP, DOWN, A, B, SELECT, START}
     public Joypad(Cpu cpu) {
         this.cpu = cpu;
     }
@@ -49,6 +51,10 @@ public final class Joypad implements Component {
         }
     }
 
+    /**
+     * simulates the pressure on the given key.
+     * @param k the key 
+     */
     public void keyPressed(Key k) {
         keyChange(k, true);
         int line = k.ordinal() < 4 ? 0 : 1;
@@ -56,6 +62,10 @@ public final class Joypad implements Component {
             cpu.requestInterrupt(Interrupt.JOYPAD);
     }
 
+    /**
+     * simulates the release of the given key.
+     * @param k the key 
+     */
     public void keyReleased(Key k) {
         keyChange(k, false);
     }
