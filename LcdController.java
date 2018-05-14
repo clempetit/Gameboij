@@ -28,9 +28,18 @@ import static ch.epfl.gameboj.AddressMap.OAM_END;
 import static ch.epfl.gameboj.AddressMap.REGS_LCDC_START;
 import static ch.epfl.gameboj.AddressMap.REGS_LCDC_END;
 
+/**
+ * represents a Liquid Crystal Display controller.
+ */
 public final class LcdController implements Component, Clocked {
-
+    
+    /**
+     * the screen width in pixels
+     */
     public static final int LCD_WIDTH = 160;
+    /**
+     * the screen height in pixels
+     */
     public static final int LCD_HEIGHT = 144;
 
     private static final int BG_LINE_SIZE = 256;
@@ -76,14 +85,19 @@ public final class LcdController implements Component, Clocked {
         copyDestination = AddressMap.OAM_END;
     }
 
+     /**
+     * returns the image currently displayed on the screen, or an image with all its pixels of color 0 if the first image has not been drawn yet.
+     * @return the image currently displayed on the screen or an empty image
+     */
     public LcdImage currentImage() {
         return currentImage == null ? new LcdImage.Builder(160, 144).build()
                 : currentImage;
     }
 
-    /**
-     * Attach the LcdController to the given bus and and stores the bus in the
-     * LcdController.
+     /**
+     * Attaches the LcdController to the given bus and stores the bus in the LcdController.
+     * 
+     * @param bus the bus
      */
     @Override
     public void attachTo(Bus bus) {
