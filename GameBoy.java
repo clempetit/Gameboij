@@ -18,7 +18,14 @@ import ch.epfl.gameboj.component.memory.RamController;
 
 public final class GameBoy {
 
+    /**
+     * the number of cycles executed per second.
+     */
     public static final long CYCLES_PER_SECOND = 1 << 20;
+    
+    /**
+     * the number of cycles executed per nanosecond
+     */
     public static final double CYCLES_PER_NANOSECOND = CYCLES_PER_SECOND / 1e9;
     
     private final Bus bus;
@@ -89,17 +96,24 @@ public final class GameBoy {
         return timer;
     }
     
+    /**
+     * @return the lcd controller
+     */
     public LcdController lcdController() {
         return lcdc;
     }
-    
+
+    /**
+     * @return the joypad
+     */
     public Joypad joypad() {
         return joypad;
     }
 
     /**
      * runs the simulated gameboy until the given cycle minus 1, calling the
-     * method cycle of the timer and then of the processor.
+     * method cycle of the timer, then of the lcd controller and then of the
+     * processor.
      * 
      * @param cycle
      *            the cycle
