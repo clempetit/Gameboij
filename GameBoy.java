@@ -27,7 +27,7 @@ public final class GameBoy {
     public static final long CYCLES_PER_SECOND = 1 << 20;
     
     /**
-     * the number of cycles executed per nanosecond
+     * the number of cycles executed per nanosecond.
      */
     public static final double CYCLES_PER_NANOSECOND = CYCLES_PER_SECOND / 1e9;
     
