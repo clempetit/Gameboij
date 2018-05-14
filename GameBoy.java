@@ -16,6 +16,9 @@ import ch.epfl.gameboj.component.memory.BootRomController;
 import ch.epfl.gameboj.component.memory.Ram;
 import ch.epfl.gameboj.component.memory.RamController;
 
+/**
+ * represents a Game Boy.
+ */
 public final class GameBoy {
 
     /**
