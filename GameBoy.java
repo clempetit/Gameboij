@@ -19,15 +19,15 @@ import ch.epfl.gameboj.component.memory.RamController;
 public final class GameBoy {
 
     public static final long CYCLES_PER_SECOND = 1 << 20;
-    public static final double CYCLES_PER_NANOSECOND = (double)CYCLES_PER_SECOND * Math.pow(10, -9);
+    public static final double CYCLES_PER_NANOSECOND = CYCLES_PER_SECOND / 1e9;
     
     private final Bus bus;
     private final Ram workRam;
     private final Cpu cpu;
     private final BootRomController bcr;
     private final Timer timer;
-    private LcdController lcdc;
-    private Joypad joypad;
+    private final LcdController lcdc;
+    private final Joypad joypad;
     private long SimulatedCycles = 0;
 
     /**
