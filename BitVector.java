@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import ch.epfl.gameboj.Preconditions;
+import static ch.epfl.gameboj.Preconditions.checkArgument;
 
 /**
  * represents a bit vector whose size is a strictly positive multiple of 32.
@@ -37,7 +38,7 @@ public final class BitVector {
      *             if sizeInBits is invalid
      */
     public BitVector(int sizeInBits, boolean initValue) {
-        Preconditions.checkArgument(
+        checkArgument(
                 sizeInBits > 0 && (sizeInBits % Integer.SIZE == 0));
         vector = new int[sizeInBits / Integer.SIZE];
         if (initValue)
@@ -108,7 +109,7 @@ public final class BitVector {
      */
     public BitVector and(BitVector that) {
         int[] vector2 = that.vector;
-        Preconditions.checkArgument(vector2.length == vector.length);
+        checkArgument(vector2.length == vector.length);
         int[] and = new int[vector.length];
         for (int i = 0; i < and.length; i++) {
             and[i] = vector[i] & vector2[i];
@@ -128,7 +129,7 @@ public final class BitVector {
      */
     public BitVector or(BitVector that) {
         int[] vector2 = that.vector;
-        Preconditions.checkArgument(vector2.length == vector.length);
+        checkArgument(vector2.length == vector.length);
         int[] or = new int[vector.length];
         for (int i = 0; i < or.length; i++) {
             or[i] = vector[i] | vector2[i];
@@ -149,7 +150,7 @@ public final class BitVector {
     }
 
     private BitVector extract(int sizeInBits, int start, extensionType type) {
-        Preconditions.checkArgument(
+        checkArgument(
                 sizeInBits % Integer.SIZE == 0 && sizeInBits > 0);
         int[] extracted = new int[sizeInBits / Integer.SIZE];
         int startMod32 = Math.floorMod(start, Integer.SIZE);
@@ -272,7 +273,7 @@ public final class BitVector {
          *             if sizeInBits is invalid
          */
         public Builder(int sizeInBits) {
-            Preconditions.checkArgument(
+            checkArgument(
                     sizeInBits > 0 && sizeInBits % Integer.SIZE == 0);
             vector = new int[sizeInBits / Integer.SIZE];
         }
