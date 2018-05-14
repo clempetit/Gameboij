@@ -7,9 +7,10 @@ package ch.epfl.gameboj.component.lcd;
 
 import java.util.Objects;
 
-import ch.epfl.gameboj.Preconditions;
 import ch.epfl.gameboj.bits.BitVector;
 import ch.epfl.gameboj.bits.Bits;
+import ch.epfl.gameboj.Preconditions;
+import static ch.epfl.gameboj.Preconditions.checkArgument;
 
 /**
  * represents a Game Boy image line.
@@ -35,7 +36,7 @@ public final class LcdImageLine {
      *             if the bit vectors are not all the same size
      */
     public LcdImageLine(BitVector msb, BitVector lsb, BitVector opacity) {
-        Preconditions.checkArgument(
+        checkArgument(
                 msb.size() == lsb.size() && lsb.size() == opacity.size());
         this.msb = msb;
         this.lsb = lsb;
@@ -153,7 +154,7 @@ public final class LcdImageLine {
      * @return the composed line
      */
     public LcdImageLine below(LcdImageLine that, BitVector opacity) {
-        Preconditions.checkArgument(that.size() == this.size());
+        checkArgument(that.size() == this.size() && opacity.size() == this.size());
         BitVector newMsb = (that.msb.and(opacity))
                 .or(this.msb.and(opacity.not()));
         BitVector newLsb = (that.lsb.and(opacity))
@@ -192,8 +193,8 @@ public final class LcdImageLine {
      * @return the joined line
      */
     public LcdImageLine join(LcdImageLine that, int index) {
-        Objects.checkIndex(index, this.size());
-        Preconditions.checkArgument(that.size() == this.size());
+        checkArgument(index >= 0 && index <= this.size());
+        checkArgument(that.size() == this.size());
         BitVector maskLeft = new BitVector(size(), true).shift(index);
         BitVector maskRight = maskLeft.not();
 
@@ -230,7 +231,7 @@ public final class LcdImageLine {
     }
 
     /**
-     * represents an image line builder.
+     * represents an LcdImageLine builder.
      */
     public final static class Builder {
 
@@ -244,7 +245,7 @@ public final class LcdImageLine {
          *            the size (must be a strictly positive multiple of 32)
          */
         public Builder(int size) { // taille max ?
-            Preconditions.checkArgument(size > 0);
+            checkArgument(size > 0);
             msb = new BitVector.Builder(size);
             lsb = new BitVector.Builder(size);
         }
