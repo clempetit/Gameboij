@@ -29,11 +29,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-
-public final class Main extends Application {
-
+/**
+ * contains the simulator's main program.
+ */
+public final class Main extends Application{
+    
     private static Map<KeyCode, Key> keys = new HashMap<>();
 
+    /**
+     * calls the method launch of Application with the given arguments.
+     * @param args the arguments
+     */
     public static void main(String[] args) {
         keys.put(KeyCode.D, Key.RIGHT);                 // Faire comme ça pour remplir la HashMap ?
         keys.put(KeyCode.A, Key.LEFT);
