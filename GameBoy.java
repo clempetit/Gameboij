@@ -121,7 +121,7 @@ public final class GameBoy {
      * @param cycle
      *            the cycle
      */
-    public void runUntil(long cycle) { // vérifier gestion cycles
+    public void runUntil(long cycle) {
         Preconditions.checkArgument(cycle >= cycles());
         while (cycles() < cycle) {
             timer.cycle(SimulatedCycles);
