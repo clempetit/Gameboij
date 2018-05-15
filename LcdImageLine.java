@@ -36,8 +36,7 @@ public final class LcdImageLine {
      *             if the bit vectors are not all the same size
      */
     public LcdImageLine(BitVector msb, BitVector lsb, BitVector opacity) {
-        checkArgument(
-                msb.size() == lsb.size() && lsb.size() == opacity.size());
+        checkArgument(msb.size() == lsb.size() && lsb.size() == opacity.size());
         this.msb = msb;
         this.lsb = lsb;
         this.opacity = opacity;
@@ -154,7 +153,8 @@ public final class LcdImageLine {
      * @return the composed line
      */
     public LcdImageLine below(LcdImageLine that, BitVector opacity) {
-        checkArgument(that.size() == this.size() && opacity.size() == this.size());
+        checkArgument(
+                that.size() == this.size() && opacity.size() == this.size());
         BitVector newMsb = (that.msb.and(opacity))
                 .or(this.msb.and(opacity.not()));
         BitVector newLsb = (that.lsb.and(opacity))
@@ -206,13 +206,13 @@ public final class LcdImageLine {
     }
 
     /**
-     * checks if the given object is an LcdImageLine and if its three bit vectors
-     * are equals to those of this line.
+     * checks if the given object is an LcdImageLine and if its three bit
+     * vectors are equals to those of this line.
      * 
      * @param that
      *            the object
-     * @return true if that is an LcdImageLine and if its three bit
-     *         vectors are equals to those of this line and false otherwise
+     * @return true if that is an LcdImageLine and if its three bit vectors are
+     *         equals to those of this line and false otherwise
      */
     public boolean equals(Object that) {
         return that instanceof LcdImageLine

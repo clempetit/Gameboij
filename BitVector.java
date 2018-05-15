@@ -38,8 +38,7 @@ public final class BitVector {
      *             if sizeInBits is invalid
      */
     public BitVector(int sizeInBits, boolean initValue) {
-        checkArgument(
-                sizeInBits > 0 && (sizeInBits % Integer.SIZE == 0));
+        checkArgument(sizeInBits > 0 && (sizeInBits % Integer.SIZE == 0));
         vector = new int[sizeInBits / Integer.SIZE];
         if (initValue)
             Arrays.fill(vector, ~0);
@@ -150,8 +149,7 @@ public final class BitVector {
     }
 
     private BitVector extract(int sizeInBits, int start, extensionType type) {
-        checkArgument(
-                sizeInBits % Integer.SIZE == 0 && sizeInBits > 0);
+        checkArgument(sizeInBits % Integer.SIZE == 0 && sizeInBits > 0);
         int[] extracted = new int[sizeInBits / Integer.SIZE];
         int startMod32 = Math.floorMod(start, Integer.SIZE);
         int startDiv32 = Math.floorDiv(start, Integer.SIZE);
@@ -273,8 +271,7 @@ public final class BitVector {
          *             if sizeInBits is invalid
          */
         public Builder(int sizeInBits) {
-            checkArgument(
-                    sizeInBits > 0 && sizeInBits % Integer.SIZE == 0);
+            checkArgument(sizeInBits > 0 && sizeInBits % Integer.SIZE == 0);
             vector = new int[sizeInBits / Integer.SIZE];
         }
 

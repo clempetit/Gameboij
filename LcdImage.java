@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import ch.epfl.gameboj.Preconditions;
+import static ch.epfl.gameboj.Preconditions.checkArgument;
 
 /**
  * represents a GameBoy image.
@@ -35,8 +35,7 @@ public final class LcdImage {
      *             if lineList is empty or the height is invalid
      */
     public LcdImage(int width, int height, List<LcdImageLine> lineList) {
-        Preconditions.checkArgument(
-                !(lineList.isEmpty()) && (height == lineList.size()));
+        checkArgument(!(lineList.isEmpty()) && (height == lineList.size()));
         this.width = width;
         this.height = height;
         this.lineList = Collections.unmodifiableList(new ArrayList<>(lineList));
@@ -75,7 +74,7 @@ public final class LcdImage {
      *         the pixel of given index (x,y)
      */
     public int get(int x, int y) {
-        Preconditions.checkArgument(x >= 0 && y >= 0 && y < lineList.size());
+        checkArgument(x >= 0 && y >= 0 && y < lineList.size());
         boolean msbColor = lineList.get(y).msb().testBit(x);
         boolean lsbColor = lineList.get(y).lsb().testBit(x);
         if (msbColor) {
@@ -138,7 +137,7 @@ public final class LcdImage {
          *             if the width or the height is invalid
          */
         public Builder(int width, int height) {
-            Preconditions.checkArgument(width >= 0 && height >= 0);
+            checkArgument(width >= 0 && height >= 0);
             this.width = width;
             this.height = height;
             lineList = new ArrayList<>(Collections.nCopies(height,
@@ -159,7 +158,7 @@ public final class LcdImage {
          */
         public Builder setLine(int index, LcdImageLine newValue) {
             Objects.checkIndex(index, lineList.size());
-            Preconditions.checkArgument(newValue.size() == width);
+            checkArgument(newValue.size() == width);
             lineList.set(index, newValue);
             return this;
         }
