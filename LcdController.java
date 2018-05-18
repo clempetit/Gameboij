@@ -89,6 +89,12 @@ public final class LcdController implements Component, Clocked {
 
     private static Ram videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
 
+   /**
+    * Constructs the LCD controller.
+    * 
+    * @param cpu
+    *            the Game Boy processor to which the LCD controller
+    */
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         OAM = new Ram(AddressMap.OAM_RAM_SIZE);
