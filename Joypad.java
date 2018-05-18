@@ -24,10 +24,20 @@ public final class Joypad implements Component {
      * enumeration representing the joypad keys.
      */
     public static enum Key {RIGHT, LEFT, UP, DOWN, A, B, SELECT, START}
+    
+    /**
+     * constructs the joypad attached to the cpu
+     * 
+     * @param cpu
+     *            the Game Boy processor to which the joypad belongs
+     */
     public Joypad(Cpu cpu) {
         this.cpu = cpu;
     }
 
+    /**
+     * gives access to the register P1.
+     */
     @Override
     public int read(int address) {
         if (address == AddressMap.REG_P1) {
@@ -38,6 +48,9 @@ public final class Joypad implements Component {
         return NO_DATA;
     }
 
+    /**
+     * gives access to the register P1.
+     */
     @Override
     public void write(int address, int data) {
         if (address == AddressMap.REG_P1) {
@@ -53,7 +66,9 @@ public final class Joypad implements Component {
 
     /**
      * simulates the pressure on the given key.
-     * @param k the key 
+     * 
+     * @param k
+     *            the key
      */
     public void keyPressed(Key k) {
         keyChange(k, true);
@@ -62,9 +77,11 @@ public final class Joypad implements Component {
             cpu.requestInterrupt(Interrupt.JOYPAD);
     }
 
-    /**
+     /**
      * simulates the release of the given key.
-     * @param k the key 
+     * 
+     * @param k
+     *            the key
      */
     public void keyReleased(Key k) {
         keyChange(k, false);
