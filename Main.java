@@ -29,19 +29,15 @@ import javafx.stage.Stage;
  */
 public final class Main extends Application {
 
-    private static Map<KeyCode, Key> keys = Map.of(
-            KeyCode.D, Key.RIGHT,
-            KeyCode.A, Key.LEFT,
-            KeyCode.W, Key.UP,
-            KeyCode.S, Key.DOWN,
-            KeyCode.O, Key.A,
-            KeyCode.K, Key.B,
-            KeyCode.B, Key.SELECT,
-            KeyCode.N, Key.START
-            );
+    private final static int ENLARGEMENT_FACTOR = 2;
 
-     /**
-     * calls the method launch of Application with the given arguments.
+    private static Map<KeyCode, Key> keys = Map.of(KeyCode.D, Key.RIGHT,
+            KeyCode.A, Key.LEFT, KeyCode.W, Key.UP, KeyCode.S, Key.DOWN,
+            KeyCode.O, Key.A, KeyCode.K, Key.B, KeyCode.B, Key.SELECT,
+            KeyCode.N, Key.START);
+
+    /**
+     * calls the method launch of Application with the given argument.
      * 
      * @param args
      *            the arguments
@@ -52,13 +48,11 @@ public final class Main extends Application {
 
     /**
      * Checks that only one argument has been passed to the program-the name of
-     * the ROM file-and finish the execution otherwise. 
-     * Creates a Game Boy whose cartridge is obtained from the ROM file passed 
-     * in argument. 
-     * Creates the graphical interface and then displays it on the screen.
-     * Simulates the Game Boy by periodically updating the image displayed 
-     * on the screen and reacting to the key presses corresponding to those 
-     * of the Game Boy.
+     * the ROM file-and finish the execution otherwise. Creates a Game Boy whose
+     * cartridge is obtained from the ROM file passed in argument. Creates the
+     * graphical interface and then displays it on the screen. Simulates the
+     * Game Boy by periodically updating the image displayed on the screen and
+     * reacting to the key presses corresponding to those of the Game Boy.
      */
     @Override
     public void start(Stage stage) throws Exception {
@@ -68,20 +62,12 @@ public final class Main extends Application {
         if (argList.size() != 1)
             System.exit(1);
 
-        File romFile = new File("SuperMarioLand.gb");
-                //argList.get(0));
+        File romFile = new File(argList.get(0));
         GameBoy gb = new GameBoy(Cartridge.ofFile(romFile));
 
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(LcdController.LCD_WIDTH * 2);
-        imageView.setFitHeight(LcdController.LCD_HEIGHT * 2);   // comme ça ?
-
-        Image image = ImageConverter.convert(gb.lcdController().currentImage()); // nécessaire de le mettre ici aussi ?
-        imageView.setImage(image);
-
-        BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(imageView);
-        Scene scene = new Scene(borderPane);
+        imageView.setFitWidth(LcdController.LCD_WIDTH * ENLARGEMENT_FACTOR);
+        imageView.setFitHeight(LcdController.LCD_HEIGHT * ENLARGEMENT_FACTOR);
 
         imageView.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -99,7 +85,9 @@ public final class Main extends Application {
             }
         });
 
-        stage.setScene(scene);
+        BorderPane borderPane = new BorderPane(imageView);
+        stage.setScene(new Scene(borderPane));
+        stage.setTitle("Gameboj");
         stage.show();
         imageView.requestFocus();
 
@@ -116,5 +104,5 @@ public final class Main extends Application {
         };
         timer.start();
     }
-    
+
 }
