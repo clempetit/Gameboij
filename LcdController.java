@@ -78,6 +78,12 @@ public final class LcdController implements Component, Clocked {
 
     private static Ram videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
 
+    /**
+     * Constructs the LCD controller.
+     * 
+     * @param cpu
+     *            the Game Boy processor to which the LCD controller
+     */
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         OAM = new Ram(AddressMap.OAM_RAM_SIZE);
@@ -86,7 +92,9 @@ public final class LcdController implements Component, Clocked {
     }
 
      /**
-     * returns the image currently displayed on the screen, or an image with all its pixels of color 0 if the first image has not been drawn yet.
+     * returns the image currently displayed on the screen, or an image with all
+     * its pixels of color 0 if the first image has not been drawn yet.
+     * 
      * @return the image currently displayed on the screen or an empty image
      */
     public LcdImage currentImage() {
@@ -95,9 +103,11 @@ public final class LcdController implements Component, Clocked {
     }
 
      /**
-     * Attaches the LcdController to the given bus and stores the bus in the LcdController.
+     * Attaches the LcdController to the given bus and stores the bus in the
+     * LcdController.
      * 
-     * @param bus the bus
+     * @param bus
+     *            the bus
      */
     @Override
     public void attachTo(Bus bus) {
@@ -105,6 +115,14 @@ public final class LcdController implements Component, Clocked {
         this.bus = bus;
     }
 
+    /**
+     * gives access to the memory of object attributes.
+     * 
+     * @param address
+     *            the address (must be a 16 bits value)
+     * @throws IllegalArgumentException
+     *             if the address is invalid
+     */
     @Override
     public int read(int address) {
         Preconditions.checkBits16(address);
@@ -120,6 +138,17 @@ public final class LcdController implements Component, Clocked {
         }
     }
 
+     /**
+     * gives access to the memory of object attributes and starts the copy
+     * process if something is written in the DMA register.
+     * 
+     * @param address
+     *            the address (must be a 16 bits value)
+     * @param data
+     *            the data (must be an 8 bits value)
+     * @throws IllegalArgumentException
+     *             if the address or the data is invalid
+     */
     @Override
     public void write(int address, int data) {
         Preconditions.checkBits16(address);
@@ -157,6 +186,13 @@ public final class LcdController implements Component, Clocked {
         }
     }
 
+    /**
+     * copies the next byte to the memory of object attributes when a DMA copy
+     * is in progress.
+     * 
+     * @param cycle
+     *            the cycle
+     */
     @Override
     public void cycle(long cycle) {
         if (copyDestination != OAM_END)
