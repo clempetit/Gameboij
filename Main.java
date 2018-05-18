@@ -40,14 +40,26 @@ public final class Main extends Application {
             KeyCode.N, Key.START
             );
 
-    /**
-     * calls the method launch of Application with the given argument.
-     * @param args the arguments
+     /**
+     * calls the method launch of Application with the given arguments.
+     * 
+     * @param args
+     *            the arguments
      */
     public static void main(String[] args) {
         Application.launch(args);
     }
 
+    /**
+     * Checks that only one argument has been passed to the program-the name of
+     * the ROM file-and finish the execution otherwise. 
+     * Creates a Game Boy whose cartridge is obtained from the ROM file passed 
+     * in argument. 
+     * Creates the graphical interface and then displays it on the screen.
+     * Simulates the Game Boy by periodically updating the image displayed 
+     * on the screen and reacting to the key presses corresponding to those 
+     * of the Game Boy.
+     */
     @Override
     public void start(Stage stage) throws Exception {
 
