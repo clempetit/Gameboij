@@ -1,6 +1,6 @@
 /**
- *	@author Clément Petit (282626)
- *	@author Yanis Berkani (271348)
+ *  @author Clément Petit (282626)
+ *  @author Yanis Berkani (271348)
  */
 
 package ch.epfl.gameboj.gui;

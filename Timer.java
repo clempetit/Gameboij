@@ -51,7 +51,7 @@ public final class Timer implements Component, Clocked {
      */
     public int read(int address) {
         Preconditions.checkBits16(address);
-        switch(address) {
+        switch (address) {
         case AddressMap.REG_DIV:
             return Bits.extract(DIV, 8, 8);
         case AddressMap.REG_TIMA:
@@ -73,7 +73,7 @@ public final class Timer implements Component, Clocked {
         Preconditions.checkBits8(data);
         Preconditions.checkBits16(address);
         boolean s0 = state();
-        switch(address) {
+        switch (address) {
         case AddressMap.REG_DIV:
             DIV = 0;
             break;
