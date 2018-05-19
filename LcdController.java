@@ -209,7 +209,7 @@ public final class LcdController implements Component, Clocked {
     }
 
     /**
-     * manages the writings in the OAM when a copy is in progress.
+     * manages the writings in the object attributes memory when a copy is in progress.
      * Manages the activation of the screen.
      * Determines if the lcd controller needs to do something during the given cycle, and
      * if so, calls the method reallyCycle.
