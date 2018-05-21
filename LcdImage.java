@@ -35,6 +35,7 @@ public final class LcdImage {
      *             if lineList is empty or the height is invalid
      */
     public LcdImage(int width, int height, List<LcdImageLine> lineList) {
+        checkArgument(width > 0 & height > 0);
         checkArgument(!(lineList.isEmpty()) && (height == lineList.size()));
         this.width = width;
         this.height = height;

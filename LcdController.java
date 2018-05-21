@@ -33,6 +33,13 @@ import static ch.epfl.gameboj.AddressMap.REGS_LCDC_END;
  */
 public final class LcdController implements Component, Clocked {
 
+    private final Cpu cpu;
+    private final Ram OAM;
+    private Bus bus;
+    
+    private LcdImage.Builder nextImageBuilder;
+    private LcdImage currentImage;
+    
     private static final int TILE_EDGE_SIZE = 8;
     private static final int NB_OF_SPRITES = 40;
     private static final int BYTES_PER_TILE = 16;
@@ -54,15 +61,9 @@ public final class LcdController implements Component, Clocked {
     private long nextNonIdleCycle;
 
     private int winY;
-
-    private final Cpu cpu;
-    private Bus bus;
-    private final Ram OAM;
+    
     private int copyDestination;
     private int copySource;
-
-    private LcdImage.Builder nextImageBuilder;
-    private LcdImage currentImage;
 
     private enum Reg implements Register {
         LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX
