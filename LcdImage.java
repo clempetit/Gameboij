@@ -25,14 +25,15 @@ public final class LcdImage {
      * lines.
      * 
      * @param width
-     *            the image width
+     *            the image width (must be equal to the size of each line
+     *            in the list, although this condition is not checked for a cost reason)
      * @param height
      *            the image height (must be equal to the size of the image line
      *            list)
      * @param lineList
-     *            the list of the image lines
+     *            the list of the image lines (must not be empty)
      * @throws IllegalArgumentException
-     *             if lineList is empty or the height is invalid
+     *             if lineList is empty or if the height or the width are invalid
      */
     public LcdImage(int width, int height, List<LcdImageLine> lineList) {
         checkArgument(width > 0 & height > 0);
@@ -68,7 +69,7 @@ public final class LcdImage {
      *            the pixel abscissa (must be positive)
      * @param y
      *            the pixel ordinate (must be positive and strictly inferior to
-     *            the size of this image line list)
+     *            the height of this image)
      * @throws IllegalArgumentException
      *             if x or y is invalid
      * @return an integer included between 0 and 3 that represents the color of
@@ -94,13 +95,13 @@ public final class LcdImage {
     }
 
     /**
-     * checks if the given object is an LcdImage and if its image line list is
-     * equal to this image line list.
+     * checks if the given object is an LcdImage and if its line list is
+     * equal to this image's line list.
      * 
      * @param that
      *            the object
-     * @return true if the given object is an LcdImage and if its image line
-     *         list is equal to this image line list and false otherwise
+     * @return true if the given object is an LcdImage and if its line
+     *         list is equal to this image's line list, and false otherwise
      */
     public boolean equals(Object that) {
         if (!(that instanceof LcdImage)) {
@@ -110,9 +111,9 @@ public final class LcdImage {
     }
 
     /**
-     * returns the hashcode of the list of the image lines .
+     * returns the hashcode of the image's line list.
      * 
-     * @return the hashcode of the image lines list
+     * @return the hashcode of the image's line list
      */
     public int hashcode() {
         return Objects.hash(lineList);
@@ -127,8 +128,8 @@ public final class LcdImage {
         private List<LcdImageLine> lineList;
 
         /**
-         * initializes the width and the height of the image to build that is
-         * initially empty, that is that all its pixels have the color 0.
+         * initializes the image builder with the given width and height
+         * and all its pixels with the color 0.
          * 
          * @param width
          *            the image width (must be positive)
@@ -152,9 +153,11 @@ public final class LcdImage {
          *            the index (must be positive and strictly inferior to the
          *            size of the image line list)
          * @param newValue
-         *            the value
+         *            the new ImageLine's value (must have a size equal to the builder's width)
          * @throws IndexOutOfBoundsException
          *             if the index is invalid
+         * @throws IllegalArgumentException
+         *             if the newValue's size is invalid          
          * @return the builder
          */
         public Builder setLine(int index, LcdImageLine newValue) {

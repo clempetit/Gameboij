@@ -27,9 +27,9 @@ public final class LcdImageLine {
      * initializes the bit vectors msb, lsb and opacity.
      * 
      * @param msb
-     *            the bit vector containing the most significant bits
+     *            the bit vector containing the most significant bits of the pixels
      * @param lsb
-     *            the bit vector containing the least significant bits
+     *            the bit vector containing the least significant bits of the pixels
      * @param opacity
      *            the bit vector containing the opacity
      * @throws IllegalArgumentException
@@ -52,7 +52,7 @@ public final class LcdImageLine {
     }
 
     /**
-     * returns the bit vector containing the most significant bits.
+     * returns the bit vector containing the most significant bits of the pixels.
      * 
      * @return the bit vector msb
      */
@@ -61,7 +61,7 @@ public final class LcdImageLine {
     }
 
     /**
-     * returns the bit vector containing the least significant bits.
+     * returns the bit vector containing the least significant bits of the pixels.
      * 
      * @return the bit vector lsb
      */
@@ -98,7 +98,7 @@ public final class LcdImageLine {
      *            the start pixel
      * @param size
      *            the size
-     * @return a line of given size from the infinite extension by wrapping from
+     * @return a line of given size from the infinite extension by wrapping, from
      *         a given pixel
      */
     public LcdImageLine extractWrapped(int size, int start) {
@@ -125,11 +125,9 @@ public final class LcdImageLine {
         BitVector newLsb = new BitVector(size(), false);
         BitVector newMsb = new BitVector(size(), false);
 
-        BitVector notMsb = msb.not();
-        BitVector notLsb = lsb.not();
         for (int i = 0; i < 4; i++) {
-            BitVector l = Bits.test(i, 0) ? lsb : notLsb;
-            BitVector m = Bits.test(i, 1) ? msb : notMsb;
+            BitVector l = Bits.test(i, 0) ? lsb : lsb.not();
+            BitVector m = Bits.test(i, 1) ? msb : msb.not();
             BitVector mask = m.and(l);
             newMsb = newMsb.or(mask
                     .and(new BitVector(size(), Bits.test(palette, 2 * i + 1))));
@@ -173,7 +171,7 @@ public final class LcdImageLine {
      *             if the other line is invalid
      * @return the composed line
      */
-    public LcdImageLine below(LcdImageLine that) { // (op & sup) | (!op & inf)
+    public LcdImageLine below(LcdImageLine that) {
         return below(that, that.opacity);
     }
 
@@ -244,7 +242,7 @@ public final class LcdImageLine {
          * @param size
          *            the size (must be a strictly positive multiple of 32)
          */
-        public Builder(int size) { // taille max ?
+        public Builder(int size) {
             checkArgument(size > 0);
             msb = new BitVector.Builder(size);
             lsb = new BitVector.Builder(size);
@@ -257,9 +255,9 @@ public final class LcdImageLine {
          * @param index
          *            the index
          * @param msbByte
-         *            the high bytes
+         *            the high byte
          * @param lsbByte
-         *            the low bytes
+         *            the low byte
          * @return the builder
          */
         public Builder setBytes(int index, int msbByte, int lsbByte) {

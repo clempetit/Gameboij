@@ -261,7 +261,7 @@ public final class BitVector {
         private int[] vector;
 
         /**
-         * builds a bit vector of given size and of which all bits have the
+         * creates a bit vector builder of given size and of which all bits have the
          * value 0.
          * 
          * @param sizeInBits
@@ -297,20 +297,18 @@ public final class BitVector {
                 throw new IllegalStateException();
             }
             Preconditions.checkBits8(newValue);
-            if (!(index >= 0 && index < (nbOfBytesInInt * vector.length))) {
-                throw new IndexOutOfBoundsException();
-            }
+            Objects.checkIndex(index, nbOfBytesInInt * vector.length);
             int indexInInt = index % nbOfBytesInInt;
             int indexInTab = index / nbOfBytesInInt;
 
-            int mask = ~(BYTE_MASK << Byte.SIZE * (indexInInt));
+            int mask = ~(BYTE_MASK << (Byte.SIZE * indexInInt));
             vector[indexInTab] = (vector[indexInTab] & mask)
-                    | newValue << Byte.SIZE * (indexInInt);
+                    | newValue << (Byte.SIZE * indexInInt);
             return this;
         }
 
         /**
-         * builds the bit vector.
+         * builds the bit vector and makes the vector as null so the builder cannot be used again.
          * 
          * @throws IllegalStateException
          *             if the vector is null
