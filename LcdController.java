@@ -36,10 +36,10 @@ public final class LcdController implements Component, Clocked {
     private final Cpu cpu;
     private final Ram OAM;
     private Bus bus;
-    
+
     private LcdImage.Builder nextImageBuilder;
     private LcdImage currentImage;
-    
+
     /**
      * the screen width in pixels
      */
@@ -48,12 +48,12 @@ public final class LcdController implements Component, Clocked {
      * the screen height in pixels
      */
     public static final int LCD_HEIGHT = 144;
-    
+
     private static final int LY_MAX = 153;
-    
+
     private static final int BG_LINE_SIZE = 256;
     private static final int WIN_LINE_SIZE = LCD_WIDTH;
-    
+
     private static final int TILE_EDGE_SIZE = 8;
     private static final int NB_OF_SPRITES = 40;
     private static final int BYTES_PER_TILE = 16;
@@ -63,7 +63,7 @@ public final class LcdController implements Component, Clocked {
     private long nextNonIdleCycle;
 
     private int winY;
-    
+
     private int copyDestination;
     private int copySource;
 
@@ -92,12 +92,14 @@ public final class LcdController implements Component, Clocked {
 
     private static Ram videoRam = new Ram(AddressMap.VIDEO_RAM_SIZE);
 
-   /**
-    * Constructs the LCD controller (that is initially disabled) with an assigned cpu.
-    * 
-    * @param cpu
-    *            the Game Boy processor from which the LCD controller can request interruptions
-    */
+    /**
+     * Constructs the LCD controller (that is initially disabled) with an
+     * assigned cpu.
+     * 
+     * @param cpu
+     *            the Game Boy processor from which the LCD controller can
+     *            request interruptions
+     */
     public LcdController(Cpu cpu) {
         this.cpu = cpu;
         OAM = new Ram(AddressMap.OAM_RAM_SIZE);
@@ -106,13 +108,14 @@ public final class LcdController implements Component, Clocked {
     }
 
     /**
-     * returns the image currently displayed on the screen, or an empty image
-     * if the first image has not been drawn yet.
+     * returns the image currently displayed on the screen, or an empty image if
+     * the first image has not been drawn yet.
      * 
      * @return the image currently displayed on the screen or an empty image
      */
     public LcdImage currentImage() {
-        return currentImage == null ? new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT).build()
+        return currentImage == null
+                ? new LcdImage.Builder(LCD_WIDTH, LCD_HEIGHT).build()
                 : currentImage;
     }
 
@@ -130,8 +133,8 @@ public final class LcdController implements Component, Clocked {
     }
 
     /**
-     * gives access to the video ram, the lcd controller registers and
-     * the object attributes memory.
+     * gives access to the video ram, the lcd controller registers and the
+     * object attributes memory.
      * 
      * @param address
      *            the address (must be a 16 bits value)
@@ -141,27 +144,23 @@ public final class LcdController implements Component, Clocked {
     @Override
     public int read(int address) {
         Preconditions.checkBits16(address);
-        
+
         if (address >= VIDEO_RAM_START && address < VIDEO_RAM_END) {
             return videoRam.read(address - VIDEO_RAM_START);
-        }
-        else if (address >= REGS_LCDC_START && address < REGS_LCDC_END) {
+        } else if (address >= REGS_LCDC_START && address < REGS_LCDC_END) {
             Reg r = Reg.values()[address - REGS_LCDC_START];
             return lcdBank.get(r);
-        }
-        else if (address >= OAM_START && address < OAM_END) {
+        } else if (address >= OAM_START && address < OAM_END) {
             return OAM.read(address - OAM_START);
-        }
-        else {
+        } else {
             return NO_DATA;
         }
     }
 
     /**
-     * gives access to the video ram, the lcd controller registers and
-     * the object attributes memory.
-     * Initiates the copy process if any 8 bits value is written in the
-     * DMA register.
+     * gives access to the video ram, the lcd controller registers and the
+     * object attributes memory. Initiates the copy process if any 8 bits value
+     * is written in the DMA register.
      * 
      * @param address
      *            the address (must be a 16 bits value)
@@ -179,7 +178,7 @@ public final class LcdController implements Component, Clocked {
 
         if (address >= VIDEO_RAM_START && address < VIDEO_RAM_END) {
             videoRam.write(address - VIDEO_RAM_START, data);
-            
+
         } else if (address >= OAM_START && address < OAM_END) {
             OAM.write(address - OAM_START, data);
 
@@ -187,20 +186,18 @@ public final class LcdController implements Component, Clocked {
             Reg r = Reg.values()[address - REGS_LCDC_START];
 
             if (!((r == Reg.LY) | (r == Reg.STAT))) {
-                
+
                 lcdBank.set(r, data);
-                
+
                 if (r == Reg.LCDC && prevLcdStatus
                         && !(lcdBank.testBit(Reg.LCDC, LcdcBits.LCD_STATUS))) {
                     setMode(0);
                     lcdBank.set(Reg.LY, 0);
                     LycEqLy();
                     nextNonIdleCycle = Long.MAX_VALUE;
-                }
-                else if (r == Reg.LYC) {
+                } else if (r == Reg.LYC) {
                     LycEqLy();
-                }
-                else if (r == Reg.DMA) {
+                } else if (r == Reg.DMA) {
                     copyDestination = OAM_START;
                     copySource = lcdBank.get(Reg.DMA) << Byte.SIZE;
                 }
@@ -213,10 +210,11 @@ public final class LcdController implements Component, Clocked {
     }
 
     /**
-     * Manages the writings in the object attributes memory when a copy is in progress.
-     * Manages the activation of the screen when required, and set LY to 153 so it can be set to 0 in mode 0.
-     * Determines if the lcd controller needs to do something during the given cycle, and
-     * if so, calls the method reallyCycle.
+     * Manages the writings in the object attributes memory when a copy is in
+     * progress. Manages the activation of the screen when required, and set LY
+     * to 153 so it can be set to 0 in mode 0. Determines if the lcd controller
+     * needs to do something during the given cycle, and if so, calls the method
+     * reallyCycle.
      * 
      * @param cycle
      *            the cycle
@@ -254,15 +252,15 @@ public final class LcdController implements Component, Clocked {
                 setMode(1);
                 cpu.requestInterrupt(Interrupt.VBLANK);
                 currentImage = nextImageBuilder.build();
-                
+
                 lcdBank.set(Reg.LY, LCD_HEIGHT);
                 LycEqLy();
-                
+
                 nextNonIdleCycle += 114;
             } else {
                 lcdBank.set(Reg.LY, (lcdBank.get(Reg.LY) + 1) % (LY_MAX + 1));
                 LycEqLy();
-                
+
                 setMode(2);
                 if (lcdBank.get(Reg.LY) == 0) {
                     nextImageBuilder = new LcdImage.Builder(LCD_WIDTH,
@@ -331,10 +329,10 @@ public final class LcdController implements Component, Clocked {
         LcdImageLine bgLine = extractBgLine(bgLineIndex);
 
         int WX = Math.max(0, lcdBank.get(Reg.WX) - 7);
-        
-        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN))
-                && WX < LCD_WIDTH && y >= lcdBank.get(Reg.WY)) {
-            
+
+        if ((lcdBank.testBit(Reg.LCDC, LcdcBits.WIN)) && WX < LCD_WIDTH
+                && y >= lcdBank.get(Reg.WY)) {
+
             LcdImageLine winLine = extractLine(winY, WIN_LINE_SIZE,
                     LcdcBits.WIN_AREA);
             winY++;
@@ -342,15 +340,16 @@ public final class LcdController implements Component, Clocked {
         }
 
         if (lcdBank.testBit(Reg.LCDC, LcdcBits.OBJ)) {
-            int size = Bits.test(lcdBank.get(Reg.LCDC), LcdcBits.OBJ_SIZE)
-                    ? 16
+            int size = Bits.test(lcdBank.get(Reg.LCDC), LcdcBits.OBJ_SIZE) ? 16
                     : 8;
             int[] spritesList = spritesIntersectingLine(y, size);
-            LcdImageLine spritesBGLine = extractSpritesLine(y, spritesList, size, true);
-            LcdImageLine spritesFGLine = extractSpritesLine(y, spritesList, size, false);
+            LcdImageLine spritesBGLine = extractSpritesLine(y, spritesList,
+                    size, true);
+            LcdImageLine spritesFGLine = extractSpritesLine(y, spritesList,
+                    size, false);
             BitVector bgOpacity = bgLine.opacity()
                     .or(spritesBGLine.opacity().not());
-            
+
             bgLine = spritesBGLine.below(bgLine, bgOpacity)
                     .below(spritesFGLine);
         }
@@ -376,12 +375,12 @@ public final class LcdController implements Component, Clocked {
                 + TILES_PER_LINE * (lineIndex / TILE_EDGE_SIZE);
 
         for (int i = 0; i < size / Byte.SIZE; i++) {
-            
+
             int tileIndex = read(address + i);
-            
+
             if (tileSource == 0)
                 tileIndex = Bits.clip(8, tileIndex + 0x80);
-            
+
             lineBuilder.setBytes(i,
                     getTileLineVector(tileSourceStart, tileIndex, tileLineIndex,
                             true),
@@ -396,24 +395,25 @@ public final class LcdController implements Component, Clocked {
         return AddressMap.BG_DISPLAY_DATA[start];
     }
 
-    private LcdImageLine extractSpritesLine(int y, int[] spritesList, int size, boolean background) {
-        
+    private LcdImageLine extractSpritesLine(int y, int[] spritesList, int size,
+            boolean background) {
+
         LcdImageLine fullSpriteLine = emptyLine();
-        
+
         int spriteTileSourceStart = AddressMap.TILE_SOURCE[1];
 
         for (int spriteIndex : spritesList) {
-            
+
             int spriteMemoryIndex = OAM_START
                     + ATTRIBUTE_BYTES_PER_SPRITE * spriteIndex;
-            
+
             int spriteSpec = read(
                     spriteMemoryIndex + spritesAttributes.SPECS.ordinal());
 
             if (Bits.test(spriteSpec, SpriteSpec.BEHIND_BG) == background) {
-                
+
                 int spriteOrdinate = read(spriteMemoryIndex) - 16;
-                
+
                 int tileIndex = read(
                         spriteMemoryIndex + spritesAttributes.INDEX.ordinal());
 
@@ -435,14 +435,14 @@ public final class LcdController implements Component, Clocked {
                         : Reg.OBP0;
                 int palette = lcdBank.get(paletteReg);
 
-                int xCoord = read(spriteMemoryIndex
-                        + spritesAttributes.X_COORD.ordinal()) - 8;
-                
+                int xCoord = read(
+                        spriteMemoryIndex + spritesAttributes.X_COORD.ordinal())
+                        - 8;
+
                 LcdImageLine spriteLine = new LcdImageLine.Builder(LCD_WIDTH)
                         .setBytes(0, tileLineMsb, tileLineLsb).build()
-                        .shift(xCoord)
-                        .mapColors(palette);
-                
+                        .shift(xCoord).mapColors(palette);
+
                 fullSpriteLine = spriteLine.below(fullSpriteLine);
             }
         }
@@ -454,13 +454,13 @@ public final class LcdController implements Component, Clocked {
         int nbOfSprites = 0;
 
         for (int i = 0; i < NB_OF_SPRITES; i++) {
-            
+
             int spriteMemoryIndex = OAM_START + ATTRIBUTE_BYTES_PER_SPRITE * i;
             int spriteOrdinate = read(spriteMemoryIndex) - 16;
-            
+
             if (nbOfSprites < sprites.length && y >= spriteOrdinate
                     && y < spriteOrdinate + size)
-                
+
                 sprites[nbOfSprites++] = (read(spriteMemoryIndex
                         + spritesAttributes.X_COORD.ordinal()) << Byte.SIZE)
                         | i;
@@ -468,16 +468,16 @@ public final class LcdController implements Component, Clocked {
         Arrays.sort(sprites, 0, nbOfSprites);
 
         int[] spriteIndex = new int[nbOfSprites];
-        
+
         for (int j = 0; j < spriteIndex.length; j++)
             spriteIndex[j] = Bits.clip(8, sprites[j]);
-            
+
         return spriteIndex;
     }
 
     private int getTileLineVector(int tileSourceStart, int tileIndex,
             int tileLineIndex, boolean msb) {
-        
+
         int address = tileSourceStart + BYTES_PER_TILE * tileIndex
                 + 2 * tileLineIndex;
         if (msb)
