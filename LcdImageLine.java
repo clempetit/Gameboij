@@ -255,9 +255,9 @@ public final class LcdImageLine {
          * @param index
          *            the index
          * @param msbByte
-         *            the high byte
+         *            the new high byte
          * @param lsbByte
-         *            the low byte
+         *            the new low byte
          * @return the builder
          */
         public Builder setBytes(int index, int msbByte, int lsbByte) {

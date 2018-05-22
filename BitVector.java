@@ -308,7 +308,7 @@ public final class BitVector {
         }
 
         /**
-         * builds the bit vector and makes the vector as null so the builder cannot be used again.
+         * builds the bit vector and makes the attribute vector as null so the builder cannot be used again.
          * 
          * @throws IllegalStateException
          *             if the vector is null
