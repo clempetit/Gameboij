@@ -19,7 +19,7 @@ public final class ImageConverter {
             0xFF_A9_A9_A9, 0xFF_00_00_00 };                                                   
     
     /**
-     * converts the given LcdImage to a JavaFX image.
+     * converts the given LcdImage into a JavaFX image.
      * @param li the LcdImage
      * @return a JavaFX image
      */

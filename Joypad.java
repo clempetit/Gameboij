@@ -29,10 +29,11 @@ public final class Joypad implements Component {
     }
 
     /**
-     * constructs the joypad attached to the cpu
+     * constructs the joypad with an assigned cpu.
      * 
      * @param cpu
-     *            the Game Boy processor to which the joypad belongs
+     *            the Game Boy processor from which the joypad can
+     *            request interruptions
      */
     public Joypad(Cpu cpu) {
         this.cpu = cpu;

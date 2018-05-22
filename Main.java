@@ -47,8 +47,8 @@ public final class Main extends Application {
     }
 
     /**
-     * Checks that only one argument has been passed to the program-the name of
-     * the ROM file-and finish the execution otherwise.
+     * Checks that only one argument has been passed to the program (the name of
+     * a ROM file) and finish the execution otherwise.
      * Creates a Game Boy whose cartridge is obtained from the ROM file passed in argument.
      * Creates the graphical interface and then displays it on the screen.
      * Simulates the Game Boy by periodically updating the image displayed on 
