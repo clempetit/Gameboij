@@ -71,7 +71,7 @@ public final class LcdController implements Component, Clocked {
         LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGP, OBP0, OBP1, WY, WX
     };
 
-    private static final RegisterFile<Reg> lcdBank = new RegisterFile<>(
+    private final RegisterFile<Reg> lcdBank = new RegisterFile<>(
             Reg.values());
 
     private static enum LcdcBits implements Bit {
@@ -159,7 +159,8 @@ public final class LcdController implements Component, Clocked {
 
     /**
      * gives access to the video ram, the lcd controller registers and the
-     * object attributes memory. Initiates the copy process if any 8 bits value
+     * object attributes memory.
+     * Initiates the copy process if any 8 bits value
      * is written in the DMA register.
      * 
      * @param address
@@ -211,8 +212,10 @@ public final class LcdController implements Component, Clocked {
 
     /**
      * Manages the writings in the object attributes memory when a copy is in
-     * progress. Manages the activation of the screen when required, and set LY
-     * to 153 so it can be set to 0 in mode 0. Determines if the lcd controller
+     * progress.
+     * Manages the activation of the screen when required, and set LY
+     * to 153 so it can be set to 0 in mode 0.
+     * Determines if the lcd controller
      * needs to do something during the given cycle, and if so, calls the method
      * reallyCycle.
      * 
@@ -340,9 +343,11 @@ public final class LcdController implements Component, Clocked {
         }
 
         if (lcdBank.testBit(Reg.LCDC, LcdcBits.OBJ)) {
-            int size = Bits.test(lcdBank.get(Reg.LCDC), LcdcBits.OBJ_SIZE) ? 16
+            int size = Bits.test(lcdBank.get(Reg.LCDC), LcdcBits.OBJ_SIZE)
+                    ? 16
                     : 8;
             int[] spritesList = spritesIntersectingLine(y, size);
+            
             LcdImageLine spritesBGLine = extractSpritesLine(y, spritesList,
                     size, true);
             LcdImageLine spritesFGLine = extractSpritesLine(y, spritesList,
@@ -441,7 +446,8 @@ public final class LcdController implements Component, Clocked {
 
                 LcdImageLine spriteLine = new LcdImageLine.Builder(LCD_WIDTH)
                         .setBytes(0, tileLineMsb, tileLineLsb).build()
-                        .shift(xCoord).mapColors(palette);
+                        .shift(xCoord)
+                        .mapColors(palette);
 
                 fullSpriteLine = spriteLine.below(fullSpriteLine);
             }
